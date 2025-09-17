@@ -160,7 +160,7 @@ docs/
 2. **Generate API contracts** from functional requirements:
    - For each user action → endpoint
    - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+   - Output OpenAPI/GraphQL schema to `/contracts/` use 3.1.3 version
 
 3. **Generate contract tests** from contracts:
    - One test file per endpoint

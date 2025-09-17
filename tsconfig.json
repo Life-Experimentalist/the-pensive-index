@@ -3,13 +3,16 @@
         "lib": [
             "dom",
             "dom.iterable",
-            "es6"
+            "es6",
+            "es2020"
         ],
+        "target": "es2020",
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
         "noEmit": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "module": "esnext",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
@@ -37,6 +40,12 @@
             ],
             "@/hooks/*": [
                 "./src/hooks/*"
+            ],
+            "@/database/*": [
+                "./src/lib/database/*"
+            ],
+            "@/validation/*": [
+                "./src/lib/validation/*"
             ]
         }
     },

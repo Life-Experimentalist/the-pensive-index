@@ -1,50 +1,66 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# The Pensieve Index Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Story Library First
+Every feature prioritizes existing story discovery before prompt generation:
+- Search existing tagged stories must be the primary function
+- Story prompt generation is secondary (only when library gaps exist)
+- All pathways must be searchable against the story database
+- Library growth through community curation is prioritized
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Hierarchical Data Integrity
+Complex data relationships must be maintainable and scalable:
+- Fandoms contain Tags and Plot Blocks with strict namespacing
+- Plot Blocks support tree structures with conditional branching
+- Tag Classes enable cross-referential validation (e.g., shipping conflicts)
+- Admin roles respect fandom boundaries (FandomAdmin vs ProjectAdmin)
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Test-First Development (NON-NEGOTIABLE)
+TDD mandatory for all validation logic and user interactions:
+- Validation engine tests written → User approved → Tests fail → Then implement
+- Complex rule combinations must have comprehensive test coverage
+- Drag-and-drop interactions require integration tests
+- Red-Green-Refactor cycle strictly enforced
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Responsive Interaction Design
+User experience must be optimized for both desktop and mobile:
+- Desktop: Full three-panel drag-and-drop interface
+- Mobile: Tap-to-select with collapsible panels and touch-friendly design
+- Validation conflicts only shown on "Finish" - never during selection
+- 60fps performance requirement for all interactive elements
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Community-Driven Growth
+Platform scalability through decentralized content management:
+- Admin curation system for tags, plot blocks, and validation rules
+- Public story submission via browser extension with GitHub Issues integration
+- Manual review and approval workflow for all story additions
+- Role-based permissions ensure content quality and fandom expertise
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technical Standards
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Platform Requirements
+- **Frontend**: Next.js with React/TypeScript, Tailwind CSS, dnd-kit for drag-and-drop
+- **Backend**: NextAuth.js for authentication, Cloudflare D1 for database
+- **Deployment**: Cloudflare Pages with edge functions
+- **Testing**: Comprehensive validation engine testing, responsive UI testing
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### Performance Targets
+- Pathway validation: <200ms for complex rule sets
+- Story search: <500ms for filtered queries
+- Mobile interface: 60fps drag interactions on modern devices
+- Desktop interface: Smooth drag-and-drop with visual feedback
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Community Integration
+
+### Story Submission Workflow
+Public story submission via manual form → Browser extension auto-fills GitHub issue → Admin reviews and manually adds to database via admin console. Extension works on AO3, FFN, etc., for user-driven tagging (not auto-generated). Extension auto-fills story details but requires human verification of pathway tags.
+
+### Content Growth Strategy
+Admin-driven content curation enables organic growth. FandomAdmins add Tags, Plot Blocks, and validation rules. Community submits stories with suggested pathways. System suggests "Create New Story" prompts when library gaps exist, highlighting novelty aspects.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Constitution supersedes all other practices. Complexity must be justified against library-first principles. Features must demonstrate clear value for writers (prompt generation) AND readers (story discovery). All validation rules must be admin-configurable to support fandom growth.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-09-17 | **Last Amended**: 2025-09-17

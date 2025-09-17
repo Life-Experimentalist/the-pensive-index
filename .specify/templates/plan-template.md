@@ -34,20 +34,43 @@
 [Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: [e.g., TypeScript 5.x, Node.js 18+ or NEEDS CLARIFICATION]
+**Primary Dependencies**: [e.g., Next.js, React, Tailwind CSS, dnd-kit, NextAuth.js or NEEDS CLARIFICATION]
+**Storage**: [e.g., Cloudflare D1, SQLite, or NEEDS CLARIFICATION]
+**Testing**: [e.g., Jest, Vitest, Playwright, Cypress or NEEDS CLARIFICATION]
+**Target Platform**: [e.g., Cloudflare Pages, Vercel, or NEEDS CLARIFICATION]
+**Project Type**: [web/mobile/desktop - The Pensieve Index is primarily web-based]
+**Performance Goals**: [e.g., <200ms validation, <500ms search, 60fps mobile drag or NEEDS CLARIFICATION]
+**Constraints**: [e.g., Responsive design, offline capability, mobile-first or NEEDS CLARIFICATION]
+**Scale/Scope**: [e.g., Multi-fandom support, 10k+ stories, complex validation rules or NEEDS CLARIFICATION]
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**Library-First Discovery Platform**:
+- [ ] Feature prioritizes existing story discovery over prompt generation
+- [ ] Clear value demonstrated for both writers (prompt) AND readers (discovery)
+- [ ] Library gaps identified where prompt generation adds value
+
+**Hierarchical Data Architecture**:
+- [ ] Data structures support Fandom → Tags/Plot Blocks hierarchy
+- [ ] Plot Blocks support conditional branching (tree structures)
+- [ ] Admin roles respect fandom boundaries (Project vs Fandom admins)
+
+**Test-First Development**:
+- [ ] Validation engine testing planned for complex rule combinations
+- [ ] Responsive UI testing covers desktop and mobile interactions
+- [ ] Drag-and-drop functionality has comprehensive test coverage
+
+**Responsive UI Design**:
+- [ ] Desktop three-panel interface specified (Selection, Pathway, Output)
+- [ ] Mobile tap-to-select with collapsible panels planned
+- [ ] Touch/click handlers appropriate for each platform
+
+**Delayed Validation Strategy**:
+- [ ] Users can build impossible combinations during selection
+- [ ] Validation triggers only on Finish/Checkout button
+- [ ] Conflict resolution UI provides clear fixes and explanations
 
 ## Project Structure
 
@@ -64,42 +87,46 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 ```
-# Option 1: Single project (DEFAULT)
+# The Pensieve Index - Web Application Structure
+app/                    # Next.js 13+ app directory
+├── (auth)/            # Auth route groups
+├── api/               # API routes
+├── admin/             # Admin dashboard pages
+├── fandom/            # Fandom-specific pages
+└── globals.css        # Global styles
+
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── components/        # React components
+│   ├── ui/           # Base UI components
+│   ├── forms/        # Form components
+│   ├── drag-drop/    # Drag & drop interface
+│   └── admin/        # Admin-specific components
+├── lib/              # Utility libraries
+│   ├── validation/   # Validation engine
+│   ├── database/     # Database utilities
+│   └── auth/         # Authentication helpers
+├── types/            # TypeScript type definitions
+├── hooks/            # Custom React hooks
+└── stores/           # State management
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── __mocks__/        # Test mocks
+├── components/       # Component tests
+├── validation/       # Validation engine tests
+├── integration/      # Integration tests
+└── e2e/             # End-to-end tests
 
-# Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+public/
+├── icons/            # Fandom and UI icons
+└── images/           # Static images
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure]
+docs/
+├── api/              # API documentation
+├── admin/            # Admin guide
+└── user/             # User guide
 ```
 
-**Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
+**Structure Decision**: Web application structure for The Pensieve Index using Next.js app directory
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -161,12 +188,12 @@ ios/ or android/
 - Load `.specify/templates/tasks-template.md` as base
 - Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
 - Each contract → contract test task [P]
-- Each entity → model creation task [P] 
+- Each entity → model creation task [P]
 - Each user story → integration test task
 - Implementation tasks to make tests pass
 
 **Ordering Strategy**:
-- TDD order: Tests before implementation 
+- TDD order: Tests before implementation
 - Dependency order: Models before services before UI
 - Mark [P] for parallel execution (independent files)
 
@@ -177,8 +204,8 @@ ios/ or android/
 ## Phase 3+: Future Implementation
 *These phases are beyond the scope of the /plan command*
 
-**Phase 3**: Task execution (/tasks command creates tasks.md)  
-**Phase 4**: Implementation (execute tasks.md following constitutional principles)  
+**Phase 3**: Task execution (/tasks command creates tasks.md)
+**Phase 4**: Implementation (execute tasks.md following constitutional principles)
 **Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
 
 ## Complexity Tracking

@@ -424,7 +424,7 @@ export class DatabaseSeeder {
         id: 'admin-1',
         email: 'admin@pensieve-index.com',
         name: 'System Administrator',
-        role: 'admin' as const,
+        role: 'ProjectAdmin' as const,
         permissions: [],
         is_active: true,
       },

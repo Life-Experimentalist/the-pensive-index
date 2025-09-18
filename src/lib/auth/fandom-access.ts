@@ -1,5 +1,5 @@
 import { DatabaseManager } from '@/lib/database';
-import { AuthContext } from './middleware';
+import { AuthContext, AdminAccessControl } from './middleware';
 import { ErrorFactory } from '@/lib/errors';
 import { eq, and, inArray } from 'drizzle-orm';
 import { fandoms, tags, plotBlocks, tagClasses } from '@/lib/database/schema';
@@ -128,7 +128,7 @@ export class FandomAccessValidator {
     // Check specific permission if provided
     if (
       requiredPermission &&
-      !authContext.user.permissions.includes(requiredPermission)
+      !AdminAccessControl.hasPermission(authContext, requiredPermission, fandomId)
     ) {
       throw ErrorFactory.authorization(
         `Insufficient permissions for operation on fandom "${fandom.name}"`
@@ -183,9 +183,9 @@ export class FandomAccessValidator {
       } else if (
         authContext.user.permissions.some(
           p =>
-            p.includes('create:') ||
-            p.includes('update:') ||
-            p.includes('delete:')
+            p.id.includes('create:') ||
+            p.id.includes('update:') ||
+            p.id.includes('delete:')
         )
       ) {
         accessLevel = 'write';
@@ -201,7 +201,7 @@ export class FandomAccessValidator {
     if (options.permission) {
       return accessibleFandoms.filter(fandom => {
         if (authContext.isAdmin) return true;
-        return authContext.user.permissions.includes(options.permission!);
+        return AdminAccessControl.hasPermission(authContext, options.permission!, fandom.id);
       });
     }
 

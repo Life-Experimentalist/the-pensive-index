@@ -14,7 +14,13 @@ export interface AuthContext {
     email: string;
     name?: string;
     roles: string[];
-    permissions: string[];
+    permissions: Array<{
+      id: string;
+      name: string;
+      description: string;
+      scope: 'global' | 'fandom' | 'content';
+      resource?: string; // e.g., fandomId for scoped permissions
+    }>;
   };
   isAdmin: boolean;
   isAuthenticated: boolean;
@@ -24,10 +30,45 @@ export interface AuthContext {
  * User roles and permissions system
  */
 export const USER_ROLES = {
+  PROJECT_ADMIN: 'ProjectAdmin',
+  FANDOM_ADMIN: 'FandomAdmin',
+  // Legacy roles (to be migrated)
   ADMIN: 'admin',
   MODERATOR: 'moderator',
   CONTRIBUTOR: 'contributor',
   USER: 'user',
+} as const;
+
+export const ADMIN_PERMISSIONS = {
+  // Rule management permissions
+  CREATE_RULE: 'rule:create',
+  UPDATE_RULE: 'rule:update',
+  DELETE_RULE: 'rule:delete',
+  PUBLISH_RULE: 'rule:publish',
+  
+  // Template management permissions
+  CREATE_TEMPLATE: 'template:create',
+  UPDATE_TEMPLATE: 'template:update',
+  DELETE_TEMPLATE: 'template:delete',
+  MANAGE_TEMPLATES: 'template:manage',
+  
+  // Testing permissions
+  RUN_TESTS: 'test:run',
+  CREATE_TEST_SCENARIO: 'test:create',
+  MANAGE_TEST_SANDBOX: 'test:sandbox',
+  
+  // Import/Export permissions
+  EXPORT_RULES: 'export:rules',
+  IMPORT_RULES: 'import:rules',
+  
+  // Fandom administration
+  MANAGE_FANDOM: 'fandom:manage',
+  ACCESS_FANDOM: 'fandom:access',
+  
+  // System administration
+  MANAGE_ADMINS: 'admin:manage',
+  VIEW_ANALYTICS: 'analytics:view',
+  SYSTEM_CONFIG: 'system:config',
 } as const;
 
 export const PERMISSIONS = {
@@ -53,14 +94,47 @@ export const PERMISSIONS = {
 
   // System permissions
   MANAGE_USERS: 'manage:users',
-  VIEW_ANALYTICS: 'view:analytics',
-  SYSTEM_CONFIG: 'system:config',
+  
+  // Include admin permissions
+  ...ADMIN_PERMISSIONS,
 } as const;
 
 /**
  * Role-based permission mapping
  */
 const ROLE_PERMISSIONS = {
+  [USER_ROLES.PROJECT_ADMIN]: Object.values(PERMISSIONS),
+  [USER_ROLES.FANDOM_ADMIN]: [
+    // Rule management for assigned fandoms
+    PERMISSIONS.CREATE_RULE,
+    PERMISSIONS.UPDATE_RULE,
+    PERMISSIONS.DELETE_RULE,
+    PERMISSIONS.PUBLISH_RULE,
+    
+    // Template usage (not creation)
+    PERMISSIONS.EXPORT_RULES,
+    PERMISSIONS.IMPORT_RULES,
+    
+    // Testing
+    PERMISSIONS.RUN_TESTS,
+    PERMISSIONS.CREATE_TEST_SCENARIO,
+    PERMISSIONS.MANAGE_TEST_SANDBOX,
+    
+    // Fandom access (scoped to assigned fandoms)
+    PERMISSIONS.ACCESS_FANDOM,
+    
+    // Standard content permissions
+    PERMISSIONS.CREATE_TAG,
+    PERMISSIONS.UPDATE_TAG,
+    PERMISSIONS.DELETE_TAG,
+    PERMISSIONS.CREATE_TAG_CLASS,
+    PERMISSIONS.UPDATE_TAG_CLASS,
+    PERMISSIONS.DELETE_TAG_CLASS,
+    PERMISSIONS.CREATE_PLOT_BLOCK,
+    PERMISSIONS.UPDATE_PLOT_BLOCK,
+    PERMISSIONS.DELETE_PLOT_BLOCK,
+  ],
+  // Legacy roles
   [USER_ROLES.ADMIN]: Object.values(PERMISSIONS),
   [USER_ROLES.MODERATOR]: [
     PERMISSIONS.CREATE_TAG,
@@ -151,7 +225,7 @@ export class AuthMiddleware {
         throw ErrorFactory.unauthorized('Authentication required');
       }
 
-      if (!authContext.user.permissions.includes(permission)) {
+      if (!AdminAccessControl.hasPermission(authContext, permission)) {
         throw ErrorFactory.forbidden(`Permission required: ${permission}`);
       }
 
@@ -179,8 +253,8 @@ export class AuthMiddleware {
       }
 
       const hasPermissions = requireAll
-        ? permissions.every(p => authContext.user.permissions.includes(p))
-        : permissions.some(p => authContext.user.permissions.includes(p));
+        ? permissions.every(p => AdminAccessControl.hasPermission(authContext, p))
+        : permissions.some(p => AdminAccessControl.hasPermission(authContext, p));
 
       if (!hasPermissions) {
         const verb = requireAll ? 'all' : 'any';
@@ -268,7 +342,13 @@ export class AuthMiddleware {
   /**
    * Get permissions for given roles
    */
-  private static getPermissionsForRoles(roles: string[]): string[] {
+  private static getPermissionsForRoles(roles: string[]): Array<{
+    id: string;
+    name: string;
+    description: string;
+    scope: 'global' | 'fandom' | 'content';
+    resource?: string;
+  }> {
     const permissions = new Set<string>();
 
     for (const role of roles) {
@@ -277,7 +357,141 @@ export class AuthMiddleware {
       rolePermissions.forEach(permission => permissions.add(permission));
     }
 
-    return Array.from(permissions);
+    // Convert permission strings to permission objects
+    return Array.from(permissions).map(permissionId => ({
+      id: permissionId,
+      name: permissionId.replace(/[:\-]/g, ' ').toUpperCase(),
+      description: `Permission to ${permissionId}`,
+      scope: 'global' as const, // Default to global scope, could be enhanced
+    }));
+  }
+}
+
+/**
+ * Admin-specific access control utilities
+ */
+export class AdminAccessControl {
+  /**
+   * Check if user has a specific permission
+   */
+  static hasPermission(authContext: AuthContext, permissionId: string, resource?: string): boolean {
+    return authContext.user.permissions.some(permission => {
+      if (permission.id !== permissionId) return false;
+      
+      // If resource is specified, check scoped permissions
+      if (resource) {
+        return permission.scope !== 'global' && permission.resource === resource;
+      }
+      
+      // Otherwise, any scope is acceptable
+      return true;
+    });
+  }
+
+  /**
+   * Check if user is a ProjectAdmin (global access)
+   */
+  static isProjectAdmin(authContext: AuthContext): boolean {
+    return authContext.user.roles.includes(USER_ROLES.PROJECT_ADMIN);
+  }
+
+  /**
+   * Check if user is a FandomAdmin for specific fandom
+   */
+  static isFandomAdmin(authContext: AuthContext, fandomId?: string): boolean {
+    if (!authContext.user.roles.includes(USER_ROLES.FANDOM_ADMIN)) {
+      return false;
+    }
+    
+    // If no fandomId specified, check if user is any kind of FandomAdmin
+    if (!fandomId) {
+      return true;
+    }
+    
+    // Check if user has access to specific fandom
+    return authContext.user.permissions.some(
+      permission => permission.scope === 'fandom' && permission.resource === fandomId
+    );
+  }
+
+  /**
+   * Check if user can manage validation rules for a fandom
+   */
+  static canManageRules(authContext: AuthContext, fandomId: string): boolean {
+    // ProjectAdmin can manage all rules
+    if (AdminAccessControl.isProjectAdmin(authContext)) {
+      return true;
+    }
+    
+    // FandomAdmin can manage rules for assigned fandoms
+    return AdminAccessControl.isFandomAdmin(authContext, fandomId) &&
+           AdminAccessControl.hasPermission(authContext, PERMISSIONS.CREATE_RULE, fandomId);
+  }
+
+  /**
+   * Check if user can manage rule templates (ProjectAdmin only)
+   */
+  static canManageTemplates(authContext: AuthContext): boolean {
+    return AdminAccessControl.isProjectAdmin(authContext) &&
+           AdminAccessControl.hasPermission(authContext, PERMISSIONS.MANAGE_TEMPLATES);
+  }
+
+  /**
+   * Require ProjectAdmin role
+   */
+  static requireProjectAdmin<T extends any[]>(
+    handler: (
+      request: NextRequest,
+      authContext: AuthContext,
+      ...args: T
+    ) => Promise<NextResponse>
+  ) {
+    return async (request: NextRequest, ...args: T): Promise<NextResponse> => {
+      const authContext = await AuthMiddleware.getAuthContext(request);
+
+      if (!authContext.isAuthenticated) {
+        throw ErrorFactory.unauthorized('Authentication required');
+      }
+
+      if (!AdminAccessControl.isProjectAdmin(authContext)) {
+        throw ErrorFactory.forbidden('ProjectAdmin access required');
+      }
+
+      return handler(request, authContext, ...args);
+    };
+  }
+
+  /**
+   * Require FandomAdmin role for specific fandom
+   */
+  static requireFandomAdmin<T extends any[]>(
+    handler: (
+      request: NextRequest,
+      authContext: AuthContext,
+      fandomId: string,
+      ...args: T
+    ) => Promise<NextResponse>
+  ) {
+    return async (
+      request: NextRequest,
+      { params }: { params: { fandomId: string } },
+      ...args: T
+    ): Promise<NextResponse> => {
+      const authContext = await AuthMiddleware.getAuthContext(request);
+      const fandomId = params.fandomId;
+
+      if (!authContext.isAuthenticated) {
+        throw ErrorFactory.unauthorized('Authentication required');
+      }
+
+      if (!AdminAccessControl.canManageRules(authContext, fandomId)) {
+        throw ErrorFactory.forbidden(
+          `FandomAdmin access required for fandom: ${fandomId}`
+        );
+      }
+
+      return handler(request, authContext, fandomId, ...args);
+    };
   }
 }
 
@@ -299,7 +513,7 @@ export class FandomAccessControl {
     }
 
     // Check if user has the required permission
-    if (!authContext.user.permissions.includes(permission)) {
+    if (!AdminAccessControl.hasPermission(authContext, permission, fandomId)) {
       return false;
     }
 

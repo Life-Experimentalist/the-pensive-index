@@ -405,6 +405,124 @@ export type NewStorySubmission = typeof storySubmissions.$inferInsert;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type NewAdminUser = typeof adminUsers.$inferInsert;
 
+// Validation Rules table
+export const validationRules = sqliteTable('validation_rules', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  fandom_id: text('fandom_id')
+    .notNull()
+    .references(() => fandoms.id, { onDelete: 'cascade' }),
+  category: text('category').notNull(),
+  priority: integer('priority').notNull().default(1),
+  is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  applies_to: text('applies_to', { mode: 'json' }).$type<string[]>().notNull(),
+  created_by: text('created_by').notNull(),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  published_at: integer('published_at', { mode: 'timestamp' }),
+  version: text('version').notNull().default('1.0.0'),
+  tags: text('tags', { mode: 'json' }).$type<string[]>(),
+  metadata: text('metadata', { mode: 'json' }).$type<Record<string, any>>(),
+});
+
+// Rule Conditions table
+export const ruleConditions = sqliteTable('rule_conditions', {
+  id: text('id').primaryKey(),
+  rule_id: text('rule_id')
+    .notNull()
+    .references(() => validationRules.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(),
+  target: text('target').notNull(),
+  operator: text('operator').notNull(),
+  value: text('value', { mode: 'json' }).$type<any>().notNull(),
+  weight: real('weight').notNull().default(1.0),
+  order_index: integer('order_index').notNull(),
+  group_id: text('group_id'),
+  is_negated: integer('is_negated', { mode: 'boolean' }).notNull().default(false),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  metadata: text('metadata', { mode: 'json' }).$type<Record<string, any>>(),
+});
+
+// Rule Actions table
+export const ruleActions = sqliteTable('rule_actions', {
+  id: text('id').primaryKey(),
+  rule_id: text('rule_id')
+    .notNull()
+    .references(() => validationRules.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(),
+  severity: text('severity').notNull(),
+  message: text('message').notNull(),
+  data: text('data', { mode: 'json' }).$type<Record<string, any>>(),
+  order_index: integer('order_index').notNull(),
+  condition_group: text('condition_group'),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Rule Templates table
+export const ruleTemplates = sqliteTable('rule_templates', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  category: text('category').notNull(),
+  fandom_id: text('fandom_id').references(() => fandoms.id, { onDelete: 'cascade' }),
+  template_data: text('template_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  is_public: integer('is_public', { mode: 'boolean' }).notNull().default(false),
+  created_by: text('created_by').notNull(),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  usage_count: integer('usage_count').notNull().default(0),
+  tags: text('tags', { mode: 'json' }).$type<string[]>(),
+});
+
+// Rule Tests table
+export const ruleTests = sqliteTable('rule_tests', {
+  id: text('id').primaryKey(),
+  rule_id: text('rule_id')
+    .notNull()
+    .references(() => validationRules.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  test_data: text('test_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  expected_result: text('expected_result', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  last_run_at: integer('last_run_at', { mode: 'timestamp' }),
+  last_run_result: text('last_run_result', { mode: 'json' }).$type<Record<string, any>>(),
+  is_passing: integer('is_passing', { mode: 'boolean' }),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export type ValidationRule = typeof validationRules.$inferSelect;
+export type NewValidationRule = typeof validationRules.$inferInsert;
+
+export type RuleCondition = typeof ruleConditions.$inferSelect;
+export type NewRuleCondition = typeof ruleConditions.$inferInsert;
+
+export type RuleAction = typeof ruleActions.$inferSelect;
+export type NewRuleAction = typeof ruleActions.$inferInsert;
+
+export type RuleTemplate = typeof ruleTemplates.$inferSelect;
+export type NewRuleTemplate = typeof ruleTemplates.$inferInsert;
+
+export type RuleTest = typeof ruleTests.$inferSelect;
+export type NewRuleTest = typeof ruleTests.$inferInsert;
+
 // Export schema object for easy access to all tables
 export const schema = {
   fandoms,
@@ -417,4 +535,9 @@ export const schema = {
   storyPlotBlocks,
   storySubmissions,
   adminUsers,
+  validationRules,
+  ruleConditions,
+  ruleActions,
+  ruleTemplates,
+  ruleTests,
 } as const;

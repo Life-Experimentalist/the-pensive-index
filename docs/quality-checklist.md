@@ -262,7 +262,7 @@ export const performanceBenchmarks = {
 
 ### API Documentation Standards
 
-- All endpoints documented with OpenAPI/Swagger specifications
+- All endpoints documented with OpenAPI-v3.1.3/Swagger specifications
 - Request/response examples for all endpoints
 - Error code documentation with troubleshooting guides
 - Authentication and authorization requirements clearly stated

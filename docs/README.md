@@ -11,7 +11,7 @@ This directory contains comprehensive documentation for The Pensieve Index proje
 
 ### 📁 Architecture & Design
 - [`architecture/`](./architecture/) - System architecture and design decisions
-- [`api/`](./api/) - API documentation and OpenAPI specifications
+- [`api/`](./api/) - API documentation and OpenAPI-3.1.3 specifications
 - [`database/`](./database/) - Database schema and migration documentation
 
 ### 📁 User Guides

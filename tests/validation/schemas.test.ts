@@ -12,94 +12,26 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 
-// Import validation schemas (these will be implemented in T024)
-// import {
-//   FandomSchema,
-//   TagSchema,
-//   TagClassSchema,
-//   PlotBlockSchema,
-//   PlotBlockConditionSchema
-// } from '../../src/types/validation';
+// Import validation schemas
+import {
+  fandomSchema as FandomSchema,
+  tagSchema as TagSchema,
+  tagClassSchema as TagClassSchema,
+  plotBlockSchema as PlotBlockSchema,
+  plotBlockConditionSchema as PlotBlockConditionSchema
+} from '../../src/lib/validation/schemas';
 
 describe('Zod Schema Validation Tests', () => {
-  // Mock schemas for testing structure - will be replaced with real imports
-  const FandomSchema = z.object({
-    name: z.string().min(1).max(100),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
-    description: z.string().max(1000).optional(),
-    metadata: z.record(z.any()).optional(),
-    is_active: z.boolean().default(true),
-  });
-
-  const TagSchema = z.object({
-    name: z.string().min(1).max(50),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
-    fandom_id: z.number().int().positive(),
-    tag_class_id: z.string().uuid().optional(),
-    parent_id: z.string().uuid().optional(),
-    metadata: z.record(z.any()).optional(),
-    is_active: z.boolean().default(true),
-  });
-
-  const TagClassSchema = z.object({
-    name: z.string().min(1).max(50),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
-    description: z.string().max(500).optional(),
-    validation_rules: z
-      .object({
-        mutual_exclusion: z.array(z.string()).optional(),
-        required_context: z.array(z.string()).optional(),
-        max_instances: z.number().int().positive().optional(),
-        applicable_categories: z.array(z.string()).optional(),
-      })
-      .optional(),
-    metadata: z.record(z.any()).optional(),
-    is_active: z.boolean().default(true),
-  });
-
-  const PlotBlockSchema = z.object({
-    name: z.string().min(1).max(100),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
-    description: z.string().max(1000).optional(),
-    fandom_id: z.number().int().positive(),
-    parent_id: z.string().uuid().optional(),
-    category: z.enum([
-      'character-development',
-      'relationship',
-      'action',
-      'structure',
-      'worldbuilding',
-      'misc',
-    ]),
-    complexity: z.enum(['simple', 'moderate', 'complex', 'epic']),
-    tags: z.array(z.string().uuid()).optional(),
-    metadata: z.record(z.any()).optional(),
-    is_active: z.boolean().default(true),
-  });
-
-  const PlotBlockConditionSchema = z.object({
-    source_block_id: z.string().uuid(),
-    target_block_id: z.string().uuid().optional(),
-    condition_type: z.enum([
-      'prerequisite',
-      'tag_presence',
-      'attribute',
-      'custom',
-    ]),
-    operator: z.string().min(1),
-    value: z.string().optional(),
-    metadata: z.record(z.any()).optional(),
-    is_active: z.boolean().default(true),
-  });
-
   describe('Fandom Schema Validation', () => {
     it('should validate valid fandom data', () => {
       const validFandom = {
+        id: 'fandom-1',
         name: 'Harry Potter',
         slug: 'harry-potter',
         description: 'The wizarding world of Harry Potter',
-        metadata: { genre: 'fantasy', rating: 'teen' },
         is_active: true,
+        created_at: new Date('2025-01-17T10:00:00Z'),
+        updated_at: new Date('2025-01-17T10:00:00Z'),
       };
 
       const result = FandomSchema.parse(validFandom);
@@ -507,7 +439,7 @@ describe('Zod Schema Validation Tests', () => {
 
       try {
         FandomSchema.parse(invalidFandom);
-        fail('Should have thrown validation error');
+        expect(true).toBe(false); // Should not reach here
       } catch (error) {
         expect(error).toBeInstanceOf(z.ZodError);
         const zodError = error as z.ZodError;
@@ -530,7 +462,7 @@ describe('Zod Schema Validation Tests', () => {
 
       try {
         TagSchema.parse(invalidTag);
-        fail('Should have thrown validation error');
+        expect(true).toBe(false); // Should not reach here
       } catch (error) {
         const zodError = error as z.ZodError;
         const nameError = zodError.issues.find(issue =>

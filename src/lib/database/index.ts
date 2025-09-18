@@ -766,3 +766,14 @@ export {
   desc,
   asc,
 };
+
+// Legacy functions for backward compatibility
+export async function getDatabase(): Promise<DatabaseConnection> {
+  const manager = DatabaseManager.getInstance();
+  return manager.getConnection();
+}
+
+export async function closeDatabase(): Promise<void> {
+  const manager = DatabaseManager.getInstance();
+  return manager.close();
+}

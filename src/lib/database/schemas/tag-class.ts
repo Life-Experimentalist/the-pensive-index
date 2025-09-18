@@ -33,7 +33,7 @@ export const tagClasses = sqliteTable(
     description: text('description'),
 
     // Fandom relationship (tag classes are scoped to fandoms)
-    fandomId: text('fandom_id').notNull(),
+    fandomId: integer('fandom_id').notNull(),
 
     // Validation rules (JSON string)
     validationRules: text('validation_rules'), // JSON: { mutuallyExclusive: boolean, required: boolean, maxSelections: number, etc. }

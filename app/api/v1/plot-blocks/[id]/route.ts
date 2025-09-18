@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseManager } from '@/lib/database';
 import { ResponseHandler, withErrorHandling } from '@/lib/api/responses';
 import { CommonMiddleware } from '@/lib/api/middleware';
-import { plotBlockSchema } from '@/lib/validation/schemas';
+import {
+  plotBlockSchema,
+  updatePlotBlockSchema,
+} from '@/lib/validation/schemas';
 import { ErrorFactory } from '@/lib/errors';
 import { and, eq } from 'drizzle-orm';
 import { plotBlocks } from '@/lib/database/schema';
@@ -53,7 +56,7 @@ export const PUT = CommonMiddleware.admin(
     ) => {
       const plotBlockId = params.id;
       const body = await request.json();
-      const validatedData = plotBlockSchema.partial().parse(body);
+      const validatedData = updatePlotBlockSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();

@@ -1,0 +1,448 @@
+{
+    "info": {
+        "name": "Rule Testing Workflow",
+        "description": "API tests for rule testing, publishing, and version management",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Setup Test Rule",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Create a test rule for testing workflow",
+                            "const testRuleName = 'Testing Rule ' + Math.random().toString(36).substr(2, 9);",
+                            "pm.environment.set('testingRuleName', testRuleName);"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Test rule created successfully', function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "if (pm.response.code === 201) {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.environment.set('testingRuleId', jsonData.id);",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"fandomId\": \"{{fandomId}}\",\n  \"name\": \"{{testingRuleName}}\",\n  \"description\": \"Test rule for testing workflow validation\",\n  \"ruleType\": \"conditional_requirement\",\n  \"severity\": \"warning\",\n  \"message\": \"This rule triggers when specific conditions are met\",\n  \"priority\": 50,\n  \"conditions\": [\n    {\n      \"conditionType\": \"has_tag\",\n      \"targetType\": \"tag\",\n      \"targetIds\": [\"time-travel\"],\n      \"operator\": \"contains\",\n      \"value\": true,\n      \"logicOperator\": \"AND\",\n      \"orderIndex\": 0\n    }\n  ],\n  \"actions\": [\n    {\n      \"actionType\": \"suggest_tag\",\n      \"targetType\": \"tag\",\n      \"targetIds\": [\"temporal-mechanics\"],\n      \"parameters\": {\n        \"suggestionText\": \"Consider adding temporal mechanics tag for time travel stories\"\n      },\n      \"orderIndex\": 0\n    }\n  ]\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Test Rule Against Sample Pathway",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Record test start time for performance measurement",
+                            "pm.environment.set('testStartTime', new Date().getTime());"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Performance validation",
+                            "const startTime = pm.environment.get('testStartTime');",
+                            "const endTime = new Date().getTime();",
+                            "const testExecutionTime = endTime - startTime;",
+                            "const performanceTarget = parseInt(pm.environment.get('performanceTarget')) || 100;",
+                            "",
+                            "pm.test('Rule test executes within performance target', function () {",
+                            "    pm.expect(testExecutionTime).to.be.below(performanceTarget);",
+                            "});",
+                            "",
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Test result has required structure', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('isValid');",
+                            "    pm.expect(jsonData).to.have.property('violations');",
+                            "    pm.expect(jsonData).to.have.property('suggestions');",
+                            "    pm.expect(jsonData).to.have.property('executionTime');",
+                            "    pm.expect(jsonData.violations).to.be.an('array');",
+                            "    pm.expect(jsonData.suggestions).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Execution time meets performance requirement', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.executionTime).to.be.a('number');",
+                            "    pm.expect(jsonData.executionTime).to.be.below(performanceTarget);",
+                            "});",
+                            "",
+                            "pm.test('Rule logic works correctly', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    // Since test pathway has time-travel tag, rule should trigger",
+                            "    pm.expect(jsonData.suggestions.length).to.be.greaterThan(0);",
+                            "    const suggestion = jsonData.suggestions[0];",
+                            "    pm.expect(suggestion).to.have.property('action');",
+                            "    pm.expect(suggestion).to.have.property('targetType');",
+                            "    pm.expect(suggestion).to.have.property('targetId');",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"inputPathway\": {\n    \"id\": \"test-pathway-001\",\n    \"fandomId\": \"{{fandomId}}\",\n    \"tags\": [\"time-travel\", \"harry-hermione\", \"post-war\"],\n    \"plotBlocks\": [\"goblin-inheritance\", \"marriage-law\"]\n  },\n  \"expectedResult\": {\n    \"isValid\": true,\n    \"violations\": [],\n    \"suggestions\": [\n      {\n        \"action\": \"add\",\n        \"targetType\": \"tag\",\n        \"targetId\": \"temporal-mechanics\",\n        \"reason\": \"Consider adding temporal mechanics tag for time travel stories\"\n      }\n    ],\n    \"executionTime\": 50\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}/test",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}",
+                        "test"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Test Rule Against Non-Matching Pathway",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Rule does not trigger for non-matching pathway', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    // Since test pathway has no time-travel tag, rule should not trigger",
+                            "    pm.expect(jsonData.suggestions.length).to.equal(0);",
+                            "    pm.expect(jsonData.violations.length).to.equal(0);",
+                            "    pm.expect(jsonData.isValid).to.be.true;",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"inputPathway\": {\n    \"id\": \"test-pathway-002\",\n    \"fandomId\": \"{{fandomId}}\",\n    \"tags\": [\"harry-ginny\", \"post-hogwarts\", \"auror-harry\"],\n    \"plotBlocks\": [\"epilogue-compliant\"]\n  },\n  \"expectedResult\": {\n    \"isValid\": true,\n    \"violations\": [],\n    \"suggestions\": [],\n    \"executionTime\": 30\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}/test",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}",
+                        "test"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Publish Rule (Activate)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Rule is now active', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.isActive).to.be.true;",
+                            "});",
+                            "",
+                            "pm.test('Version number incremented on publish', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.version).to.be.greaterThan(1);",
+                            "});",
+                            "",
+                            "pm.test('Published timestamp set', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.publishedAt).to.be.a('string');",
+                            "    pm.expect(new Date(jsonData.publishedAt)).to.be.a('date');",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"changeDescription\": \"Publishing rule after successful testing\"\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}/publish",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}",
+                        "publish"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Rule Versions",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Versions array returned', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.be.an('array');",
+                            "    pm.expect(jsonData.length).to.be.greaterThan(1);",
+                            "});",
+                            "",
+                            "pm.test('Versions have proper structure', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const version = jsonData[0];",
+                            "    pm.expect(version).to.have.property('versionNumber');",
+                            "    pm.expect(version).to.have.property('snapshot');",
+                            "    pm.expect(version).to.have.property('changeDescription');",
+                            "    pm.expect(version).to.have.property('isActive');",
+                            "    pm.expect(version).to.have.property('createdAt');",
+                            "});",
+                            "",
+                            "pm.test('Only one version is active', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const activeVersions = jsonData.filter(v => v.isActive);",
+                            "    pm.expect(activeVersions.length).to.equal(1);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}/versions",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}",
+                        "versions"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Rollback to Previous Version",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Rule reverted to previous version', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.version).to.equal(1);",
+                            "});",
+                            "",
+                            "pm.test('Rollback creates new version entry', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('rolledBackAt');",
+                            "    pm.expect(jsonData).to.have.property('rollbackReason');",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"targetVersion\": 1,\n  \"reason\": \"Rolling back for testing purposes\"\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}/rollback",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}",
+                        "rollback"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Cleanup Test Rule",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Test rule cleaned up successfully', function () {",
+                            "    pm.response.to.have.status(204);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testingRuleId}}",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testingRuleId}}"
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global validation",
+                    "if (!pm.environment.get('validationApiUrl')) {",
+                    "    throw new Error('validationApiUrl environment variable not set');",
+                    "}",
+                    "",
+                    "if (!pm.environment.get('adminToken')) {",
+                    "    throw new Error('adminToken environment variable not set');",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "testingRuleId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "testingRuleName",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

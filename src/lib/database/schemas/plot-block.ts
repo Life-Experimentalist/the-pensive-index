@@ -12,7 +12,7 @@ export const plotBlocks = sqliteTable(
   'plot_blocks',
   {
     id: text('id').primaryKey(),
-    fandom_id: text('fandom_id')
+    fandom_id: integer('fandom_id')
       .notNull()
       .references(() => fandoms.id, { onDelete: 'cascade' }),
     parent_id: text('parent_id'),

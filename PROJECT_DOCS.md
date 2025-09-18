@@ -422,3 +422,24 @@ interface SelectedPlotBlock {
 ---
 
 *This documentation follows Spec-Driven Development principles and is updated with each feature implementation cycle (/specify → /plan → /tasks).*
+
+---
+
+**Next: Spec 002 - Configurable Validation Framework**
+
+```
+/specify "Build a configurable validation framework that allows admins to create custom validation rules, tag relationships, and plot block dependencies through an admin interface. The system should support rule templates for common validation patterns (conditional requirements, exclusivity rules, prerequisite dependencies) while allowing admins to define custom rule types. Include a visual rule builder interface where admins can link tags and plot blocks with drag-and-drop connections, set conditions, and test validation scenarios before publishing rules to users."
+
+/plan "Use Next.js 13+ with TypeScript 5.x, React Flow for visual rule builder, and Cloudflare D1 for rule storage. Implement comprehensive API testing with Vitest for unit tests and Postman collections for integration testing of all validation endpoints. Create Postman environment configurations with automated test scripts for rule CRUD operations, validation testing, and error scenarios. Include JSON schema validation in Postman tests and authentication flow testing for admin roles. Use Zod for runtime rule validation and implement rule caching with <100ms evaluation performance target."
+
+/tasks
+```
+
+
+**Spec 003 - Admin Rule Management Dashboard**
+
+```
+/specify "Create an admin dashboard for managing validation rules and tag relationships with role-based permissions. ProjectAdmins can create rule templates and manage system-wide validation patterns. FandomAdmins can configure fandom-specific rules, create tag classes, define plot block hierarchies, and link validation conditions. Include a visual rule builder with drag-and-drop interface for connecting tags/plot blocks, conditional logic builder for complex scenarios, rule testing sandbox, and bulk import/export functionality for sharing rule sets between fandoms."
+
+/tasks
+```

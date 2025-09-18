@@ -45,26 +45,26 @@ export const ADMIN_PERMISSIONS = {
   UPDATE_RULE: 'rule:update',
   DELETE_RULE: 'rule:delete',
   PUBLISH_RULE: 'rule:publish',
-  
+
   // Template management permissions
   CREATE_TEMPLATE: 'template:create',
   UPDATE_TEMPLATE: 'template:update',
   DELETE_TEMPLATE: 'template:delete',
   MANAGE_TEMPLATES: 'template:manage',
-  
+
   // Testing permissions
   RUN_TESTS: 'test:run',
   CREATE_TEST_SCENARIO: 'test:create',
   MANAGE_TEST_SANDBOX: 'test:sandbox',
-  
+
   // Import/Export permissions
   EXPORT_RULES: 'export:rules',
   IMPORT_RULES: 'import:rules',
-  
+
   // Fandom administration
   MANAGE_FANDOM: 'fandom:manage',
   ACCESS_FANDOM: 'fandom:access',
-  
+
   // System administration
   MANAGE_ADMINS: 'admin:manage',
   VIEW_ANALYTICS: 'analytics:view',
@@ -94,7 +94,7 @@ export const PERMISSIONS = {
 
   // System permissions
   MANAGE_USERS: 'manage:users',
-  
+
   // Include admin permissions
   ...ADMIN_PERMISSIONS,
 } as const;
@@ -110,19 +110,19 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.UPDATE_RULE,
     PERMISSIONS.DELETE_RULE,
     PERMISSIONS.PUBLISH_RULE,
-    
+
     // Template usage (not creation)
     PERMISSIONS.EXPORT_RULES,
     PERMISSIONS.IMPORT_RULES,
-    
+
     // Testing
     PERMISSIONS.RUN_TESTS,
     PERMISSIONS.CREATE_TEST_SCENARIO,
     PERMISSIONS.MANAGE_TEST_SANDBOX,
-    
+
     // Fandom access (scoped to assigned fandoms)
     PERMISSIONS.ACCESS_FANDOM,
-    
+
     // Standard content permissions
     PERMISSIONS.CREATE_TAG,
     PERMISSIONS.UPDATE_TAG,
@@ -253,8 +253,12 @@ export class AuthMiddleware {
       }
 
       const hasPermissions = requireAll
-        ? permissions.every(p => AdminAccessControl.hasPermission(authContext, p))
-        : permissions.some(p => AdminAccessControl.hasPermission(authContext, p));
+        ? permissions.every(p =>
+            AdminAccessControl.hasPermission(authContext, p)
+          )
+        : permissions.some(p =>
+            AdminAccessControl.hasPermission(authContext, p)
+          );
 
       if (!hasPermissions) {
         const verb = requireAll ? 'all' : 'any';
@@ -374,15 +378,21 @@ export class AdminAccessControl {
   /**
    * Check if user has a specific permission
    */
-  static hasPermission(authContext: AuthContext, permissionId: string, resource?: string): boolean {
+  static hasPermission(
+    authContext: AuthContext,
+    permissionId: string,
+    resource?: string
+  ): boolean {
     return authContext.user.permissions.some(permission => {
       if (permission.id !== permissionId) return false;
-      
+
       // If resource is specified, check scoped permissions
       if (resource) {
-        return permission.scope !== 'global' && permission.resource === resource;
+        return (
+          permission.scope !== 'global' && permission.resource === resource
+        );
       }
-      
+
       // Otherwise, any scope is acceptable
       return true;
     });
@@ -402,15 +412,16 @@ export class AdminAccessControl {
     if (!authContext.user.roles.includes(USER_ROLES.FANDOM_ADMIN)) {
       return false;
     }
-    
+
     // If no fandomId specified, check if user is any kind of FandomAdmin
     if (!fandomId) {
       return true;
     }
-    
+
     // Check if user has access to specific fandom
     return authContext.user.permissions.some(
-      permission => permission.scope === 'fandom' && permission.resource === fandomId
+      permission =>
+        permission.scope === 'fandom' && permission.resource === fandomId
     );
   }
 
@@ -422,18 +433,29 @@ export class AdminAccessControl {
     if (AdminAccessControl.isProjectAdmin(authContext)) {
       return true;
     }
-    
+
     // FandomAdmin can manage rules for assigned fandoms
-    return AdminAccessControl.isFandomAdmin(authContext, fandomId) &&
-           AdminAccessControl.hasPermission(authContext, PERMISSIONS.CREATE_RULE, fandomId);
+    return (
+      AdminAccessControl.isFandomAdmin(authContext, fandomId) &&
+      AdminAccessControl.hasPermission(
+        authContext,
+        PERMISSIONS.CREATE_RULE,
+        fandomId
+      )
+    );
   }
 
   /**
    * Check if user can manage rule templates (ProjectAdmin only)
    */
   static canManageTemplates(authContext: AuthContext): boolean {
-    return AdminAccessControl.isProjectAdmin(authContext) &&
-           AdminAccessControl.hasPermission(authContext, PERMISSIONS.MANAGE_TEMPLATES);
+    return (
+      AdminAccessControl.isProjectAdmin(authContext) &&
+      AdminAccessControl.hasPermission(
+        authContext,
+        PERMISSIONS.MANAGE_TEMPLATES
+      )
+    );
   }
 
   /**

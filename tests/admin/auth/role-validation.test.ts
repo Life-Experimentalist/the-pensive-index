@@ -3,7 +3,7 @@ import { AuthContext, AdminAccessControl, USER_ROLES, ADMIN_PERMISSIONS } from '
 
 /**
  * T004: Admin Authentication and Permission Tests
- * 
+ *
  * These tests MUST FAIL initially as implementation doesn't exist yet.
  * Following TDD methodology - tests first, then implementation.
  */
@@ -182,7 +182,7 @@ describe('Admin Authentication and Role Validation', () => {
       // This test MUST FAIL initially
       const isProjectAdmin = AdminAccessControl.isProjectAdmin(mockRegularUser);
       const isFandomAdmin = AdminAccessControl.isFandomAdmin(mockRegularUser);
-      
+
       expect(isProjectAdmin).toBe(false);
       expect(isFandomAdmin).toBe(false);
     });

@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
 
       try {
         const db = await DatabaseManager.getInstance().getConnection();
-        
+
         // Get admin user details if exists
         const adminUser = await db.query.adminUsers.findFirst({
           where: eq(schema.adminUsers.email, session.user.email!),

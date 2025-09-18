@@ -1,6 +1,40 @@
 // Core entity types for The Pensieve Index
 // These match the database schema and API contracts
 
+// Admin validation rule types
+export interface ValidationRule {
+  id: string;
+  name: string;
+  description: string;
+  fandomId: string;
+  ruleType: 'conditional' | 'exclusivity' | 'prerequisite' | 'hierarchy' | 'custom';
+  priority: number;
+  conditions: RuleCondition[];
+  actions: RuleAction[];
+  templateId?: string;
+  isActive: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  metadata: Record<string, any>;
+}
+
+export interface RuleCondition {
+  type: 'tag_present' | 'tag_absent' | 'plot_block_present' | 'tag_count' | 'custom';
+  target: string;
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
+  value: any;
+  logicalOperator?: 'AND' | 'OR';
+}
+
+export interface RuleAction {
+  type: 'error' | 'warning' | 'suggestion' | 'auto_add' | 'auto_remove';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  message: string;
+  targetTags?: string[];
+  targetPlotBlocks?: string[];
+}
+
 export interface Fandom {
   id: string;
   name: string;

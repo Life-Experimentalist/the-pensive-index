@@ -1,0 +1,473 @@
+{
+    "info": {
+        "name": "Rule Templates",
+        "description": "API tests for rule template listing and instantiation",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Get All Rule Templates",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Response is an array of templates', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Templates have required structure', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.length > 0) {",
+                            "        const template = jsonData[0];",
+                            "        pm.expect(template).to.have.property('id');",
+                            "        pm.expect(template).to.have.property('name');",
+                            "        pm.expect(template).to.have.property('description');",
+                            "        pm.expect(template).to.have.property('category');",
+                            "        pm.expect(template).to.have.property('ruleType');",
+                            "        pm.expect(template).to.have.property('parameters');",
+                            "        pm.expect(template.parameters).to.be.an('array');",
+                            "    }",
+                            "});",
+                            "",
+                            "pm.test('System templates are included', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const systemTemplates = jsonData.filter(t => t.isSystem === true);",
+                            "    pm.expect(systemTemplates.length).to.be.greaterThan(0);",
+                            "});",
+                            "",
+                            "// Store first template for subsequent tests",
+                            "if (pm.response.code === 200) {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.length > 0) {",
+                            "        const shippingTemplate = jsonData.find(t => t.category === 'shipping_rules');",
+                            "        if (shippingTemplate) {",
+                            "            pm.environment.set('testTemplateId', shippingTemplate.id);",
+                            "        }",
+                            "    }",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Templates by Category",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('All templates match requested category', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    jsonData.forEach(template => {",
+                            "        pm.expect(template.category).to.equal('shipping_rules');",
+                            "    });",
+                            "});",
+                            "",
+                            "pm.test('Shipping templates have appropriate parameters', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.length > 0) {",
+                            "        const template = jsonData[0];",
+                            "        const characterParams = template.parameters.filter(p => ",
+                            "            p.name.toLowerCase().includes('character') || ",
+                            "            p.type === 'tag'",
+                            "        );",
+                            "        pm.expect(characterParams.length).to.be.greaterThan(0);",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates?category=shipping_rules",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates"
+                    ],
+                    "query": [
+                        {
+                            "key": "category",
+                            "value": "shipping_rules"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Template by ID",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Template has complete structure', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('conditionTemplate');",
+                            "    pm.expect(jsonData).to.have.property('actionTemplate');",
+                            "    pm.expect(jsonData.conditionTemplate).to.be.an('array');",
+                            "    pm.expect(jsonData.actionTemplate).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Template parameters have proper validation', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    jsonData.parameters.forEach(param => {",
+                            "        pm.expect(param).to.have.property('name');",
+                            "        pm.expect(param).to.have.property('displayName');",
+                            "        pm.expect(param).to.have.property('type');",
+                            "        pm.expect(param).to.have.property('required');",
+                            "        pm.expect(['tag', 'plot_block', 'text', 'number']).to.include(param.type);",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates/{{testTemplateId}}",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates",
+                        "{{testTemplateId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Instantiate Template with Valid Parameters",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Generate unique rule name for template instantiation",
+                            "const ruleName = 'Template Rule ' + Math.random().toString(36).substr(2, 9);",
+                            "pm.environment.set('templateRuleName', ruleName);"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 201', function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test('Rule created from template', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData).to.have.property('name');",
+                            "    pm.expect(jsonData).to.have.property('conditions');",
+                            "    pm.expect(jsonData).to.have.property('actions');",
+                            "    pm.expect(jsonData.conditions).to.be.an('array');",
+                            "    pm.expect(jsonData.actions).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Template parameters applied correctly', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.name).to.equal(pm.environment.get('templateRuleName'));",
+                            "    pm.expect(jsonData.fandomId).to.equal(pm.environment.get('fandomId'));",
+                            "});",
+                            "",
+                            "pm.test('Rule type matches template', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    // Based on shipping_rules template, should be exclusivity",
+                            "    pm.expect(['exclusivity', 'conditional_requirement']).to.include(jsonData.ruleType);",
+                            "});",
+                            "",
+                            "// Store created rule ID for cleanup",
+                            "if (pm.response.code === 201) {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.environment.set('templateRuleId', jsonData.id);",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"templateId\": \"{{testTemplateId}}\",\n  \"fandomId\": \"{{fandomId}}\",\n  \"name\": \"{{templateRuleName}}\",\n  \"description\": \"Rule created from template for testing\",\n  \"parameters\": {\n    \"primaryCharacter\": \"harry-potter\",\n    \"excludedShippings\": [\"harry-hermione\", \"harry-ginny\"],\n    \"maxShippings\": 1,\n    \"severity\": \"warning\"\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates/{{testTemplateId}}/instantiate",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates",
+                        "{{testTemplateId}}",
+                        "instantiate"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Instantiate Template with Missing Required Parameter",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 400', function () {",
+                            "    pm.response.to.have.status(400);",
+                            "});",
+                            "",
+                            "pm.test('Error indicates missing required parameter', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('error');",
+                            "    pm.expect(jsonData.error.toLowerCase()).to.include('parameter');",
+                            "    pm.expect(jsonData.error.toLowerCase()).to.include('required');",
+                            "});",
+                            "",
+                            "pm.test('Validation details provided', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('validationErrors');",
+                            "    pm.expect(jsonData.validationErrors).to.be.an('array');",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"templateId\": \"{{testTemplateId}}\",\n  \"fandomId\": \"{{fandomId}}\",\n  \"name\": \"Incomplete Template Rule\",\n  \"description\": \"This should fail due to missing required parameters\",\n  \"parameters\": {\n    \"severity\": \"warning\"\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates/{{testTemplateId}}/instantiate",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates",
+                        "{{testTemplateId}}",
+                        "instantiate"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Instantiate Template with Invalid Parameter Type",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 400', function () {",
+                            "    pm.response.to.have.status(400);",
+                            "});",
+                            "",
+                            "pm.test('Error indicates invalid parameter type', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('error');",
+                            "    pm.expect(jsonData.error.toLowerCase()).to.include('invalid');",
+                            "});",
+                            "",
+                            "pm.test('Type validation error details provided', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('validationErrors');",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"templateId\": \"{{testTemplateId}}\",\n  \"fandomId\": \"{{fandomId}}\",\n  \"name\": \"Invalid Parameter Rule\",\n  \"description\": \"This should fail due to invalid parameter types\",\n  \"parameters\": {\n    \"primaryCharacter\": 12345,\n    \"excludedShippings\": \"not-an-array\",\n    \"maxShippings\": \"not-a-number\",\n    \"severity\": \"invalid-severity\"\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/templates/{{testTemplateId}}/instantiate",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "templates",
+                        "{{testTemplateId}}",
+                        "instantiate"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Cleanup Template-Created Rule",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Template rule cleaned up successfully', function () {",
+                            "    pm.response.to.have.status(204);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{templateRuleId}}",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{templateRuleId}}"
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global validation",
+                    "if (!pm.environment.get('validationApiUrl')) {",
+                    "    throw new Error('validationApiUrl environment variable not set');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test for all template operations",
+                    "pm.test('Response time acceptable for template operations', function () {",
+                    "    const maxTime = 500; // Template operations can be slightly slower",
+                    "    pm.expect(pm.response.responseTime).to.be.below(maxTime);",
+                    "});"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "testTemplateId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "templateRuleId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "templateRuleName",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

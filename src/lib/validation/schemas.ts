@@ -15,23 +15,18 @@ const urlSchema = z.string().url('Invalid URL format').optional();
 const timestampSchema = z.coerce.date();
 
 // Fandom validation schema
-export const fandomSchema = z
-  .object({
-    id: entityIdSchema,
-    name: z
-      .string()
-      .min(1, 'Fandom name is required')
-      .max(200, 'Fandom name too long'),
-    description: z
-      .string()
-      .min(1, 'Description is required')
-      .max(2000, 'Description too long'),
-    slug: slugSchema,
-    is_active: z.boolean().default(true),
-    created_at: timestampSchema,
-    updated_at: timestampSchema,
-  })
-  .strict();
+export const fandomSchema = z.object({
+  id: entityIdSchema.optional(),
+  name: z
+    .string()
+    .min(1, 'Fandom name is required')
+    .max(200, 'Fandom name too long'),
+  description: z.string().max(2000, 'Description too long').optional(),
+  slug: slugSchema.optional(),
+  is_active: z.boolean().default(true),
+  created_at: timestampSchema.optional(),
+  updated_at: timestampSchema.optional(),
+});
 
 export const createFandomSchema = fandomSchema.omit({
   id: true,
@@ -45,28 +40,24 @@ export const updateFandomSchema = fandomSchema.partial().omit({
 });
 
 // Tag validation schemas
-export const tagSchema = z
-  .object({
-    id: entityIdSchema,
-    name: z
-      .string()
-      .min(1, 'Tag name is required')
-      .max(100, 'Tag name too long')
-      .regex(
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        'Tag name must be lowercase with hyphens'
-      ),
-    fandom_id: entityIdSchema,
-    description: z.string().max(1000, 'Description too long').optional(),
-    category: z.string().max(50, 'Category too long').optional(),
-    is_active: z.boolean().default(true),
-    created_at: timestampSchema,
-    updated_at: timestampSchema,
-    requires: z.array(entityIdSchema).optional(),
-    enhances: z.array(entityIdSchema).optional(),
-    tag_class_id: entityIdSchema.optional(),
-  })
-  .strict();
+export const tagSchema = z.object({
+  id: entityIdSchema.optional(),
+  name: z.string().min(1, 'Tag name is required').max(100, 'Tag name too long'),
+  slug: slugSchema.optional(),
+  fandom_id: entityIdSchema.optional(),
+  parent_id: entityIdSchema.optional(),
+  description: z.string().max(1000, 'Description too long').optional(),
+  category: z.string().max(50, 'Category too long').optional(),
+  complexity: z.union([z.number().int().min(1).max(5), z.string()]).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  is_active: z.boolean().default(true),
+  created_at: timestampSchema.optional(),
+  updated_at: timestampSchema.optional(),
+  requires: z.array(entityIdSchema).optional(),
+  enhances: z.array(entityIdSchema).optional(),
+  tag_class_id: entityIdSchema.optional(),
+});
 
 export const createTagSchema = tagSchema.omit({
   id: true,
@@ -80,87 +71,52 @@ export const updateTagSchema = tagSchema.partial().omit({
 });
 
 // Tag class validation rules schema
-export const tagClassValidationRulesSchema = z
-  .object({
-    mutual_exclusion: z
-      .object({
-        within_class: z.boolean().default(false),
-        conflicting_tags: z.array(entityIdSchema).optional(),
-        conflicting_classes: z.array(entityIdSchema).optional(),
-      })
-      .optional(),
-
-    required_context: z
-      .object({
-        required_tags: z.array(entityIdSchema).optional(),
-        required_classes: z.array(entityIdSchema).optional(),
-        required_metadata: z.array(z.string()).optional(),
-      })
-      .optional(),
-
-    instance_limits: z
-      .object({
-        max_instances: z.number().int().positive().optional(),
-        min_instances: z.number().int().nonnegative().optional(),
-        exact_instances: z.number().int().positive().optional(),
-      })
-      .refine(
-        data => {
-          if (data.exact_instances !== undefined) {
-            return (
-              data.max_instances === undefined &&
-              data.min_instances === undefined
-            );
-          }
-          if (
-            data.max_instances !== undefined &&
-            data.min_instances !== undefined
-          ) {
-            return data.max_instances >= data.min_instances;
-          }
-          return true;
-        },
-        { message: 'Instance limits configuration is invalid' }
-      )
-      .optional(),
-
-    category_restrictions: z
-      .object({
-        applicable_categories: z.array(z.string()).optional(),
-        excluded_categories: z.array(z.string()).optional(),
-        required_plot_blocks: z.array(entityIdSchema).optional(),
-      })
-      .optional(),
-
-    dependencies: z
-      .object({
-        requires: z.array(entityIdSchema).optional(),
-        enhances: z.array(entityIdSchema).optional(),
-        enables: z.array(entityIdSchema).optional(),
-      })
-      .optional(),
-  })
-  .strict();
+export const tagClassValidationRulesSchema = z.object({
+  mutual_exclusion: z.array(z.string()).optional(),
+  required_context: z.array(z.string()).optional(),
+  max_instances: z.number().int().positive().optional(),
+  applicable_categories: z.array(z.string()).optional(),
+  instance_limits: z
+    .object({
+      max_instances: z.number().int().positive().optional(),
+      min_instances: z.number().int().nonnegative().optional(),
+      exact_instances: z.number().int().positive().optional(),
+    })
+    .optional(),
+  category_restrictions: z
+    .object({
+      applicable_categories: z.array(z.string()).optional(),
+      excluded_categories: z.array(z.string()).optional(),
+      required_plot_blocks: z.array(entityIdSchema).optional(),
+    })
+    .optional(),
+  dependencies: z
+    .object({
+      requires: z.array(entityIdSchema).optional(),
+      enhances: z.array(entityIdSchema).optional(),
+      enables: z.array(entityIdSchema).optional(),
+    })
+    .optional(),
+});
 
 // Tag class validation schema
-export const tagClassSchema = z
-  .object({
-    id: entityIdSchema,
-    name: z
-      .string()
-      .min(1, 'Tag class name is required')
-      .max(100, 'Tag class name too long'),
-    fandom_id: entityIdSchema,
-    description: z
-      .string()
-      .min(1, 'Description is required')
-      .max(1000, 'Description too long'),
-    validation_rules: tagClassValidationRulesSchema,
-    is_active: z.boolean().default(true),
-    created_at: timestampSchema,
-    updated_at: timestampSchema,
-  })
-  .strict();
+export const tagClassSchema = z.object({
+  id: entityIdSchema.optional(),
+  name: z
+    .string()
+    .min(1, 'Tag class name is required')
+    .max(100, 'Tag class name too long'),
+  slug: slugSchema.optional(),
+  fandom_id: entityIdSchema.optional(),
+  description: z.string().max(1000, 'Description too long').optional(),
+  validation_rules: tagClassValidationRulesSchema.optional(),
+  complexity: z.union([z.number().int().min(1).max(5), z.string()]).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  is_active: z.boolean().default(true),
+  created_at: timestampSchema.optional(),
+  updated_at: timestampSchema.optional(),
+});
 
 export const createTagClassSchema = tagClassSchema.omit({
   id: true,
@@ -174,36 +130,32 @@ export const updateTagClassSchema = tagClassSchema.partial().omit({
 });
 
 // Plot block validation schema
-export const plotBlockSchema = z
-  .object({
-    id: entityIdSchema,
-    name: z
-      .string()
-      .min(1, 'Plot block name is required')
-      .max(200, 'Plot block name too long'),
-    fandom_id: entityIdSchema,
-    category: z
-      .string()
-      .min(1, 'Category is required')
-      .max(50, 'Category too long'),
-    description: z
-      .string()
-      .min(1, 'Description is required')
-      .max(2000, 'Description too long'),
-    is_active: z.boolean().default(true),
-    created_at: timestampSchema,
-    updated_at: timestampSchema,
-    conflicts_with: z.array(entityIdSchema).optional(),
-    requires: z.array(entityIdSchema).optional(),
-    soft_requires: z.array(entityIdSchema).optional(),
-    enhances: z.array(entityIdSchema).optional(),
-    enabled_by: z.array(entityIdSchema).optional(),
-    excludes_categories: z.array(z.string()).optional(),
-    max_instances: z.number().int().positive().optional(),
-    parent_id: entityIdSchema.optional(),
-    children: z.array(entityIdSchema).optional(),
-  })
-  .strict();
+export const plotBlockSchema = z.object({
+  id: entityIdSchema.optional(),
+  name: z
+    .string()
+    .min(1, 'Plot block name is required')
+    .max(200, 'Plot block name too long'),
+  slug: slugSchema.optional(),
+  parent_id: entityIdSchema.optional(),
+  fandom_id: entityIdSchema.optional(),
+  category: z.string().max(50, 'Category too long').optional(),
+  description: z.string().max(2000, 'Description too long').optional(),
+  complexity: z.union([z.number().int().min(1).max(5), z.string()]).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  is_active: z.boolean().default(true),
+  created_at: timestampSchema.optional(),
+  updated_at: timestampSchema.optional(),
+  conflicts_with: z.array(entityIdSchema).optional(),
+  requires: z.array(entityIdSchema).optional(),
+  soft_requires: z.array(entityIdSchema).optional(),
+  enhances: z.array(entityIdSchema).optional(),
+  enabled_by: z.array(entityIdSchema).optional(),
+  excludes_categories: z.array(z.string()).optional(),
+  max_instances: z.number().int().positive().optional(),
+  children: z.array(entityIdSchema).optional(),
+});
 
 export const createPlotBlockSchema = plotBlockSchema.omit({
   id: true,
@@ -217,29 +169,35 @@ export const updatePlotBlockSchema = plotBlockSchema.partial().omit({
 });
 
 // Plot block condition validation schema
-export const plotBlockConditionSchema = z
-  .object({
-    id: entityIdSchema,
-    plot_block_id: entityIdSchema,
-    parent_id: entityIdSchema.optional(),
-    name: z
-      .string()
-      .min(1, 'Condition name is required')
-      .max(200, 'Condition name too long'),
-    description: z
-      .string()
-      .min(1, 'Description is required')
-      .max(1000, 'Description too long'),
-    order: z.number().int().nonnegative(),
-    is_active: z.boolean().default(true),
-    created_at: timestampSchema,
-    updated_at: timestampSchema,
-    conflicts_with: z.array(entityIdSchema).optional(),
-    requires: z.array(entityIdSchema).optional(),
-    enables: z.array(entityIdSchema).optional(),
-    children: z.array(entityIdSchema).optional(),
-  })
-  .strict();
+export const plotBlockConditionSchema = z.object({
+  id: entityIdSchema.optional(),
+  plot_block_id: z.union([entityIdSchema, z.number()]).optional(),
+  source_block_id: entityIdSchema.optional(),
+  target_block_id: entityIdSchema.optional(),
+  parent_id: entityIdSchema.optional(),
+  name: z
+    .string()
+    .min(1, 'Condition name is required')
+    .max(200, 'Condition name too long')
+    .optional(),
+  condition_type: z
+    .enum(['prerequisite', 'custom', 'conflict', 'enhancement'])
+    .optional(),
+  operator: z.string().min(1, 'Operator is required'),
+  value: z.string().optional(),
+  description: z.string().max(1000, 'Description too long').optional(),
+  order: z.number().int().nonnegative().optional(),
+  complexity: z.union([z.number().int().min(1).max(5), z.string()]).optional(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  is_active: z.boolean().default(true),
+  created_at: timestampSchema.optional(),
+  updated_at: timestampSchema.optional(),
+  conflicts_with: z.array(entityIdSchema).optional(),
+  requires: z.array(entityIdSchema).optional(),
+  enables: z.array(entityIdSchema).optional(),
+  children: z.array(entityIdSchema).optional(),
+});
 
 export const createPlotBlockConditionSchema = plotBlockConditionSchema.omit({
   id: true,

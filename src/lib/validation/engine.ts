@@ -89,76 +89,320 @@ export class ValidationEngine {
     const warnings: ValidationWarning[] = [];
     const suggestions: ValidationSuggestion[] = [];
 
-    // Group tags by their classes
+    // Create lookup maps for efficient access
+    const tagMap = new Map<string, any>();
     const tagsByClass = new Map<string, string[]>();
+    const appliedTagSet = new Set(context.applied_tags);
 
-    for (const tagId of context.applied_tags) {
-      // In a real implementation, we'd need to look up each tag's class
-      // For now, this is a placeholder that assumes tag IDs contain class info
-      const tagClass = this.getTagClassForTag(tagId);
-      if (tagClass) {
-        if (!tagsByClass.has(tagClass)) {
-          tagsByClass.set(tagClass, []);
+    // Build tag lookup and grouping
+    for (const tag of context.all_tags || []) {
+      tagMap.set(tag.name, tag);
+      if (tag.tag_class_id) {
+        if (!tagsByClass.has(tag.tag_class_id)) {
+          tagsByClass.set(tag.tag_class_id, []);
         }
-        tagsByClass.get(tagClass)!.push(tagId);
+        if (appliedTagSet.has(tag.name)) {
+          tagsByClass.get(tag.tag_class_id)!.push(tag.name);
+        }
       }
     }
 
     // Check each tag class for violations
-    for (const [classId, tags] of tagsByClass) {
-      const tagClass = this.tagClasses.get(classId);
-      if (!tagClass) continue;
+    for (const tagClass of context.tag_classes) {
+      const classAppliedTags = tagsByClass.get(tagClass.id) || [];
+      const rules = tagClass.validation_rules;
 
-      // Check mutual exclusion
-      if (tagClass.validation_rules?.mutual_exclusion?.within_class) {
-        const conflictingTags =
-          tagClass.validation_rules.mutual_exclusion.conflicting_tags || [];
-        const selectedConflicting = tags.filter(tag =>
-          conflictingTags.includes(tag)
-        );
-        if (selectedConflicting.length > 1) {
+      // Skip if no rules or empty rules
+      if (!rules || Object.keys(rules).length === 0) continue;
+
+      // 1. Mutual Exclusion Rules
+      if (rules.mutual_exclusion) {
+        // Check within-class mutual exclusion
+        if (
+          rules.mutual_exclusion.within_class &&
+          classAppliedTags.length > 1
+        ) {
           errors.push({
             type: 'mutual_exclusion_violation',
             name: 'mutual_exclusion_violation',
             message: `Multiple mutually exclusive tags selected from ${
               tagClass.name
-            }: ${selectedConflicting.join(', ')}`,
+            }: ${classAppliedTags.join(', ')}`,
             field: 'tags',
-            value: selectedConflicting,
+            value: classAppliedTags,
             severity: 'error',
           });
           suggestions.push({
             type: 'remove_conflicting_tags',
-            message: `Remove all but one tag from: ${selectedConflicting.join(
+            message: `Remove all but one tag from: ${classAppliedTags.join(
               ', '
             )}`,
             action: 'remove_tags',
-            alternative_ids: selectedConflicting.slice(1),
+            alternative_ids: classAppliedTags.slice(1),
           });
+        }
+
+        // Check specific conflicting tags
+        if (
+          rules.mutual_exclusion.conflicting_tags &&
+          classAppliedTags.length > 0
+        ) {
+          for (const conflictingTag of rules.mutual_exclusion
+            .conflicting_tags) {
+            if (context.applied_tags.includes(conflictingTag)) {
+              errors.push({
+                type: 'tag_conflict',
+                name: 'tag_conflict',
+                message: `Conflicting tags selected: ${classAppliedTags.join(
+                  ', '
+                )} conflicts with ${conflictingTag}`,
+                field: 'tags',
+                value: [...classAppliedTags, conflictingTag],
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check conflicting classes
+        if (rules.mutual_exclusion.conflicting_classes) {
+          for (const conflictingClass of rules.mutual_exclusion
+            .conflicting_classes) {
+            const conflictingTags = tagsByClass.get(conflictingClass) || [];
+            if (classAppliedTags.length > 0 && conflictingTags.length > 0) {
+              errors.push({
+                type: 'class_conflict',
+                name: 'class_conflict',
+                message: `Tags from conflicting classes: ${tagClass.name} and ${conflictingClass}`,
+                field: 'tags',
+                value: [...classAppliedTags, ...conflictingTags],
+                severity: 'error',
+              });
+            }
+          }
         }
       }
 
-      // Check instance limits
-      if (tagClass.validation_rules?.instance_limits) {
-        const maxInstances =
-          tagClass.validation_rules.instance_limits.max_instances;
-        if (typeof maxInstances === 'number' && tags.length > maxInstances) {
+      // 2. Instance Limit Rules
+      if (rules.instance_limits) {
+        const { max_instances, min_instances, exact_instances } =
+          rules.instance_limits;
+
+        if (
+          typeof max_instances === 'number' &&
+          classAppliedTags.length > max_instances
+        ) {
           errors.push({
             type: 'instance_limit_exceeded',
             name: 'instance_limit_exceeded',
-            message: `Too many ${tagClass.name} tags selected (${tags.length}). Maximum allowed: ${maxInstances}`,
+            message: `Too many ${tagClass.name} tags selected (${classAppliedTags.length}). Maximum allowed: ${max_instances}`,
             field: 'tags',
-            value: tags,
+            value: classAppliedTags,
             severity: 'error',
           });
-          suggestions.push({
-            type: 'reduce_tag_count',
-            message: `Remove ${tags.length - maxInstances} ${
-              tagClass.name
-            } tags`,
-            action: 'remove_tags',
-            alternative_ids: tags.slice(maxInstances),
-          });
+        }
+
+        // Only check minimum/exact requirements if there are tags from this class
+        if (classAppliedTags.length > 0) {
+          if (
+            typeof min_instances === 'number' &&
+            classAppliedTags.length < min_instances
+          ) {
+            errors.push({
+              type: 'instance_limit_minimum',
+              name: 'instance_limit_minimum',
+              message: `Too few ${tagClass.name} tags selected (${classAppliedTags.length}). At least ${min_instances} required`,
+              field: 'tags',
+              value: classAppliedTags,
+              severity: 'error',
+            });
+          }
+
+          if (
+            typeof exact_instances === 'number' &&
+            classAppliedTags.length !== exact_instances
+          ) {
+            errors.push({
+              type: 'instance_limit_exact',
+              name: 'instance_limit_exact',
+              message: `Incorrect number of ${tagClass.name} tags selected (${classAppliedTags.length}). Exactly ${exact_instances} required`,
+              field: 'tags',
+              value: classAppliedTags,
+              severity: 'error',
+            });
+          }
+        }
+      }
+
+      // 3. Required Context Rules
+      if (rules.required_context) {
+        // Check required tags
+        if (
+          rules.required_context.required_tags &&
+          classAppliedTags.length > 0
+        ) {
+          for (const requiredTag of rules.required_context.required_tags) {
+            if (!context.applied_tags.includes(requiredTag)) {
+              errors.push({
+                type: 'missing_required_tag',
+                name: 'missing_required_tag',
+                message: `Missing required tag: ${requiredTag} (required by ${tagClass.name})`,
+                field: 'tags',
+                value: requiredTag,
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check required metadata
+        if (
+          rules.required_context.required_metadata &&
+          classAppliedTags.length > 0
+        ) {
+          for (const requiredMeta of rules.required_context.required_metadata) {
+            if (!context.metadata?.[requiredMeta]) {
+              errors.push({
+                type: 'missing_required_metadata',
+                name: 'missing_required_metadata',
+                message: `Missing required metadata: ${requiredMeta} (required by ${tagClass.name})`,
+                field: 'metadata',
+                value: requiredMeta,
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check required tag classes
+        if (
+          rules.required_context.required_classes &&
+          classAppliedTags.length > 0
+        ) {
+          for (const requiredClass of rules.required_context.required_classes) {
+            const hasRequiredClass =
+              (tagsByClass.get(requiredClass) || []).length > 0;
+            if (!hasRequiredClass) {
+              errors.push({
+                type: 'missing_required_class',
+                name: 'missing_required_class',
+                message: `Missing tags from required class: ${requiredClass} (required by ${tagClass.name})`,
+                field: 'tags',
+                value: requiredClass,
+                severity: 'error',
+              });
+            }
+          }
+        }
+      }
+
+      // 4. Category Restriction Rules
+      if (rules.category_restrictions && classAppliedTags.length > 0) {
+        // Check excluded categories
+        if (rules.category_restrictions.excluded_categories) {
+          for (const tag of classAppliedTags) {
+            const tagObj = tagMap.get(tag);
+            if (
+              tagObj &&
+              rules.category_restrictions.excluded_categories.includes(
+                tagObj.category
+              )
+            ) {
+              errors.push({
+                type: 'excluded_category',
+                name: 'excluded_category',
+                message: `Tag ${tag} uses excluded category: ${tagObj.category}`,
+                field: 'tags',
+                value: tag,
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check applicable categories
+        if (rules.category_restrictions.applicable_categories) {
+          for (const tag of classAppliedTags) {
+            const tagObj = tagMap.get(tag);
+            if (
+              tagObj &&
+              !rules.category_restrictions.applicable_categories.includes(
+                tagObj.category
+              )
+            ) {
+              errors.push({
+                type: 'invalid_category',
+                name: 'invalid_category',
+                message: `Tag ${tag} category not applicable: ${tagObj.category}`,
+                field: 'tags',
+                value: tag,
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check required plot blocks
+        if (rules.category_restrictions.required_plot_blocks) {
+          const hasRequiredPlotBlocks =
+            rules.category_restrictions.required_plot_blocks.some(plotBlockId =>
+              context.metadata?.plot_blocks?.includes(plotBlockId)
+            );
+          if (!hasRequiredPlotBlocks) {
+            errors.push({
+              type: 'missing_required_plot_block',
+              name: 'missing_required_plot_block',
+              message: `Missing required plot block for ${tagClass.name}`,
+              field: 'plot_blocks',
+              value: rules.category_restrictions.required_plot_blocks,
+              severity: 'error',
+            });
+          }
+        }
+      }
+
+      // 5. Dependency Rules
+      if (rules.dependencies && classAppliedTags.length > 0) {
+        // Check hard dependencies
+        if (rules.dependencies.requires) {
+          for (const requiredDep of rules.dependencies.requires) {
+            if (!context.applied_tags.includes(requiredDep)) {
+              errors.push({
+                type: 'missing_dependency',
+                name: 'missing_dependency',
+                message: `Missing required dependency: ${requiredDep} (required by ${tagClass.name})`,
+                field: 'tags',
+                value: requiredDep,
+                severity: 'error',
+              });
+            }
+          }
+        }
+
+        // Check enhancement opportunities
+        if (rules.dependencies.enhances) {
+          for (const enhanceTarget of rules.dependencies.enhances) {
+            if (context.applied_tags.includes(enhanceTarget)) {
+              suggestions.push({
+                type: 'enhancement',
+                message: `${tagClass.name} enhances ${enhanceTarget}`,
+                action: 'add',
+                alternative_ids: [enhanceTarget],
+              });
+            }
+          }
+        }
+
+        // Check enabled features
+        if (rules.dependencies.enables) {
+          for (const enabledFeature of rules.dependencies.enables) {
+            suggestions.push({
+              type: 'feature_unlock',
+              message: `${tagClass.name} unlocks feature: ${enabledFeature}`,
+              action: 'add',
+              alternative_ids: [enabledFeature],
+            });
+          }
         }
       }
     }

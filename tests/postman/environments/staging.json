@@ -1,0 +1,93 @@
+{
+    "id": "staging-validation-environment",
+    "name": "Staging Validation Environment",
+    "values": [
+        {
+            "key": "baseUrl",
+            "value": "https://staging.pensieve-index.dev",
+            "description": "Base URL for staging environment",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "apiVersion",
+            "value": "v1",
+            "description": "API version for validation endpoints",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "validationApiUrl",
+            "value": "{{baseUrl}}/api/{{apiVersion}}",
+            "description": "Complete validation API base URL",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "authToken",
+            "value": "{{STAGING_AUTH_TOKEN}}",
+            "description": "Staging authentication token (set via environment variable)",
+            "type": "secret",
+            "enabled": true
+        },
+        {
+            "key": "adminToken",
+            "value": "{{STAGING_ADMIN_TOKEN}}",
+            "description": "Staging admin authentication token",
+            "type": "secret",
+            "enabled": true
+        },
+        {
+            "key": "fandomId",
+            "value": "harry-potter",
+            "description": "Test fandom ID for validation rules",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "testUserId",
+            "value": "staging-test-user",
+            "description": "Staging test user ID for authentication testing",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "performanceTarget",
+            "value": "100",
+            "description": "Performance target in milliseconds for validation",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "validationTimeout",
+            "value": "200",
+            "description": "Validation timeout in milliseconds",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "testRuleId",
+            "value": "",
+            "description": "Dynamic test rule ID set during test execution",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "testTemplateId",
+            "value": "",
+            "description": "Dynamic test template ID set during test execution",
+            "type": "default",
+            "enabled": true
+        },
+        {
+            "key": "dbUrl",
+            "value": "{{STAGING_DATABASE_URL}}",
+            "description": "Staging database URL for integration testing",
+            "type": "secret",
+            "enabled": true
+        }
+    ],
+    "_postman_variable_scope": "environment",
+    "_postman_exported_at": "2025-09-18T00:00:00.000Z",
+    "_postman_exported_using": "Postman/10.x.x"
+}

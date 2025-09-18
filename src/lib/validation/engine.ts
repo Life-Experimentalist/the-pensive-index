@@ -6,7 +6,18 @@ import {
   ValidationSuggestion,
   TagClass,
   PlotBlock,
+  ConflictDetectionContext,
 } from '@/types';
+
+import {
+  characterWarningTemplates,
+  getWarningTemplateByTags,
+} from './templates/character-warnings';
+import {
+  ValidationRuleCompiler,
+  ActionExecutionResult,
+  ValidationContext as CompilerValidationContext,
+} from './rules/compiler';
 
 /**
  * Core validation engine for The Pensieve Index
@@ -71,6 +82,14 @@ export class ValidationEngine {
     warnings.push(...circularResult.warnings);
     if (circularResult.suggestions) {
       suggestions.push(...circularResult.suggestions);
+    }
+
+    // Check for character dynamic warnings
+    const characterWarningResult = this.validateCharacterDynamics(context);
+    errors.push(...characterWarningResult.errors);
+    warnings.push(...characterWarningResult.warnings);
+    if (characterWarningResult.suggestions) {
+      suggestions.push(...characterWarningResult.suggestions);
     }
 
     return {
@@ -635,5 +654,152 @@ export class ValidationEngine {
     // This would implement actual plot block conflict checking logic
     // For now, return null (no conflicts)
     return null;
+  }
+
+  /**
+   * Validate character dynamics and plot development warnings
+   */
+  private validateCharacterDynamics(context: ValidationContext): ValidationResult {
+    const errors: ValidationError[] = [];
+    const warnings: ValidationWarning[] = [];
+    const suggestions: ValidationSuggestion[] = [];
+
+    // We need to get plot block information from metadata or create a minimal context
+    const selectedPlotBlocks = context.metadata?.selected_plot_blocks || [];
+
+    // Get applicable warning templates based on current tags and plot blocks
+    const applicableTemplates = getWarningTemplateByTags(
+      context.applied_tags,
+      selectedPlotBlocks
+    );
+
+    // Process each applicable template
+    for (const template of applicableTemplates) {
+      // Check if all conditions are met
+      const conditionsMet = this.evaluateTemplateConditions(template, context, selectedPlotBlocks);
+
+      if (conditionsMet) {
+        // Execute template actions
+        for (const action of template.actions) {
+          const result = this.executeTemplateAction(action, context, selectedPlotBlocks);
+
+          switch (result.type) {
+            case 'plot_warning':
+              warnings.push({
+                type: 'plot_development_risk',
+                message: result.message,
+                field: result.targetIds?.join(', '),
+                suggestion: `Template: ${template.id}. ${result.plotGuidance?.conflictDescription || ''}`
+              });
+              break;
+
+            case 'character_guidance':
+              warnings.push({
+                type: 'character_dynamic_concern',
+                message: result.message,
+                field: result.characterDynamics?.characters.join(', '),
+                suggestion: result.characterDynamics?.guidanceNote
+              });
+              break;
+
+            case 'suggestion':
+              if (result.suggestedAction && result.targetIds) {
+                suggestions.push({
+                  type: result.suggestedAction,
+                  message: result.message,
+                  action: result.suggestedAction,
+                  target_id: result.targetIds[0],
+                  alternative_ids: result.targetIds
+                });
+              }
+              break;
+          }
+        }
+      }
+    }
+
+    return {
+      is_valid: errors.length === 0,
+      errors,
+      warnings,
+      suggestions,
+    };
+  }
+
+  /**
+   * Evaluate if template conditions are met
+   */
+  private evaluateTemplateConditions(template: any, context: ValidationContext, selectedPlotBlocks: string[]): boolean {
+    return template.conditions.every((condition: any) => {
+      switch (condition.operator) {
+        case 'contains_all':
+          return condition.targetIds.every((id: string) =>
+            condition.targetType === 'tag'
+              ? context.applied_tags.includes(id)
+              : selectedPlotBlocks.includes(id)
+          );
+
+        case 'contains_any':
+          return condition.targetIds.some((id: string) =>
+            condition.targetType === 'tag'
+              ? context.applied_tags.includes(id)
+              : selectedPlotBlocks.includes(id)
+          );
+
+        case 'contains_multiple':
+          const matchCount = condition.targetIds.filter((id: string) =>
+            condition.targetType === 'tag'
+              ? context.applied_tags.includes(id)
+              : selectedPlotBlocks.includes(id)
+          ).length;
+          return matchCount >= (condition.value || 2);
+
+        case 'contains':
+          return condition.targetIds.some((id: string) =>
+            condition.targetType === 'tag'
+              ? context.applied_tags.includes(id)
+              : selectedPlotBlocks.includes(id)
+          );
+
+        default:
+          return false;
+      }
+    });
+  }
+
+  /**
+   * Execute template action and return result
+   */
+  private executeTemplateAction(action: any, context: ValidationContext, selectedPlotBlocks: string[]): ActionExecutionResult {
+    // Create a compiler-compatible validation context
+    const compilerContext: CompilerValidationContext = {
+      fandomId: context.metadata?.fandom_id || 'default',
+      selectedTags: context.applied_tags,
+      selectedPlotBlocks: selectedPlotBlocks,
+      pathway: context.applied_tags.map(tag => ({ id: tag, type: 'tag' as const })),
+      tagData: new Map(),
+      plotBlockData: new Map(),
+      metadata: context.metadata
+    };
+
+    const compiler = new ValidationRuleCompiler();
+
+    // Convert template action to validation rule action format
+    const ruleAction = {
+      id: 'template-action',
+      ruleId: 'template-rule',
+      actionType: action.actionType,
+      targetType: action.targetType,
+      targetIds: action.targetIds,
+      severity: action.severity,
+      message: action.message,
+      parameters: action.parameters,
+      orderIndex: 0,
+      createdAt: new Date(),
+    };
+
+    // Compile and execute the action
+    const compiledAction = compiler['compileAction'](ruleAction);
+    return compiledAction(compilerContext);
   }
 }

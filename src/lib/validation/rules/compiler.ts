@@ -62,10 +62,32 @@ export interface CompiledAction {
 }
 
 export interface ActionExecutionResult {
-  type: 'error' | 'warning' | 'suggestion';
+  type:
+    | 'error'
+    | 'warning'
+    | 'suggestion'
+    | 'plot_warning'
+    | 'character_guidance';
   message: string;
   targetIds?: string[];
   suggestedAction?: 'add' | 'remove' | 'replace';
+  plotGuidance?: {
+    warningType: string;
+    riskLevel: 'low' | 'medium' | 'high';
+    conflictDescription: string;
+    rectificationStrategies: Array<{
+      strategy: string;
+      difficulty: 'easy' | 'moderate' | 'difficult';
+      example?: string;
+    }>;
+    continuationWarnings: string[];
+  };
+  characterDynamics?: {
+    characters: string[];
+    relationshipType: string;
+    conflictTriggers: string[];
+    guidanceNote: string;
+  };
 }
 
 /**
@@ -493,6 +515,12 @@ export class ValidationRuleCompiler {
         return this.compileShowMessageAction(action);
       case 'modify_priority':
         return this.compileModifyPriorityAction(action);
+      case 'warn_plot_development':
+        return this.compileWarnPlotDevelopmentAction(action);
+      case 'provide_guidance':
+        return this.compileProvideGuidanceAction(action);
+      case 'suggest_alternatives':
+        return this.compileSuggestAlternativesAction(action);
       default:
         throw new Error(`Unknown action type: ${action.actionType}`);
     }
@@ -614,6 +642,60 @@ export class ValidationRuleCompiler {
       return {
         type: 'suggestion',
         message: 'Priority modification applied',
+      };
+    };
+  }
+
+  private compileWarnPlotDevelopmentAction(
+    action: RuleAction
+  ): (context: ValidationContext) => ActionExecutionResult {
+    return (context: ValidationContext): ActionExecutionResult => {
+      const guidance = action.parameters.plotGuidance as any;
+
+      return {
+        type: 'plot_warning',
+        message: guidance?.message || 'This combination may present plot development challenges',
+        plotGuidance: {
+          warningType: guidance?.warningType || 'character_dynamic',
+          riskLevel: guidance?.riskLevel || 'medium',
+          conflictDescription: guidance?.conflictDescription || 'Potential character inconsistency',
+          rectificationStrategies: guidance?.rectificationStrategies || [],
+          continuationWarnings: guidance?.continuationWarnings || []
+        }
+      };
+    };
+  }
+
+  private compileProvideGuidanceAction(
+    action: RuleAction
+  ): (context: ValidationContext) => ActionExecutionResult {
+    return (context: ValidationContext): ActionExecutionResult => {
+      const characterDynamics = action.parameters.characterDynamics as any;
+
+      return {
+        type: 'character_guidance',
+        message: characterDynamics?.guidanceNote || 'Consider character development implications',
+        characterDynamics: {
+          characters: characterDynamics?.characters || [],
+          relationshipType: characterDynamics?.relationshipType || 'friendship',
+          conflictTriggers: characterDynamics?.conflictTriggers || [],
+          guidanceNote: characterDynamics?.guidanceNote || ''
+        }
+      };
+    };
+  }
+
+  private compileSuggestAlternativesAction(
+    action: RuleAction
+  ): (context: ValidationContext) => ActionExecutionResult {
+    return (context: ValidationContext): ActionExecutionResult => {
+      const alternatives = action.parameters.alternatives as string[] || [];
+
+      return {
+        type: 'suggestion',
+        message: `Consider these alternatives: ${alternatives.join(', ')}`,
+        suggestedAction: 'replace',
+        targetIds: alternatives
       };
     };
   }

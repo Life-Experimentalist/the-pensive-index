@@ -36,12 +36,17 @@ export const ActionType = z.enum([
   'require_plot_block',
   'show_message',
   'modify_priority',
+  'warn_plot_development',
+  'provide_guidance',
+  'suggest_alternatives',
 ]);
 
 export const TemplateCategory = z.enum([
   'shipping_rules',
   'plot_consistency',
   'tag_relationships',
+  'character_dynamics',
+  'plot_development_warnings',
   'custom',
 ]);
 
@@ -97,6 +102,8 @@ export const ValidationRuleSchema = AdminEntitySchema.extend({
   name: z.string().min(1).max(255),
   description: z.string().min(1).max(1000),
   ruleType: ValidationRuleType,
+  category: z.string().min(1).max(100).default('custom'),
+  appliesTo: z.array(z.string()).min(1).default(['pathway']),
   conditions: z.array(RuleConditionSchema).min(1),
   actions: z.array(RuleActionSchema).min(1),
   severity: ValidationSeverity,
@@ -139,6 +146,40 @@ export const ValidationSuggestionSchema = z.object({
   targetType: z.enum(['tag', 'plot_block']),
   targetId: z.string(),
   reason: z.string().min(1),
+});
+
+// Plot Development Warning specific schema
+export const PlotDevelopmentWarningSchema = z.object({
+  warningType: z.enum([
+    'character_dynamic',
+    'plot_consistency',
+    'relationship_conflict',
+  ]),
+  riskLevel: z.enum(['low', 'medium', 'high']),
+  conflictDescription: z.string().min(1).max(1000),
+  possibleOutcomes: z.array(z.string()),
+  rectificationStrategies: z.array(
+    z.object({
+      strategy: z.string().min(1).max(500),
+      difficulty: z.enum(['easy', 'moderate', 'difficult']),
+      example: z.string().optional(),
+    })
+  ),
+  continuationWarnings: z.array(z.string()),
+});
+
+export const CharacterDynamicWarningSchema = z.object({
+  characterNames: z.array(z.string().min(1)),
+  relationshipType: z.enum([
+    'friendship',
+    'rivalry',
+    'family',
+    'romantic',
+    'mentor-student',
+  ]),
+  conflictTriggers: z.array(z.string()),
+  plotElements: z.array(z.string()),
+  guidanceNote: z.string().min(1).max(1000),
 });
 
 export const TestResultSchema = z.object({

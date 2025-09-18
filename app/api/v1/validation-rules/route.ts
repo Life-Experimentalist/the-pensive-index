@@ -88,6 +88,7 @@ export const POST = CommonMiddleware.admin(
     }
 
     // Create the validation rule
+    // Use ruleType as category and omit applies_to (defaults to empty array)
     const [newRule] = await db
       .insert(validationRules)
       .values({
@@ -95,11 +96,11 @@ export const POST = CommonMiddleware.admin(
         fandom_id: validatedData.fandomId,
         name: validatedData.name,
         description: validatedData.description,
-        category: validatedData.category || 'custom',
+        category: validatedData.ruleType, // map ruleType to category
         priority: validatedData.priority || 1,
         is_active: true,
-        applies_to: validatedData.appliesTo || ['pathway'],
-        created_by: 'admin', // This would come from auth context
+        applies_to: [], // default no specific applies_to when not provided
+        created_by: 'admin',
         version: '1.0.0',
       })
       .returning();

@@ -1,9 +1,9 @@
 /**
  * Fandom Admin Assignment UI Component
- * 
+ *
  * Interactive React component for managing fandom-specific admin assignments.
  * Features hierarchical display, bulk operations, and fandom-scoped permissions.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -12,7 +12,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { 
+import {
   ChevronRight,
   ChevronDown,
   Users,
@@ -120,7 +120,7 @@ const FANDOM_ROLES: AdminRole[] = [
 /**
  * Main Fandom Assignment Component
  */
-export default function FandomAssignment({ 
+export default function FandomAssignment({
   className = '',
   selectedFandomId,
   onFandomSelect
@@ -255,7 +255,7 @@ export default function FandomAssignment({
       }
       return newSet;
     });
-    
+
     // Call parent callback if provided
     if (onFandomSelect && !expandedFandoms.has(fandomId)) {
       onFandomSelect(fandomId);
@@ -283,7 +283,7 @@ export default function FandomAssignment({
   const selectAllInFandom = (fandomId: string) => {
     const fandomAssignments = filteredAssignments.filter(a => a.fandom_id === fandomId);
     const allSelected = fandomAssignments.every(a => selectedAssignments.has(a.id));
-    
+
     setSelectedAssignments(prev => {
       const newSet = new Set(prev);
       if (allSelected) {
@@ -344,10 +344,10 @@ export default function FandomAssignment({
       const matchesSearch = assignment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            assignment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            assignment.fandom_name.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesRole = filterRole === 'all' || assignment.role.name === filterRole;
-      
-      const matchesStatus = filterStatus === 'all' || 
+
+      const matchesStatus = filterStatus === 'all' ||
                            (filterStatus === 'active' && assignment.is_active) ||
                            (filterStatus === 'inactive' && !assignment.is_active) ||
                            (filterStatus === 'expiring' && assignment.expires_at && new Date(assignment.expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
@@ -363,7 +363,7 @@ export default function FandomAssignment({
    */
   const assignmentsByFandom = useMemo(() => {
     const grouped: Record<string, FandomAssignment[]> = {};
-    
+
     filteredAssignments.forEach(assignment => {
       if (!grouped[assignment.fandom_id]) {
         grouped[assignment.fandom_id] = [];
@@ -409,7 +409,7 @@ export default function FandomAssignment({
                 Bulk Actions ({selectedAssignments.size})
               </button>
             )}
-            
+
             <button
               onClick={loadFandomsAndAssignments}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
@@ -581,7 +581,7 @@ function FandomSection({
               ) : (
                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
               )}
-              
+
               <div>
                 <h3 className="font-medium text-gray-900 group-hover:text-blue-600">
                   {fandom.name}
@@ -620,7 +620,7 @@ function FandomSection({
                   <Plus className="w-4 h-4" />
                 </button>
               )}
-              
+
               <button
                 onClick={onRefresh}
                 className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -861,7 +861,7 @@ function AddAssignmentForm({
       <h4 className="font-medium text-gray-900 mb-3">
         Add Assignment to {fandomName}
       </h4>
-      
+
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* User selection */}
@@ -1089,7 +1089,7 @@ function BulkOperationsPanel({
         </button>
         <button
           onClick={handleExecute}
-          disabled={isProcessing || 
+          disabled={isProcessing ||
             (operationType === 'reassign' && !targetRole) ||
             (operationType === 'transfer' && !targetUser)
           }

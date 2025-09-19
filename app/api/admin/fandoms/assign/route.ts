@@ -1,9 +1,9 @@
 /**
  * Fandom Assignment API
- * 
+ *
  * API endpoints for managing fandom-specific admin assignments.
  * Handles assigning/removing Fandom Admins and managing fandom ownership.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (!canAssign) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to assign fandom admins',
           required_permission: 'admin:assign',
           fandom_id: fandomId
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     const existingAssignment = await fandomService.getUserFandomAssignment(userId, fandomId);
     if (existingAssignment) {
       return NextResponse.json(
-        { 
+        {
           error: 'User already assigned to this fandom',
           existing_assignment_id: existingAssignment.id
         },
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -197,7 +197,7 @@ export async function PUT(request: NextRequest) {
 
     if (!canReassign) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to reassign fandoms',
           fandom_id: fandomId
         },
@@ -245,7 +245,7 @@ export async function PUT(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -290,7 +290,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!canRemove) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to remove fandom admins',
           fandom_id: fandomId
         },
@@ -334,7 +334,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -385,9 +385,9 @@ export async function GET(request: NextRequest) {
       const hasAccess = await fandomService.hasAccessToFandom(currentUserId, fandomId);
       if (!hasAccess) {
         return NextResponse.json(
-          { 
+          {
             error: 'No access to this fandom',
-            fandom_id: fandomId 
+            fandom_id: fandomId
           },
           { status: 403 }
         );
@@ -403,7 +403,7 @@ export async function GET(request: NextRequest) {
             { status: 400 }
           );
         }
-        
+
         const userFandoms = await fandomService.getUserFandoms(userId);
         return NextResponse.json({
           success: true,
@@ -495,7 +495,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!canAssign) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to assign fandom admins',
           fandom_id: fandomId
         },
@@ -532,7 +532,7 @@ export async function PATCH(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },

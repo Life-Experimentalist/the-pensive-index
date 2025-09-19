@@ -1,9 +1,9 @@
 /**
  * Admin User Management API
- * 
+ *
  * API endpoints for managing admin users in the hierarchical system.
  * Provides user information, permission checking, and admin user operations.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -173,7 +173,7 @@ async function handleGetUser(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid query parameters',
           details: error.errors
         },
@@ -226,7 +226,7 @@ async function handleListUsers(
       );
       if (!hasAccess) {
         return NextResponse.json(
-          { 
+          {
             error: 'No access to view users in this fandom',
             fandom_id: validatedParams.fandom_id
           },
@@ -269,7 +269,7 @@ async function handleListUsers(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid query parameters',
           details: error.errors
         },
@@ -322,7 +322,7 @@ async function handleCheckPermissions(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid query parameters',
           details: error.errors
         },
@@ -471,7 +471,7 @@ export async function PUT(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -540,7 +540,7 @@ export async function DELETE(request: NextRequest) {
 
     // Deactivate user and revoke all assignments
     await updateAdminUser(user_id, { is_active: false });
-    
+
     // Revoke all active assignments
     const assignments = await adminModel.getUserAssignments(user_id);
     for (const assignment of assignments) {

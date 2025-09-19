@@ -17,6 +17,8 @@ import {
   LogOut,
   Shield,
   BarChart3,
+  Mail,
+  Activity,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -86,6 +88,31 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
       icon: LayoutDashboard,
     },
     {
+      label: 'User Management',
+      href: '/admin/users',
+      icon: Users,
+    },
+    {
+      label: 'Role Assignment',
+      href: '/admin/role-assignment',
+      icon: Shield,
+    },
+    {
+      label: 'Fandom Assignment',
+      href: '/admin/fandom-assignment',
+      icon: Tag,
+    },
+    {
+      label: 'Invitations',
+      href: '/admin/invitations',
+      icon: Mail,
+    },
+    {
+      label: 'Audit Logs',
+      href: '/admin/audit-logs',
+      icon: Activity,
+    },
+    {
       label: 'Validation Rules',
       href: '/admin/validation-rules',
       icon: Settings,
@@ -99,11 +126,6 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
       label: 'Tag Classes',
       href: '/admin/tag-classes',
       icon: Tag,
-    },
-    {
-      label: 'Users',
-      href: '/admin/users',
-      icon: Users,
     },
     {
       label: 'Analytics',

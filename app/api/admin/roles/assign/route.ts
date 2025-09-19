@@ -1,9 +1,9 @@
 /**
  * Admin Role Assignment API
- * 
+ *
  * API endpoints for managing admin role assignments in the hierarchical system.
  * Handles both Project Admin and Fandom Admin role assignments with proper RBAC.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (!canAssign) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to assign this role',
           required_permission: 'admin:assign',
           role: role,
@@ -113,19 +113,19 @@ export async function POST(request: NextRequest) {
     const hasConflictingAssignment = existingAssignments.some(assignment => {
       if (!assignment.is_active) return false;
       if (assignment.role.name !== role) return false;
-      
+
       // For Fandom Admin, check same fandom
       if (role === 'FandomAdmin') {
         return assignment.fandom_id === fandomId;
       }
-      
+
       // For Project Admin, check global assignment
       return !assignment.fandom_id;
     });
 
     if (hasConflictingAssignment) {
       return NextResponse.json(
-        { 
+        {
           error: 'User already has this role assignment',
           role: role,
           fandom_id: fandomId
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -234,7 +234,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!canRevoke) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to revoke this role',
           assignment_id: assignmentId
         },
@@ -270,7 +270,7 @@ export async function DELETE(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -314,7 +314,7 @@ export async function PUT(request: NextRequest) {
 
     if (!canTransfer) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to transfer this role',
           role: role,
           fandom_context: fandomId
@@ -371,7 +371,7 @@ export async function PUT(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -416,7 +416,7 @@ export async function GET(request: NextRequest) {
       user_id: searchParams.get('user_id') || undefined,
       role: searchParams.get('role') as AdminRole || undefined,
       fandom_id: searchParams.get('fandom_id') || undefined,
-      active: searchParams.get('active') === 'true' ? true : 
+      active: searchParams.get('active') === 'true' ? true :
               searchParams.get('active') === 'false' ? false : undefined,
       assigned_by: searchParams.get('assigned_by') || undefined,
       limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50,

@@ -1,9 +1,9 @@
 /**
  * Audit Log API
- * 
+ *
  * API endpoints for retrieving and managing admin audit logs.
  * Provides comprehensive logging access with filtering and export capabilities.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action'); // 'list' | 'search' | 'stats' | 'failed'
-    
+
     // Convert searchParams to object for validation
     const queryParams: Record<string, string> = {};
     searchParams.forEach((value, key) => {
@@ -119,7 +119,7 @@ async function handleGetLogs(
     const canView = await permissionValidator.canViewAuditLogs(currentUserId, fandomId);
     if (!canView) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to view audit logs',
           fandom_context: fandomId
         },
@@ -175,7 +175,7 @@ async function handleGetLogs(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid query parameters',
           details: error.errors
         },
@@ -204,7 +204,7 @@ async function handleSearchLogs(
     const canView = await permissionValidator.canViewAuditLogs(currentUserId, fandomId);
     if (!canView) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to search audit logs',
           fandom_context: fandomId
         },
@@ -248,7 +248,7 @@ async function handleSearchLogs(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid search parameters',
           details: error.errors
         },
@@ -370,7 +370,7 @@ async function handleExportLogs(
     const canView = await permissionValidator.canViewAuditLogs(currentUserId, fandomId);
     if (!canView) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to export audit logs',
           fandom_context: fandomId
         },
@@ -411,7 +411,7 @@ async function handleExportLogs(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid export parameters',
           details: error.errors
         },

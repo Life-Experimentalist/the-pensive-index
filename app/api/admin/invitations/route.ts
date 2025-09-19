@@ -1,9 +1,9 @@
 /**
  * Admin Invitation API
- * 
+ *
  * API endpoints for managing admin invitations and onboarding workflow.
  * Handles invitation creation, acceptance, rejection, and management.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     if (!canInvite) {
       return NextResponse.json(
-        { 
+        {
           error: 'Insufficient permissions to invite admins',
           required_permission: 'admin:invite',
           target_role: role,
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action'); // 'list' | 'stats'
-    
+
     const filters = {
       status: searchParams.get('status') as 'pending' | 'accepted' | 'expired' | 'revoked' || undefined,
       fandom_id: searchParams.get('fandom_id') || undefined,
@@ -209,7 +209,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Get invitation list
       const result = await invitationService.getInvitations(filters);
-      
+
       return NextResponse.json({
         success: true,
         invitations: result.invitations.map(invitation => ({
@@ -297,7 +297,7 @@ export async function PUT(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -383,7 +383,7 @@ export async function DELETE(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },
@@ -457,7 +457,7 @@ export async function PATCH(request: NextRequest) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Invalid request data',
           details: error.errors
         },

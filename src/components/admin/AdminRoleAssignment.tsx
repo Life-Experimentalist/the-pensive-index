@@ -1,9 +1,9 @@
 /**
  * Admin Role Assignment UI Component
- * 
+ *
  * Interactive React component for managing admin role assignments.
  * Features drag-and-drop interface, real-time validation, and permission checking.
- * 
+ *
  * @package the-pensive-index
  * @version 1.0.0
  */
@@ -12,9 +12,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { 
-  DndContext, 
-  DragEndEvent, 
+import {
+  DndContext,
+  DragEndEvent,
   DragOverEvent,
   DragStartEvent,
   PointerSensor,
@@ -31,13 +31,13 @@ import {
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { 
-  Users, 
-  Shield, 
-  Plus, 
-  X, 
-  Check, 
-  AlertCircle, 
+import {
+  Users,
+  Shield,
+  Plus,
+  X,
+  Check,
+  AlertCircle,
   Search,
   Filter,
   ChevronDown,
@@ -122,7 +122,7 @@ const ADMIN_ROLES: AdminRole[] = [
  */
 export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleAssignmentComponentProps) {
   const { user } = useUser();
-  
+
   // State management
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [availableUsers, setAvailableUsers] = useState<AdminUser[]>([]);
@@ -278,7 +278,7 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
       if (response.ok) {
         // Refresh data
         await loadInitialData();
-        
+
         // Show success message
         // Could use toast or notification here
         console.log('Role assigned successfully:', result);
@@ -350,10 +350,10 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
   const filteredUsers = availableUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterRole === 'all' || 
+
+    const matchesFilter = filterRole === 'all' ||
                          user.assignments?.some(a => a.role.name === filterRole && a.is_active);
-    
+
     const matchesStatus = showInactive || user.is_active;
 
     return matchesSearch && matchesFilter && matchesStatus;
@@ -393,7 +393,7 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
               Assign and manage admin roles using drag-and-drop
             </p>
           </div>
-          
+
           {/* Permissions indicator */}
           <div className="flex items-center space-x-2 text-xs">
             {canAssign && (
@@ -564,7 +564,7 @@ function DraggableUserItem({ user }: { user: AdminUser }) {
           <p className="font-medium text-gray-900">{user.name}</p>
           <p className="text-sm text-gray-600">{user.email}</p>
         </div>
-        
+
         {/* Current roles badge */}
         {user.assignments && user.assignments.length > 0 && (
           <div className="flex flex-wrap gap-1">
@@ -616,11 +616,11 @@ function UserList({ users }: { users: AdminUser[] }) {
 /**
  * Role Selector Component
  */
-function RoleSelector({ 
-  roles, 
-  selectedRole, 
-  onRoleSelect 
-}: { 
+function RoleSelector({
+  roles,
+  selectedRole,
+  onRoleSelect
+}: {
   roles: AdminRole[];
   selectedRole: AdminRole | null;
   onRoleSelect: (role: AdminRole | null) => void;
@@ -637,8 +637,8 @@ function RoleSelector({
             onClick={() => onRoleSelect(selectedRole?.name === role.name ? null : role)}
             className={`
               p-3 text-left border rounded-lg transition-colors
-              ${selectedRole?.name === role.name 
-                ? 'border-blue-500 bg-blue-50 text-blue-900' 
+              ${selectedRole?.name === role.name
+                ? 'border-blue-500 bg-blue-50 text-blue-900'
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }
             `}
@@ -652,7 +652,7 @@ function RoleSelector({
                 <Check className="w-5 h-5 text-blue-600" />
               )}
             </div>
-            
+
             {/* Permissions preview */}
             <div className="mt-2 flex flex-wrap gap-1">
               {role.permissions.slice(0, 3).map(permission => (
@@ -696,7 +696,7 @@ function AssignmentZone({
       className={`
         min-h-32 p-6 border-2 border-dashed rounded-lg text-center transition-colors
         ${selectedRole && canAssign
-          ? 'border-blue-300 bg-blue-50' 
+          ? 'border-blue-300 bg-blue-50'
           : 'border-gray-300 bg-gray-50'
         }
         ${draggedUser && selectedRole && canAssign
@@ -767,7 +767,7 @@ function CurrentAssignments({
       <h4 className="text-sm font-medium text-gray-700">
         Current Assignments ({assignments.length})
       </h4>
-      
+
       <div className="space-y-2 max-h-48 overflow-y-auto">
         {assignments.length > 0 ? (
           assignments.map(assignment => (
@@ -789,7 +789,7 @@ function CurrentAssignments({
                     Assigned {new Date(assignment.created_at).toLocaleDateString()}
                   </p>
                 </div>
-                
+
                 {canRevoke && assignment.is_active && (
                   <button
                     onClick={() => handleRevoke(assignment.id)}

@@ -4,6 +4,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
+// Import the real RuleBuilder component
+import RuleBuilder from '@/components/admin/RuleBuilder';
+
 /**
  * T012: Rule Builder Component Tests
  *
@@ -37,6 +40,14 @@ vi.mock('@xyflow/react', () => ({
     </div>
   )),
   Handle: vi.fn(props => <div data-testid="node-handle" {...props} />),
+  Controls: vi.fn(props => <div data-testid="flow-controls" {...props} />),
+  MiniMap: vi.fn(props => <div data-testid="flow-minimap" {...props} />),
+  Background: vi.fn(props => <div data-testid="flow-background" {...props} />),
+  BackgroundVariant: {
+    Dots: 'dots',
+    Lines: 'lines',
+    Cross: 'cross',
+  },
   Position: {
     Top: 'top',
     Bottom: 'bottom',
@@ -51,6 +62,16 @@ vi.mock('@xyflow/react', () => ({
     deleteElements: vi.fn(),
     fitView: vi.fn(),
   })),
+  useNodesState: vi.fn(() => [
+    [], // nodes
+    vi.fn(), // setNodes
+    vi.fn(), // onNodesChange
+  ]),
+  useEdgesState: vi.fn(() => [
+    [], // edges
+    vi.fn(), // setEdges
+    vi.fn(), // onEdgesChange
+  ]),
   addEdge: vi.fn(),
   applyNodeChanges: vi.fn(),
   applyEdgeChanges: vi.fn(),
@@ -127,37 +148,6 @@ interface ActionNodeProps {
 }
 
 // Mock components that need to be implemented
-const MockRuleBuilder = ({
-  fandomId,
-  onSave,
-  onCancel,
-  mode = 'create',
-}: RuleBuilderProps) => {
-  return (
-    <div data-testid="rule-builder">
-      <div data-testid="rule-builder-toolbar">
-        <button data-testid="save-rule">Save Rule</button>
-        <button data-testid="cancel-rule">Cancel</button>
-        <button data-testid="validate-rule">Validate</button>
-      </div>
-      <div data-testid="rule-canvas">
-        <div data-testid="react-flow" />
-      </div>
-      <div data-testid="rule-properties">
-        <input data-testid="rule-name" placeholder="Rule name" />
-        <textarea
-          data-testid="rule-description"
-          placeholder="Rule description"
-        />
-        <select data-testid="rule-type">
-          <option value="conditional">Conditional</option>
-          <option value="exclusivity">Exclusivity</option>
-          <option value="prerequisite">Prerequisite</option>
-        </select>
-      </div>
-    </div>
-  );
-};
 
 const MockConditionNode = ({ id, data, selected }: ConditionNodeProps) => {
   return (
@@ -199,7 +189,7 @@ describe('Rule Builder Component Tests', () => {
   describe('RuleBuilder Main Component', () => {
     it('should render rule builder interface', () => {
       // This test MUST FAIL initially - component doesn't exist
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       expect(screen.getByTestId('rule-builder')).toBeInTheDocument();
       expect(screen.getByTestId('rule-builder-toolbar')).toBeInTheDocument();
@@ -210,7 +200,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should render toolbar with action buttons', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       expect(screen.getByTestId('save-rule')).toBeInTheDocument();
       expect(screen.getByTestId('cancel-rule')).toBeInTheDocument();
@@ -219,7 +209,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should render properties panel with form fields', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       expect(screen.getByTestId('rule-name')).toBeInTheDocument();
       expect(screen.getByTestId('rule-description')).toBeInTheDocument();
@@ -233,7 +223,7 @@ describe('Rule Builder Component Tests', () => {
     it('should handle rule type changes', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       const ruleTypeSelect = screen.getByTestId('rule-type');
       await user.selectOptions(ruleTypeSelect, 'exclusivity');
@@ -245,7 +235,7 @@ describe('Rule Builder Component Tests', () => {
       // This test MUST FAIL initially
       const mockOnSave = vi.fn();
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" onSave={mockOnSave} />);
+      render(<RuleBuilder onSave={mockOnSave} />);
 
       const saveButton = screen.getByTestId('save-rule');
       await user.click(saveButton);
@@ -258,7 +248,7 @@ describe('Rule Builder Component Tests', () => {
       const mockOnCancel = vi.fn();
       const user = userEvent.setup();
       render(
-        <MockRuleBuilder fandomId="harrypotter" onCancel={mockOnCancel} />
+        <RuleBuilder onCancel={mockOnCancel} />
       );
 
       const cancelButton = screen.getByTestId('cancel-rule');
@@ -270,7 +260,7 @@ describe('Rule Builder Component Tests', () => {
     it('should validate rule when validate button clicked', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       const validateButton = screen.getByTestId('validate-rule');
       await user.click(validateButton);
@@ -286,15 +276,13 @@ describe('Rule Builder Component Tests', () => {
         id: 'rule-123',
         name: 'Test Rule',
         description: 'Test rule description',
-        ruleType: 'exclusivity',
+        ruleType: 'exclusivity' as const,
         fandomId: 'harrypotter',
       };
 
       render(
-        <MockRuleBuilder
-          fandomId="harrypotter"
+        <RuleBuilder
           initialRule={initialRule}
-          mode="edit"
         />
       );
 
@@ -523,7 +511,7 @@ describe('Rule Builder Component Tests', () => {
   describe('Drag and Drop Functionality', () => {
     it('should handle drag start from toolbar', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Mock drag and drop events
       const dragStartEvent = new Event('dragstart');
@@ -545,7 +533,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should handle drop on canvas', async () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       const canvas = screen.getByTestId('rule-canvas');
 
@@ -572,7 +560,7 @@ describe('Rule Builder Component Tests', () => {
       // Test that conditions can only connect to actions,
       // not to other conditions directly
 
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // This logic would be implemented in the connection validation
       // of the actual React Flow component
@@ -584,7 +572,7 @@ describe('Rule Builder Component Tests', () => {
     it('should validate rule structure', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Fill in rule name
       const nameInput = screen.getByTestId('rule-name');
@@ -601,7 +589,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should show validation errors for incomplete rules', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Rule with no conditions or actions should be invalid
       // This would show validation errors in the UI
@@ -610,7 +598,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should validate circular dependencies', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Test that the component prevents creating rules that would
       // cause circular dependencies
@@ -622,9 +610,9 @@ describe('Rule Builder Component Tests', () => {
     it('should load rule from template', () => {
       // This test MUST FAIL initially
       render(
-        <MockRuleBuilder
-          fandomId="harrypotter"
-          templateId="template-shipping-exclusivity"
+        <RuleBuilder
+
+
         />
       );
 
@@ -635,9 +623,9 @@ describe('Rule Builder Component Tests', () => {
     it('should show placeholder replacement interface', () => {
       // This test MUST FAIL initially
       render(
-        <MockRuleBuilder
-          fandomId="harrypotter"
-          templateId="template-shipping-exclusivity"
+        <RuleBuilder
+
+
         />
       );
 
@@ -652,7 +640,7 @@ describe('Rule Builder Component Tests', () => {
       // This test MUST FAIL initially
       const startTime = performance.now();
 
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       const endTime = performance.now();
       const renderTime = endTime - startTime;
@@ -664,7 +652,7 @@ describe('Rule Builder Component Tests', () => {
     it('should handle real-time validation without lag', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       const nameInput = screen.getByTestId('rule-name');
 
@@ -683,7 +671,7 @@ describe('Rule Builder Component Tests', () => {
     it('should be keyboard navigable', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Should be able to navigate through form fields with Tab
       await user.tab();
@@ -698,7 +686,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should have proper ARIA labels', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // All interactive elements should have proper ARIA labels
       const nameInput = screen.getByTestId('rule-name');
@@ -707,7 +695,7 @@ describe('Rule Builder Component Tests', () => {
 
     it('should support screen readers', () => {
       // This test MUST FAIL initially
-      render(<MockRuleBuilder fandomId="harrypotter" />);
+      render(<RuleBuilder />);
 
       // Component should provide proper semantic structure
       // and announcements for screen readers

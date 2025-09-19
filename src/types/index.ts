@@ -1,22 +1,36 @@
 // Core entity types for The Pensieve Index
 // These match the database schema and API contracts
 
+// Rule definition types
+export interface RuleDefinition {
+  type: string;
+  conditions: any[];
+  actions: any[];
+  errorMessages: any[];
+  metadata: Record<string, any>;
+}
+
 // Admin validation rule types
 export interface ValidationRule {
   id: string;
   name: string;
-  description: string;
-  fandomId: string;
-  ruleType: 'conditional' | 'exclusivity' | 'prerequisite' | 'hierarchy' | 'custom';
+  description?: string;
+  fandom_id: string;
+  category: string;
   priority: number;
-  conditions: RuleCondition[];
-  actions: RuleAction[];
-  templateId?: string;
-  isActive: boolean;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-  metadata: Record<string, any>;
+  conditions?: RuleCondition[];
+  actions?: RuleAction[];
+  template_id?: string;
+  version: string;
+  ruleDefinition: RuleDefinition;
+  applies_to: string[];
+  tags?: string[];
+  is_active: boolean;
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+  published_at?: Date;
+  metadata?: Record<string, any>;
 }
 
 export interface RuleCondition {
@@ -389,13 +403,33 @@ export interface StorySubmission {
   updated_at: Date;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'User' | 'FandomAdmin' | 'ProjectAdmin';
+  fandom?: string;
+  isActive: boolean;
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'moderator' | 'contributor';
-  permissions: AdminPermission[];
+  role: 'FandomAdmin' | 'ProjectAdmin';
+  fandom_access?: string[];
+  permissions: Array<{
+    id: string;
+    name: string;
+    description: string;
+    scope: 'global' | 'fandom' | 'content';
+  }>;
   is_active: boolean;
+  last_login_at?: Date;
+  preferences?: Record<string, any>;
   created_at: Date;
   updated_at: Date;
 }

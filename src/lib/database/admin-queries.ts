@@ -63,7 +63,7 @@ export interface PaginatedResult<T> {
 
 export interface AdminQueryFilters {
   fandomId?: string;
-  isActive?: boolean;
+  is_active?: boolean;
   category?: string;
   createdBy?: string;
   dateRange?: {
@@ -92,7 +92,21 @@ export class AdminQueries {
         .where(eq(adminUsers.id, id))
         .limit(1);
 
-      return user || null;
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        fandom_access: user.fandom_access || undefined,
+        permissions: user.permissions,
+        is_active: user.is_active,
+        last_login_at: user.last_login_at || undefined,
+        preferences: user.preferences || undefined,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      };
     },
 
     /**
@@ -105,7 +119,21 @@ export class AdminQueries {
         .where(eq(adminUsers.email, email))
         .limit(1);
 
-      return user || null;
+      if (!user) return null;
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        fandom_access: user.fandom_access || undefined,
+        permissions: user.permissions,
+        is_active: user.is_active,
+        last_login_at: user.last_login_at || undefined,
+        preferences: user.preferences || undefined,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      };
     },
 
     /**
@@ -115,7 +143,7 @@ export class AdminQueries {
       filters: {
         role?: AdminRole;
         fandomId?: string;
-        isActive?: boolean;
+        is_active?: boolean;
       } = {},
       options: QueryOptions = {}
     ): Promise<PaginatedResult<AdminUser>> => {
@@ -133,8 +161,8 @@ export class AdminQueries {
         whereConditions.push(eq(adminUsers.role, filters.role));
       }
 
-      if (filters.isActive !== undefined) {
-        whereConditions.push(eq(adminUsers.is_active, filters.isActive));
+      if (filters.is_active !== undefined) {
+        whereConditions.push(eq(adminUsers.is_active, filters.is_active));
       }
 
       if (filters.fandomId) {
@@ -148,23 +176,51 @@ export class AdminQueries {
       const whereClause =
         whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-      const [data, [{ total }]] = await Promise.all([
-        this.db
-          .select()
-          .from(adminUsers)
-          .where(whereClause)
-          .orderBy(
-            sortOrder === 'desc'
-              ? desc(adminUsers[sortBy as keyof typeof adminUsers])
-              : asc(adminUsers[sortBy as keyof typeof adminUsers])
-          )
-          .offset(offset)
-          .limit(limit),
-        this.db.select({ total: count() }).from(adminUsers).where(whereClause),
-      ]);
+      const sortColumn =
+        sortBy === 'created_at'
+          ? adminUsers.created_at
+          : sortBy === 'updated_at'
+          ? adminUsers.updated_at
+          : sortBy === 'name'
+          ? adminUsers.name
+          : sortBy === 'email'
+          ? adminUsers.email
+          : adminUsers.created_at;
+
+      // Get paginated data
+      const data = await this.db
+        .select()
+        .from(adminUsers)
+        .where(whereClause)
+        .orderBy(sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn))
+        .offset(offset)
+        .limit(limit);
+
+      // Get total count (simplified approach)
+      const allUsers = await this.db
+        .select()
+        .from(adminUsers)
+        .where(whereClause);
+
+      const total = allUsers.length;
+
+      // Map database results to AdminUser type
+      const mappedData: AdminUser[] = data.map(user => ({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        fandom_access: user.fandom_access || undefined,
+        permissions: user.permissions,
+        is_active: user.is_active,
+        last_login_at: user.last_login_at || undefined,
+        preferences: user.preferences || undefined,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      }));
 
       return {
-        data,
+        data: mappedData,
         total,
         page,
         limit,
@@ -187,13 +243,32 @@ export class AdminQueries {
         .insert(adminUsers)
         .values({
           id,
-          ...userData,
+          email: userData.email,
+          name: userData.name,
+          role: userData.role,
+          fandom_access: userData.fandom_access,
+          permissions: userData.permissions,
+          is_active: userData.is_active,
+          last_login_at: userData.last_login_at,
+          preferences: userData.preferences,
           created_at: now,
           updated_at: now,
         })
         .returning();
 
-      return newUser;
+      return {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+        fandom_access: newUser.fandom_access || undefined,
+        permissions: newUser.permissions,
+        is_active: newUser.is_active,
+        last_login_at: newUser.last_login_at || undefined,
+        preferences: newUser.preferences || undefined,
+        created_at: newUser.created_at,
+        updated_at: newUser.updated_at,
+      };
     },
 
     /**
@@ -203,16 +278,45 @@ export class AdminQueries {
       id: string,
       updates: Partial<AdminUser>
     ): Promise<AdminUser | null> => {
+      const updateData: any = {
+        updated_at: new Date(),
+      };
+
+      if (updates.email !== undefined) updateData.email = updates.email;
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.role !== undefined) updateData.role = updates.role;
+      if (updates.fandom_access !== undefined)
+        updateData.fandom_access = updates.fandom_access;
+      if (updates.permissions !== undefined)
+        updateData.permissions = updates.permissions;
+      if (updates.is_active !== undefined)
+        updateData.is_active = updates.is_active;
+      if (updates.last_login_at !== undefined)
+        updateData.last_login_at = updates.last_login_at;
+      if (updates.preferences !== undefined)
+        updateData.preferences = updates.preferences;
+
       const [updatedUser] = await this.db
         .update(adminUsers)
-        .set({
-          ...updates,
-          updated_at: new Date(),
-        })
+        .set(updateData)
         .where(eq(adminUsers.id, id))
         .returning();
 
-      return updatedUser || null;
+      if (!updatedUser) return null;
+
+      return {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        fandom_access: updatedUser.fandom_access || undefined,
+        permissions: updatedUser.permissions,
+        is_active: updatedUser.is_active,
+        last_login_at: updatedUser.last_login_at || undefined,
+        preferences: updatedUser.preferences || undefined,
+        created_at: updatedUser.created_at,
+        updated_at: updatedUser.updated_at,
+      };
     },
 
     /**
@@ -299,8 +403,8 @@ export class AdminQueries {
 
       let whereConditions = [eq(validationRules.fandom_id, fandomId)];
 
-      if (filters.isActive !== undefined) {
-        whereConditions.push(eq(validationRules.is_active, filters.isActive));
+      if (filters.is_active !== undefined) {
+        whereConditions.push(eq(validationRules.is_active, filters.is_active));
       }
 
       if (filters.category) {
@@ -313,23 +417,22 @@ export class AdminQueries {
 
       const whereClause = and(...whereConditions);
 
-      const [data, [{ total }]] = await Promise.all([
+      const [data, allRules] = await Promise.all([
         this.db
           .select()
           .from(validationRules)
           .where(whereClause)
           .orderBy(
             sortOrder === 'desc'
-              ? desc(validationRules[sortBy as keyof typeof validationRules])
-              : asc(validationRules[sortBy as keyof typeof validationRules])
+              ? desc(validationRules.priority)
+              : asc(validationRules.priority)
           )
           .offset(offset)
           .limit(limit),
-        this.db
-          .select({ total: count() })
-          .from(validationRules)
-          .where(whereClause),
+        this.db.select().from(validationRules).where(whereClause),
       ]);
+
+      const total = allRules.length;
 
       return {
         data: data as ValidationRule[],
@@ -347,78 +450,76 @@ export class AdminQueries {
       ruleData: Omit<ValidationRule, 'id' | 'created_at' | 'updated_at'>,
       adminUserId: string
     ): Promise<ValidationRule> => {
-      return await this.db.transaction(async tx => {
-        const ruleId = `rule-${Date.now()}-${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
-        const now = new Date();
+      const ruleId = `rule-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      const now = new Date();
 
-        // Create the main rule
-        const [newRule] = await tx
-          .insert(validationRules)
-          .values({
-            id: ruleId,
-            name: ruleData.name,
-            description: ruleData.description,
-            fandom_id: ruleData.fandomId,
-            category: ruleData.category,
-            priority: ruleData.priority,
-            is_active: ruleData.isActive,
-            applies_to: ruleData.appliesTo,
-            created_by: adminUserId,
-            created_at: now,
-            updated_at: now,
-            version: ruleData.version,
-            tags: ruleData.tags,
-            metadata: ruleData.metadata,
-          })
-          .returning();
+      // Create the main rule
+      const [newRule] = await this.db
+        .insert(validationRules)
+        .values({
+          id: ruleId,
+          name: ruleData.name,
+          description: ruleData.description,
+          fandom_id: ruleData.fandom_id,
+          category: ruleData.category,
+          priority: ruleData.priority,
+          is_active: ruleData.is_active,
+          applies_to: ruleData.applies_to,
+          created_by: adminUserId,
+          created_at: now,
+          updated_at: now,
+          version: ruleData.version,
+          tags: ruleData.tags,
+          metadata: ruleData.metadata,
+        })
+        .returning();
 
-        // Create conditions
-        if (ruleData.conditions && ruleData.conditions.length > 0) {
-          const conditionsToInsert = ruleData.conditions.map(
-            (condition, index) => ({
-              id: `cond-${Date.now()}-${index}-${Math.random()
-                .toString(36)
-                .substr(2, 9)}`,
-              rule_id: ruleId,
-              type: condition.type,
-              target: condition.target,
-              operator: condition.operator,
-              value: condition.value,
-              weight: condition.weight || 1.0,
-              order_index: index,
-              group_id: condition.groupId,
-              is_negated: condition.isNegated || false,
-              created_at: now,
-              metadata: condition.metadata,
-            })
-          );
-
-          await tx.insert(ruleConditions).values(conditionsToInsert);
-        }
-
-        // Create actions
-        if (ruleData.actions && ruleData.actions.length > 0) {
-          const actionsToInsert = ruleData.actions.map((action, index) => ({
-            id: `action-${Date.now()}-${index}-${Math.random()
+      // Create conditions
+      if (ruleData.conditions && ruleData.conditions.length > 0) {
+        const conditionsToInsert = ruleData.conditions.map(
+          (condition, index) => ({
+            id: `cond-${Date.now()}-${index}-${Math.random()
               .toString(36)
               .substr(2, 9)}`,
             rule_id: ruleId,
-            type: action.type,
-            severity: action.severity,
-            message: action.message,
-            data: action.data,
+            type: condition.type,
+            target: condition.target,
+            operator: condition.operator,
+            value: condition.value,
+            weight: condition.weight || 1.0,
             order_index: index,
-            condition_group: action.conditionGroup,
+            group_id: condition.groupId,
+            is_negated: condition.isNegated || false,
             created_at: now,
-          }));
+            metadata: condition.metadata,
+          })
+        );
 
-          await tx.insert(ruleActions).values(actionsToInsert);
-        }
+        await this.db.insert(ruleConditions).values(conditionsToInsert);
+      }
 
-        return newRule as ValidationRule;
-      });
+      // Create actions
+      if (ruleData.actions && ruleData.actions.length > 0) {
+        const actionsToInsert = ruleData.actions.map((action, index) => ({
+          id: `action-${Date.now()}-${index}-${Math.random()
+            .toString(36)
+            .substr(2, 9)}`,
+          rule_id: ruleId,
+          type: action.type,
+          severity: action.severity,
+          message: action.message,
+          data: action.data,
+          order_index: index,
+          condition_group: action.conditionGroup,
+          created_at: now,
+        }));
+
+        await this.db.insert(ruleActions).values(actionsToInsert);
+      }
+
+      return newRule as ValidationRule;
     },
 
     /**
@@ -429,90 +530,90 @@ export class AdminQueries {
       updates: Partial<ValidationRule>,
       adminUserId: string
     ): Promise<ValidationRule | null> => {
-      return await this.db.transaction(async tx => {
-        // Update main rule
-        const [updatedRule] = await tx
-          .update(validationRules)
-          .set({
-            ...updates,
-            updated_at: new Date(),
-          })
-          .where(eq(validationRules.id, id))
-          .returning();
+      // Update main rule
+      const [updatedRule] = await this.db
+        .update(validationRules)
+        .set({
+          ...updates,
+          updated_at: new Date(),
+        })
+        .where(eq(validationRules.id, id))
+        .returning();
 
-        if (!updatedRule) return null;
+      if (!updatedRule) return null;
 
-        // If conditions are provided, replace them
-        if (updates.conditions) {
-          await tx.delete(ruleConditions).where(eq(ruleConditions.rule_id, id));
+      // If conditions are provided, replace them
+      if (updates.conditions) {
+        await this.db
+          .delete(ruleConditions)
+          .where(eq(ruleConditions.rule_id, id));
 
-          if (updates.conditions.length > 0) {
-            const conditionsToInsert = updates.conditions.map(
-              (condition, index) => ({
-                id: `cond-${Date.now()}-${index}-${Math.random()
-                  .toString(36)
-                  .substr(2, 9)}`,
-                rule_id: id,
-                type: condition.type,
-                target: condition.target,
-                operator: condition.operator,
-                value: condition.value,
-                weight: condition.weight || 1.0,
-                order_index: index,
-                group_id: condition.groupId,
-                is_negated: condition.isNegated || false,
-                created_at: new Date(),
-                metadata: condition.metadata,
-              })
-            );
-
-            await tx.insert(ruleConditions).values(conditionsToInsert);
-          }
-        }
-
-        // If actions are provided, replace them
-        if (updates.actions) {
-          await tx.delete(ruleActions).where(eq(ruleActions.rule_id, id));
-
-          if (updates.actions.length > 0) {
-            const actionsToInsert = updates.actions.map((action, index) => ({
-              id: `action-${Date.now()}-${index}-${Math.random()
+        if (updates.conditions.length > 0) {
+          const conditionsToInsert = updates.conditions.map(
+            (condition, index) => ({
+              id: `cond-${Date.now()}-${index}-${Math.random()
                 .toString(36)
                 .substr(2, 9)}`,
               rule_id: id,
-              type: action.type,
-              severity: action.severity,
-              message: action.message,
-              data: action.data,
+              type: condition.type,
+              target: condition.target,
+              operator: condition.operator,
+              value: condition.value,
+              weight: condition.weight || 1.0,
               order_index: index,
-              condition_group: action.conditionGroup,
+              group_id: condition.groupId,
+              is_negated: condition.isNegated || false,
               created_at: new Date(),
-            }));
+              metadata: condition.metadata,
+            })
+          );
 
-            await tx.insert(ruleActions).values(actionsToInsert);
-          }
+          await this.db.insert(ruleConditions).values(conditionsToInsert);
         }
+      }
 
-        return updatedRule as ValidationRule;
-      });
+      // If actions are provided, replace them
+      if (updates.actions) {
+        await this.db.delete(ruleActions).where(eq(ruleActions.rule_id, id));
+
+        if (updates.actions.length > 0) {
+          const actionsToInsert = updates.actions.map((action, index) => ({
+            id: `action-${Date.now()}-${index}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
+            rule_id: id,
+            type: action.type,
+            severity: action.severity,
+            message: action.message,
+            data: action.data,
+            order_index: index,
+            condition_group: action.conditionGroup,
+            created_at: new Date(),
+          }));
+
+          await this.db.insert(ruleActions).values(actionsToInsert);
+        }
+      }
+
+      return updatedRule as ValidationRule;
     },
 
     /**
      * Delete validation rule (hard delete with dependency check)
      */
     delete: async (id: string): Promise<boolean> => {
-      return await this.db.transaction(async tx => {
-        // Delete conditions and actions first
-        await tx.delete(ruleConditions).where(eq(ruleConditions.rule_id, id));
-        await tx.delete(ruleActions).where(eq(ruleActions.rule_id, id));
+      // Delete conditions and actions first
+      await this.db
+        .delete(ruleConditions)
+        .where(eq(ruleConditions.rule_id, id));
+      await this.db.delete(ruleActions).where(eq(ruleActions.rule_id, id));
 
-        // Delete the main rule
-        const result = await tx
-          .delete(validationRules)
-          .where(eq(validationRules.id, id));
+      // Delete the main rule
+      const result = await this.db
+        .delete(validationRules)
+        .where(eq(validationRules.id, id));
 
-        return result.changes > 0;
-      });
+      return result.changes > 0;
     },
 
     /**
@@ -524,10 +625,14 @@ export class AdminQueries {
     ): Promise<PaginatedResult<ValidationRule>> => {
       if (adminUser.role === 'ProjectAdmin') {
         // ProjectAdmin can see all rules
-        return this.listAllRules({}, options);
+        return this.validationRules.listAllRules({}, options);
       } else if (adminUser.role === 'FandomAdmin' && adminUser.fandom_access) {
         // FandomAdmin can only see rules for their fandoms
-        return this.listByFandoms(adminUser.fandom_access, {}, options);
+        return this.validationRules.listByFandoms(
+          adminUser.fandom_access,
+          {},
+          options
+        );
       }
 
       return {
@@ -556,8 +661,8 @@ export class AdminQueries {
 
       let whereConditions: any[] = [];
 
-      if (filters.isActive !== undefined) {
-        whereConditions.push(eq(validationRules.is_active, filters.isActive));
+      if (filters.is_active !== undefined) {
+        whereConditions.push(eq(validationRules.is_active, filters.is_active));
       }
 
       if (filters.category) {
@@ -567,23 +672,29 @@ export class AdminQueries {
       const whereClause =
         whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-      const [data, [{ total }]] = await Promise.all([
-        this.db
-          .select()
-          .from(validationRules)
-          .where(whereClause)
-          .orderBy(
-            sortOrder === 'desc'
-              ? desc(validationRules[sortBy as keyof typeof validationRules])
-              : asc(validationRules[sortBy as keyof typeof validationRules])
-          )
-          .offset(offset)
-          .limit(limit),
-        this.db
-          .select({ total: count() })
-          .from(validationRules)
-          .where(whereClause),
-      ]);
+      const allData = await this.db
+        .select()
+        .from(validationRules)
+        .where(whereClause);
+
+      const data = allData
+        .sort((a, b) => {
+          const aValue = a[sortBy as keyof typeof a];
+          const bValue = b[sortBy as keyof typeof b];
+
+          // Handle null values
+          if (aValue === null && bValue === null) return 0;
+          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
+          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+
+          if (sortOrder === 'desc') {
+            return aValue > bValue ? -1 : 1;
+          }
+          return aValue > bValue ? 1 : -1;
+        })
+        .slice(offset, offset + limit);
+
+      const total = allData.length;
 
       return {
         data: data as ValidationRule[],
@@ -612,8 +723,8 @@ export class AdminQueries {
 
       let whereConditions = [inArray(validationRules.fandom_id, fandomIds)];
 
-      if (filters.isActive !== undefined) {
-        whereConditions.push(eq(validationRules.is_active, filters.isActive));
+      if (filters.is_active !== undefined) {
+        whereConditions.push(eq(validationRules.is_active, filters.is_active));
       }
 
       if (filters.category) {
@@ -622,23 +733,29 @@ export class AdminQueries {
 
       const whereClause = and(...whereConditions);
 
-      const [data, [{ total }]] = await Promise.all([
-        this.db
-          .select()
-          .from(validationRules)
-          .where(whereClause)
-          .orderBy(
-            sortOrder === 'desc'
-              ? desc(validationRules[sortBy as keyof typeof validationRules])
-              : asc(validationRules[sortBy as keyof typeof validationRules])
-          )
-          .offset(offset)
-          .limit(limit),
-        this.db
-          .select({ total: count() })
-          .from(validationRules)
-          .where(whereClause),
-      ]);
+      const allData = await this.db
+        .select()
+        .from(validationRules)
+        .where(whereClause);
+
+      const data = allData
+        .sort((a, b) => {
+          const aValue = a[sortBy as keyof typeof a];
+          const bValue = b[sortBy as keyof typeof b];
+
+          // Handle null values
+          if (aValue === null && bValue === null) return 0;
+          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
+          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+
+          if (sortOrder === 'desc') {
+            return aValue > bValue ? -1 : 1;
+          }
+          return aValue > bValue ? 1 : -1;
+        })
+        .slice(offset, offset + limit);
+
+      const total = allData.length;
 
       return {
         data: data as ValidationRule[],
@@ -664,7 +781,7 @@ export class AdminQueries {
         .where(eq(ruleTemplates.id, id))
         .limit(1);
 
-      return (template as RuleTemplate) || null;
+      return (template as unknown as RuleTemplate) || null;
     },
 
     /**
@@ -708,26 +825,32 @@ export class AdminQueries {
       const whereClause =
         whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-      const [data, [{ total }]] = await Promise.all([
-        this.db
-          .select()
-          .from(ruleTemplates)
-          .where(whereClause)
-          .orderBy(
-            sortOrder === 'desc'
-              ? desc(ruleTemplates[sortBy as keyof typeof ruleTemplates])
-              : asc(ruleTemplates[sortBy as keyof typeof ruleTemplates])
-          )
-          .offset(offset)
-          .limit(limit),
-        this.db
-          .select({ total: count() })
-          .from(ruleTemplates)
-          .where(whereClause),
-      ]);
+      const allData = await this.db
+        .select()
+        .from(ruleTemplates)
+        .where(whereClause);
+
+      const data = allData
+        .sort((a, b) => {
+          const aValue = a[sortBy as keyof typeof a];
+          const bValue = b[sortBy as keyof typeof b];
+
+          // Handle null values
+          if (aValue === null && bValue === null) return 0;
+          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
+          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+
+          if (sortOrder === 'desc') {
+            return aValue > bValue ? -1 : 1;
+          }
+          return aValue > bValue ? 1 : -1;
+        })
+        .slice(offset, offset + limit);
+
+      const total = allData.length;
 
       return {
-        data: data as RuleTemplate[],
+        data: data as unknown as RuleTemplate[],
         total,
         page,
         limit,
@@ -754,7 +877,18 @@ export class AdminQueries {
         .insert(ruleTemplates)
         .values({
           id,
-          ...templateData,
+          name: templateData.name,
+          description: templateData.description,
+          category: templateData.category,
+          fandom_id: null, // Templates are fandom-agnostic by default
+          template_data: {
+            ruleDefinition: templateData.ruleDefinition,
+            placeholders: templateData.placeholders,
+            version: templateData.version,
+            metadata: {},
+          },
+          is_public: templateData.isActive || false,
+          tags: null,
           created_by: adminUserId,
           created_at: now,
           updated_at: now,
@@ -762,7 +896,7 @@ export class AdminQueries {
         })
         .returning();
 
-      return newTemplate as RuleTemplate;
+      return newTemplate as unknown as RuleTemplate;
     },
 
     /**
@@ -781,7 +915,7 @@ export class AdminQueries {
         .where(eq(ruleTemplates.id, id))
         .returning();
 
-      return (updatedTemplate as RuleTemplate) || null;
+      return (updatedTemplate as unknown as RuleTemplate) || null;
     },
 
     /**
@@ -795,6 +929,59 @@ export class AdminQueries {
           updated_at: new Date(),
         })
         .where(eq(ruleTemplates.id, id));
+    },
+
+    /**
+     * Clone template to create a validation rule
+     */
+    cloneToRule: async (
+      templateId: string,
+      fandomId: string,
+      customizations: {
+        name?: string;
+        priority?: number;
+        customizations?: Record<string, any>;
+      } = {},
+      adminUserId: string
+    ): Promise<ValidationRule> => {
+      const template = await this.ruleTemplates.findById(templateId);
+      if (!template) {
+        throw new Error(`Template with ID ${templateId} not found`);
+      }
+
+      // Create rule data from template
+      const ruleId = `rule-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      const now = new Date();
+
+      const ruleData = {
+        id: ruleId,
+        name: customizations.name || `${template.name} (Cloned)`,
+        description: template.description,
+        fandom_id: fandomId,
+        category: template.category,
+        priority: customizations.priority || 1,
+        is_active: true,
+        version: '1.0.0',
+        template_id: template.id,
+        applies_to: [],
+        created_by: adminUserId,
+        created_at: now,
+        updated_at: now,
+        tags: [],
+        metadata: { clonedFrom: templateId, ...customizations.customizations },
+      };
+
+      const [newRule] = await this.db
+        .insert(validationRules)
+        .values(ruleData)
+        .returning();
+
+      // Increment template usage count
+      await this.ruleTemplates.incrementUsage(templateId);
+
+      return newRule as ValidationRule;
     },
 
     /**
@@ -832,41 +1019,105 @@ export class AdminQueries {
       } = options;
       const offset = (page - 1) * limit;
 
-      const [data, [{ total }]] = await Promise.all([
-        this.db
-          .select()
-          .from(tagClasses)
-          .where(
-            and(
-              eq(tagClasses.fandom_id, fandomId),
-              eq(tagClasses.is_active, true)
-            )
+      const allData = await this.db
+        .select()
+        .from(tagClasses)
+        .where(
+          and(
+            eq(tagClasses.fandom_id, fandomId),
+            eq(tagClasses.is_active, true)
           )
-          .orderBy(
-            sortOrder === 'desc'
-              ? desc(tagClasses[sortBy as keyof typeof tagClasses])
-              : asc(tagClasses[sortBy as keyof typeof tagClasses])
-          )
-          .offset(offset)
-          .limit(limit),
-        this.db
-          .select({ total: count() })
-          .from(tagClasses)
-          .where(
-            and(
-              eq(tagClasses.fandom_id, fandomId),
-              eq(tagClasses.is_active, true)
-            )
-          ),
-      ]);
+        );
+
+      const data = allData
+        .sort((a, b) => {
+          const aValue = a[sortBy as keyof typeof a];
+          const bValue = b[sortBy as keyof typeof b];
+
+          // Handle null values
+          if (aValue === null && bValue === null) return 0;
+          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
+          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+
+          if (sortOrder === 'desc') {
+            return aValue > bValue ? -1 : 1;
+          }
+          return aValue > bValue ? 1 : -1;
+        })
+        .slice(offset, offset + limit);
+
+      const total = allData.length;
 
       return {
-        data: data as TagClass[],
+        data: data as unknown as TagClass[],
         total,
         page,
         limit,
         totalPages: Math.ceil(total / limit),
       };
+    },
+
+    /**
+     * Get tag classes based on user access
+     */
+    getByUserAccess: async (
+      user: AdminUser,
+      options: QueryOptions = {}
+    ): Promise<PaginatedResult<TagClass>> => {
+      const {
+        page = 1,
+        limit = 50,
+        sortBy = 'name',
+        sortOrder = 'asc',
+      } = options;
+      const offset = (page - 1) * limit;
+
+      // If user has access to all fandoms or specific fandoms
+      let whereConditions: any[] = [eq(tagClasses.is_active, true)];
+
+      if (
+        user.fandom_access &&
+        user.fandom_access.length > 0 &&
+        !user.fandom_access.includes('*')
+      ) {
+        whereConditions.push(inArray(tagClasses.fandom_id, user.fandom_access));
+      }
+
+      const allData = await this.db
+        .select()
+        .from(tagClasses)
+        .where(and(...whereConditions));
+
+      const sortedData = allData.sort((a, b) => {
+        const aVal = a[sortBy as keyof typeof a];
+        const bVal = b[sortBy as keyof typeof b];
+        const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        return sortOrder === 'desc' ? -comparison : comparison;
+      });
+
+      const data = sortedData.slice(offset, offset + limit);
+      const total = allData.length;
+
+      return {
+        data: data as unknown as TagClass[],
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
+    },
+
+    /**
+     * Find tag class by ID
+     */
+    findById: async (id: string): Promise<TagClass | null> => {
+      const [tagClass] = await this.db
+        .select()
+        .from(tagClasses)
+        .where(eq(tagClasses.id, id))
+        .limit(1);
+
+      return (tagClass as unknown as TagClass) || null;
     },
 
     /**
@@ -884,13 +1135,17 @@ export class AdminQueries {
         .insert(tagClasses)
         .values({
           id,
-          ...tagClassData,
+          name: tagClassData.name,
+          description: tagClassData.description || '',
+          fandom_id: tagClassData.fandomId,
+          validation_rules: {},
+          is_active: tagClassData.isActive,
           created_at: now,
           updated_at: now,
         })
         .returning();
 
-      return newTagClass as TagClass;
+      return newTagClass as unknown as TagClass;
     },
 
     /**
@@ -909,7 +1164,22 @@ export class AdminQueries {
         .where(eq(tagClasses.id, id))
         .returning();
 
-      return (updatedTagClass as TagClass) || null;
+      return (updatedTagClass as unknown as TagClass) || null;
+    },
+
+    /**
+     * Deactivate tag class (soft delete)
+     */
+    deactivate: async (id: string): Promise<boolean> => {
+      const result = await this.db
+        .update(tagClasses)
+        .set({
+          is_active: false,
+          updated_at: new Date(),
+        })
+        .where(eq(tagClasses.id, id));
+
+      return result.changes > 0;
     },
   };
 
@@ -924,46 +1194,41 @@ export class AdminQueries {
       const since = new Date();
       since.setDate(since.getDate() - days);
 
-      const [rulesCreated, templatesCreated, recentActivity] =
-        await Promise.all([
-          this.db
-            .select({ count: count() })
-            .from(validationRules)
-            .where(
-              and(
-                eq(validationRules.created_by, adminUserId),
-                gt(validationRules.created_at, since)
-              )
-            ),
-          this.db
-            .select({ count: count() })
-            .from(ruleTemplates)
-            .where(
-              and(
-                eq(ruleTemplates.created_by, adminUserId),
-                gt(ruleTemplates.created_at, since)
-              )
-            ),
-          this.db
-            .select({
-              type: sql`'rule'`,
-              name: validationRules.name,
-              created_at: validationRules.created_at,
-            })
-            .from(validationRules)
-            .where(
-              and(
-                eq(validationRules.created_by, adminUserId),
-                gt(validationRules.created_at, since)
-              )
-            )
-            .orderBy(desc(validationRules.created_at))
-            .limit(10),
-        ]);
+      const rulesCreatedData = await this.db
+        .select()
+        .from(validationRules)
+        .where(
+          and(
+            eq(validationRules.created_by, adminUserId),
+            gt(validationRules.created_at, since)
+          )
+        );
+
+      const templatesCreatedData = await this.db
+        .select()
+        .from(ruleTemplates)
+        .where(
+          and(
+            eq(ruleTemplates.created_by, adminUserId),
+            gt(ruleTemplates.created_at, since)
+          )
+        );
+
+      const recentActivity = await this.db
+        .select()
+        .from(validationRules)
+        .where(
+          and(
+            eq(validationRules.created_by, adminUserId),
+            gt(validationRules.created_at, since)
+          )
+        )
+        .orderBy(desc(validationRules.created_at))
+        .limit(10);
 
       return {
-        rulesCreated: rulesCreated[0]?.count || 0,
-        templatesCreated: templatesCreated[0]?.count || 0,
+        rulesCreated: rulesCreatedData.length,
+        templatesCreated: templatesCreatedData.length,
         recentActivity,
       };
     },
@@ -972,30 +1237,30 @@ export class AdminQueries {
      * Get fandom rule statistics
      */
     getFandomStats: async (fandomId: string) => {
-      const [ruleCount, activeRuleCount, templateCount] = await Promise.all([
-        this.db
-          .select({ count: count() })
-          .from(validationRules)
-          .where(eq(validationRules.fandom_id, fandomId)),
-        this.db
-          .select({ count: count() })
-          .from(validationRules)
-          .where(
-            and(
-              eq(validationRules.fandom_id, fandomId),
-              eq(validationRules.is_active, true)
-            )
-          ),
-        this.db
-          .select({ count: count() })
-          .from(ruleTemplates)
-          .where(eq(ruleTemplates.fandom_id, fandomId)),
-      ]);
+      const ruleCountData = await this.db
+        .select()
+        .from(validationRules)
+        .where(eq(validationRules.fandom_id, fandomId));
+
+      const activeRuleCountData = await this.db
+        .select()
+        .from(validationRules)
+        .where(
+          and(
+            eq(validationRules.fandom_id, fandomId),
+            eq(validationRules.is_active, true)
+          )
+        );
+
+      const templateCountData = await this.db
+        .select()
+        .from(ruleTemplates)
+        .where(eq(ruleTemplates.fandom_id, fandomId));
 
       return {
-        totalRules: ruleCount[0]?.count || 0,
-        activeRules: activeRuleCount[0]?.count || 0,
-        templates: templateCount[0]?.count || 0,
+        totalRules: ruleCountData.length,
+        activeRules: activeRuleCountData.length,
+        templates: templateCountData.length,
       };
     },
   };

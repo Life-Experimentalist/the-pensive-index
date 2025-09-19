@@ -13,6 +13,7 @@ import {
   count,
 } from 'drizzle-orm';
 import { Tag, PlotBlock, Story, TagClass } from '@/types';
+import { executeRawQuery, getCountValue, compatibleSelect } from './db-compatibility';
 
 /**
  * Query builder utilities for The Pensieve Index database operations
@@ -130,16 +131,61 @@ export class QueryBuilder {
       if (!story) return null;
 
       // Get story tags
-      const storyTags = await this.db
-        .select({
-          tag: schema.tags,
-          relevance_weight: schema.storyTags.relevance_weight,
-        })
-        .from(schema.storyTags)
-        .innerJoin(schema.tags, eq(schema.storyTags.tag_id, schema.tags.id))
-        .where(eq(schema.storyTags.story_id, storyId));
+      const query = sql`
+        SELECT
+          t.id as "tag.id",
+          t.name as "tag.name",
+          t.fandom_id as "tag.fandom_id",
+          t.description as "tag.description",
+          t.category as "tag.category",
+          t.is_active as "tag.is_active",
+          t.created_at as "tag.created_at",
+          t.updated_at as "tag.updated_at",
+          t.requires as "tag.requires",
+          t.enhances as "tag.enhances",
+          t.tag_class_id as "tag.tag_class_id",
+          st.relevance_weight
+        FROM
+          story_tags st
+        INNER JOIN
+          tags t ON st.tag_id = t.id
+        WHERE
+          st.story_id = ${storyId}
+      `;
+
+      const storyTags = await executeRawQuery(this.db, query);
 
       // Get story plot blocks
+      const plotBlocksQuery = sql`
+        SELECT
+          pb.id as "plot_block.id",
+          pb.name as "plot_block.name",
+          pb.fandom_id as "plot_block.fandom_id",
+          pb.category as "plot_block.category",
+          pb.description as "plot_block.description",
+          pb.is_active as "plot_block.is_active",
+          pb.created_at as "plot_block.created_at",
+          pb.updated_at as "plot_block.updated_at",
+          pb.conflicts_with as "plot_block.conflicts_with",
+          pb.requires as "plot_block.requires",
+          pb.enhances as "plot_block.enhances",
+          pb.parent_id as "plot_block.parent_id",
+          pb.has_custom_path as "plot_block.has_custom_path",
+          pb.depth as "plot_block.depth",
+          pb.path as "plot_block.path",
+          pb.children as "plot_block.children",
+          spb.relevance_weight
+        FROM
+          story_plot_blocks spb
+        INNER JOIN
+          plot_blocks pb ON spb.plot_block_id = pb.id
+        WHERE
+          spb.story_id = ${storyId}
+      `;
+
+      const storyPlotBlocks = await executeRawQuery(this.db, plotBlocksQuery);
+
+      /* Original code that was replaced:
       const storyPlotBlocks = await this.db
         .select({
           plot_block: schema.plotBlocks,
@@ -151,6 +197,7 @@ export class QueryBuilder {
           eq(schema.storyPlotBlocks.plot_block_id, schema.plotBlocks.id)
         )
         .where(eq(schema.storyPlotBlocks.story_id, storyId));
+      */
 
       return {
         story,
@@ -188,12 +235,17 @@ export class QueryBuilder {
         conditions.push(inArray(schema.stories.rating, filters.rating));
       }
 
-      const result = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(schema.stories)
-        .where(conditions.length > 0 ? and(...conditions) : undefined);
+      // Use raw SQL with compatibility utilities
+      let query = sql`SELECT COUNT(*) as count FROM ${schema.stories}`;
 
-      return Number(result[0]?.count || 0);
+      if (conditions.length > 0) {
+        const whereClause = and(...conditions);
+        // @ts-ignore - Adding WHERE clause to the query
+        query = sql`${query} WHERE ${whereClause}`;
+      }
+
+      const result = await executeRawQuery(this.db, query);
+      return getCountValue(result);
     },
   };
 
@@ -239,17 +291,36 @@ export class QueryBuilder {
      * Get tags with their usage count
      */
     findWithUsageCount: async (fandomId: string, limit: number = 50) => {
-      return await this.db
-        .select({
-          tag: schema.tags,
-          usage_count: sql<number>`count(${schema.storyTags.story_id})`,
-        })
-        .from(schema.tags)
-        .leftJoin(schema.storyTags, eq(schema.tags.id, schema.storyTags.tag_id))
-        .where(eq(schema.tags.fandom_id, fandomId))
-        .groupBy(schema.tags.id)
-        .orderBy(desc(sql`count(${schema.storyTags.story_id})`))
-        .limit(limit);
+      // Use raw SQL for complex queries with aggregates
+      const query = sql`
+        SELECT
+          t.id as "tag.id",
+          t.name as "tag.name",
+          t.fandom_id as "tag.fandom_id",
+          t.description as "tag.description",
+          t.category as "tag.category",
+          t.is_active as "tag.is_active",
+          t.created_at as "tag.created_at",
+          t.updated_at as "tag.updated_at",
+          t.requires as "tag.requires",
+          t.enhances as "tag.enhances",
+          t.tag_class_id as "tag.tag_class_id",
+          COUNT(st.story_id) as usage_count
+        FROM
+          tags t
+        LEFT JOIN
+          story_tags st ON t.id = st.tag_id
+        WHERE
+          t.fandom_id = ${fandomId}
+        GROUP BY
+          t.id
+        ORDER BY
+          COUNT(st.story_id) DESC
+        LIMIT
+          ${limit}
+      `;
+
+      return await executeRawQuery(this.db, query);
     },
 
     /**
@@ -257,21 +328,37 @@ export class QueryBuilder {
      */
     findRelated: async (tagId: string, limit: number = 10) => {
       // Find tags that frequently appear with the given tag
-      return await this.db
-        .select({
-          tag: schema.tags,
-          co_occurrence_count: sql<number>`count(*)`,
-        })
-        .from(schema.storyTags)
-        .innerJoin(
-          sql`${schema.storyTags} as st2`,
-          sql`${schema.storyTags.story_id} = st2.story_id AND st2.tag_id != ${tagId}`
-        )
-        .innerJoin(schema.tags, sql`${schema.tags.id} = st2.tag_id`)
-        .where(eq(schema.storyTags.tag_id, tagId))
-        .groupBy(sql`st2.tag_id`, schema.tags.id)
-        .orderBy(desc(sql`count(*)`))
-        .limit(limit);
+      const query = sql`
+        SELECT
+          t.id as "tag.id",
+          t.name as "tag.name",
+          t.fandom_id as "tag.fandom_id",
+          t.description as "tag.description",
+          t.category as "tag.category",
+          t.is_active as "tag.is_active",
+          t.created_at as "tag.created_at",
+          t.updated_at as "tag.updated_at",
+          t.requires as "tag.requires",
+          t.enhances as "tag.enhances",
+          t.tag_class_id as "tag.tag_class_id",
+          COUNT(*) as co_occurrence_count
+        FROM
+          story_tags st1
+        INNER JOIN
+          story_tags st2 ON st1.story_id = st2.story_id AND st2.tag_id != ${tagId}
+        INNER JOIN
+          tags t ON t.id = st2.tag_id
+        WHERE
+          st1.tag_id = ${tagId}
+        GROUP BY
+          st2.tag_id, t.id
+        ORDER BY
+          COUNT(*) DESC
+        LIMIT
+          ${limit}
+      `;
+
+      return await executeRawQuery(this.db, query);
     },
   };
 
@@ -344,20 +431,40 @@ export class QueryBuilder {
      * Find plot blocks with usage statistics
      */
     findWithUsageCount: async (fandomId: string, limit: number = 30) => {
-      return await this.db
-        .select({
-          plot_block: schema.plotBlocks,
-          usage_count: sql<number>`count(${schema.storyPlotBlocks.story_id})`,
-        })
-        .from(schema.plotBlocks)
-        .leftJoin(
-          schema.storyPlotBlocks,
-          eq(schema.plotBlocks.id, schema.storyPlotBlocks.plot_block_id)
-        )
-        .where(eq(schema.plotBlocks.fandom_id, fandomId))
-        .groupBy(schema.plotBlocks.id)
-        .orderBy(desc(sql`count(${schema.storyPlotBlocks.story_id})`))
-        .limit(limit);
+      const query = sql`
+        SELECT
+          pb.id as "plot_block.id",
+          pb.name as "plot_block.name",
+          pb.fandom_id as "plot_block.fandom_id",
+          pb.category as "plot_block.category",
+          pb.description as "plot_block.description",
+          pb.is_active as "plot_block.is_active",
+          pb.created_at as "plot_block.created_at",
+          pb.updated_at as "plot_block.updated_at",
+          pb.conflicts_with as "plot_block.conflicts_with",
+          pb.requires as "plot_block.requires",
+          pb.enhances as "plot_block.enhances",
+          pb.parent_id as "plot_block.parent_id",
+          pb.has_custom_path as "plot_block.has_custom_path",
+          pb.depth as "plot_block.depth",
+          pb.path as "plot_block.path",
+          pb.children as "plot_block.children",
+          COUNT(spb.story_id) as usage_count
+        FROM
+          plot_blocks pb
+        LEFT JOIN
+          story_plot_blocks spb ON pb.id = spb.plot_block_id
+        WHERE
+          pb.fandom_id = ${fandomId}
+        GROUP BY
+          pb.id
+        ORDER BY
+          COUNT(spb.story_id) DESC
+        LIMIT
+          ${limit}
+      `;
+
+      return await executeRawQuery(this.db, query);
     },
   };
 
@@ -369,18 +476,28 @@ export class QueryBuilder {
      * Find all fandoms with story counts
      */
     findWithStoryCounts: async () => {
-      return await this.db
-        .select({
-          fandom: schema.fandoms,
-          story_count: sql<number>`count(${schema.stories.id})`,
-        })
-        .from(schema.fandoms)
-        .leftJoin(
-          schema.stories,
-          eq(schema.fandoms.id, schema.stories.fandom_id)
-        )
-        .groupBy(schema.fandoms.id)
-        .orderBy(asc(schema.fandoms.name));
+      // Use raw SQL for complex queries with aggregates
+      const query = sql`
+        SELECT
+          f.id as "fandom.id",
+          f.name as "fandom.name",
+          f.description as "fandom.description",
+          f.slug as "fandom.slug",
+          f.is_active as "fandom.is_active",
+          f.created_at as "fandom.created_at",
+          f.updated_at as "fandom.updated_at",
+          COUNT(s.id) as story_count
+        FROM
+          fandoms f
+        LEFT JOIN
+          stories s ON f.id = s.fandom_id
+        GROUP BY
+          f.id
+        ORDER BY
+          f.name ASC
+      `;
+
+      return await executeRawQuery(this.db, query);
     },
 
     /**
@@ -404,25 +521,28 @@ export class QueryBuilder {
      * Get database statistics
      */
     getStatistics: async () => {
+      // Use raw SQL queries for counting
+      const fandomCountQuery = sql`SELECT COUNT(*) as count FROM fandoms`;
+      const tagCountQuery = sql`SELECT COUNT(*) as count FROM tags`;
+      const plotBlockCountQuery = sql`SELECT COUNT(*) as count FROM plot_blocks`;
+      const storyCountQuery = sql`SELECT COUNT(*) as count FROM stories`;
+      const tagClassCountQuery = sql`SELECT COUNT(*) as count FROM tag_classes`;
+
       const [fandomCount, tagCount, plotBlockCount, storyCount, tagClassCount] =
         await Promise.all([
-          this.db.select({ count: sql<number>`count(*)` }).from(schema.fandoms),
-          this.db.select({ count: sql<number>`count(*)` }).from(schema.tags),
-          this.db
-            .select({ count: sql<number>`count(*)` })
-            .from(schema.plotBlocks),
-          this.db.select({ count: sql<number>`count(*)` }).from(schema.stories),
-          this.db
-            .select({ count: sql<number>`count(*)` })
-            .from(schema.tagClasses),
+          executeRawQuery(this.db, fandomCountQuery),
+          executeRawQuery(this.db, tagCountQuery),
+          executeRawQuery(this.db, plotBlockCountQuery),
+          executeRawQuery(this.db, storyCountQuery),
+          executeRawQuery(this.db, tagClassCountQuery),
         ]);
 
       return {
-        fandoms: Number(fandomCount[0]?.count || 0),
-        tags: Number(tagCount[0]?.count || 0),
-        plot_blocks: Number(plotBlockCount[0]?.count || 0),
-        stories: Number(storyCount[0]?.count || 0),
-        tag_classes: Number(tagClassCount[0]?.count || 0),
+        fandoms: getCountValue(fandomCount),
+        tags: getCountValue(tagCount),
+        plot_blocks: getCountValue(plotBlockCount),
+        stories: getCountValue(storyCount),
+        tag_classes: getCountValue(tagClassCount),
       };
     },
 

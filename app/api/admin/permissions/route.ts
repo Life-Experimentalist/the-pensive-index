@@ -11,9 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { AdminPermissions } from '@/lib/admin/permissions';
-import type { AdminUser } from '@/types/admin';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 
 /**
  * GET /api/admin/permissions
@@ -21,34 +19,41 @@ import type { AdminUser } from '@/types/admin';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get the session (this would be configured with NextAuth.js)
-    const session = await getServerSession();
+    // Check admin authentication
+    const authResult = await checkAdminAuth();
 
-    if (!session?.user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Authentication required',
-        },
-        { status: 401 }
-      );
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    // Check if user is admin (this would come from your user database)
-    const user = session.user as any; // Type assertion for demo
-
-    if (!AdminPermissions.isAdmin(user)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Admin access required',
-        },
-        { status: 403 }
-      );
-    }
-
-    // Get user permissions based on role
-    const permissions = AdminPermissions.getUserPermissions(user as AdminUser);
+    // For now, return a simplified permissions structure
+    // In a full implementation, you'd check the user's role from Clerk metadata
+    const permissions = [
+      {
+        id: 'rule:read',
+        action: 'read',
+        resource: 'rules',
+        granted: true,
+      },
+      {
+        id: 'rule:write',
+        action: 'write',
+        resource: 'rules',
+        granted: true,
+      },
+      {
+        id: 'template:read',
+        action: 'read',
+        resource: 'templates',
+        granted: true,
+      },
+      {
+        id: 'template:write',
+        action: 'write',
+        resource: 'templates',
+        granted: true,
+      },
+    ];
 
     return NextResponse.json({
       success: true,

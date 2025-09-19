@@ -28,7 +28,7 @@ If applicable, add screenshots to help explain your problem.
 - **Device**: [e.g. Desktop, Mobile]
 - **OS**: [e.g. Windows 11, macOS, iOS]
 - **Browser**: [e.g. Chrome 119, Safari 17]
-- **Version**: [e.g. v0.1.0]
+- **Version**: [e.g. v1.0.0]
 
 ## Validation Engine Related
 - [ ] This bug involves the validation engine

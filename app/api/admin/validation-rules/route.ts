@@ -12,7 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
@@ -84,16 +84,13 @@ const querySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -102,7 +99,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const adminUser = user as AdminUser;
+    const adminUser = authResult.user;
 
     // Parse query parameters
     const url = new URL(request.url);
@@ -129,7 +126,7 @@ export async function GET(request: NextRequest) {
       result = await adminQueries.validationRules.listByFandom(
         validatedQuery.fandomId,
         {
-          isActive: validatedQuery.isActive,
+          is_active: validatedQuery.isActive,
           category: validatedQuery.category,
         },
         {
@@ -169,16 +166,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -187,7 +181,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminUser = user as AdminUser;
+    const adminUser = authResult.user;
 
     // Parse and validate request body
     let body;

@@ -12,11 +12,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 // Update rule validation schema
@@ -58,7 +58,7 @@ const updateRuleSchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -68,16 +68,13 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -86,13 +83,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const ruleId = params.id;
+    const adminUser = authResult.user;
+    const { id: ruleId } = await params;
 
     // Get the rule
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const rule = await adminQueries.validationRules.getById(ruleId);
+    const rule = await adminQueries.validationRules.findById(ruleId);
 
     if (!rule) {
       return NextResponse.json(
@@ -105,7 +102,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const permissionResult = AdminPermissions.validatePermission(
       adminUser,
       'rule:read',
-      rule.fandomId
+      rule.fandom_id
     );
 
     if (!permissionResult.hasPermission) {
@@ -139,16 +136,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -157,8 +151,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const ruleId = params.id;
+    const adminUser = authResult.user;
+    const { id: ruleId } = await params;
 
     // Parse and validate request body
     let body;
@@ -186,7 +180,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Get existing rule to check permissions
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingRule = await adminQueries.validationRules.getById(ruleId);
+    const existingRule = await adminQueries.validationRules.findById(ruleId);
 
     if (!existingRule) {
       return NextResponse.json(
@@ -199,7 +193,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const permissionResult = AdminPermissions.validatePermission(
       adminUser,
       'rule:update',
-      existingRule.fandomId
+      existingRule.fandom_id
     );
 
     if (!permissionResult.hasPermission) {
@@ -240,16 +234,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -258,13 +249,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const ruleId = params.id;
+    const adminUser = authResult.user;
+    const { id: ruleId } = await params;
 
     // Get existing rule to check permissions
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingRule = await adminQueries.validationRules.getById(ruleId);
+    const existingRule = await adminQueries.validationRules.findById(ruleId);
 
     if (!existingRule) {
       return NextResponse.json(
@@ -277,7 +268,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const permissionResult = AdminPermissions.validatePermission(
       adminUser,
       'rule:delete',
-      existingRule.fandomId
+      existingRule.fandom_id
     );
 
     if (!permissionResult.hasPermission) {
@@ -292,7 +283,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the rule
-    await adminQueries.validationRules.delete(ruleId, adminUser.id);
+    await adminQueries.validationRules.delete(ruleId);
 
     return NextResponse.json({
       success: true,

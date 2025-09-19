@@ -12,11 +12,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 // Update tag class validation schema
@@ -40,7 +40,7 @@ const updateTagClassSchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -50,16 +50,13 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -68,13 +65,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const tagClassId = params.id;
+    const adminUser = authResult.user;
+    const { id: tagClassId } = await params;
 
     // Get the tag class
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const tagClass = await adminQueries.tagClasses.getById(tagClassId);
+    const tagClass = await adminQueries.tagClasses.findById(tagClassId);
 
     if (!tagClass) {
       return NextResponse.json(
@@ -121,16 +118,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -139,8 +133,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const tagClassId = params.id;
+    const adminUser = authResult.user;
+    const { id: tagClassId } = await params;
 
     // Parse and validate request body
     let body;
@@ -168,7 +162,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Get existing tag class to check permissions
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingTagClass = await adminQueries.tagClasses.getById(tagClassId);
+    const existingTagClass = await adminQueries.tagClasses.findById(tagClassId);
 
     if (!existingTagClass) {
       return NextResponse.json(
@@ -198,8 +192,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Update the tag class
     const updatedTagClass = await adminQueries.tagClasses.update(
       tagClassId,
-      validationResult.data as any, // Type assertion for complex nested type
-      adminUser.id
+      validationResult.data as any // Type assertion for complex nested type
     );
 
     return NextResponse.json({
@@ -222,16 +215,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -240,13 +230,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const tagClassId = params.id;
+    const adminUser = authResult.user;
+    const { id: tagClassId } = await params;
 
     // Get existing tag class to check permissions
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingTagClass = await adminQueries.tagClasses.getById(tagClassId);
+    const existingTagClass = await adminQueries.tagClasses.findById(tagClassId);
 
     if (!existingTagClass) {
       return NextResponse.json(
@@ -274,7 +264,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the tag class
-    await adminQueries.tagClasses.delete(tagClassId, adminUser.id);
+    await adminQueries.tagClasses.deactivate(tagClassId);
 
     return NextResponse.json({
       success: true,

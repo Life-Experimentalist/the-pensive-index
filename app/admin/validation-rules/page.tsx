@@ -15,7 +15,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
   PlusIcon,
@@ -24,6 +24,7 @@ import {
   PencilIcon,
   TrashIcon,
   DocumentDuplicateIcon,
+  DocumentTextIcon,
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -109,7 +110,7 @@ const mockRules: ValidationRule[] = [
 ];
 
 export default function ValidationRulesList() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [rules, setRules] = useState<ValidationRule[]>(mockRules);
   const [loading, setLoading] = useState(true);
   const [selectedRules, setSelectedRules] = useState<string[]>([]);
@@ -122,7 +123,7 @@ export default function ValidationRulesList() {
     sortOrder: 'asc',
   });
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
 

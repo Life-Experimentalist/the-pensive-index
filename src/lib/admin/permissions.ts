@@ -170,7 +170,7 @@ export class AdminPermissions {
     // For resource-specific actions, check fandom access
     if (resource && this.isResourceScopedAction(action)) {
       // Check if user has access to this fandom
-      if (!user.fandomIds || !user.fandomIds.includes(resource)) {
+      if (!user.fandom_access || !user.fandom_access.includes(resource)) {
         return {
           hasPermission: false,
           scope: 'none',
@@ -189,7 +189,7 @@ export class AdminPermissions {
     // Action is allowed and no resource scoping needed
     return {
       hasPermission: true,
-      scope: user.fandomIds && user.fandomIds.length > 0 ? 'fandom' : 'none',
+      scope: user.fandom_access && user.fandom_access.length > 0 ? 'fandom' : 'none',
       resource,
     };
   }
@@ -233,9 +233,9 @@ export class AdminPermissions {
         });
       } else if (user.role === 'FandomAdmin') {
         // FandomAdmin has scoped permissions
-        if (this.isResourceScopedAction(action) && user.fandomIds) {
+        if (this.isResourceScopedAction(action) && user.fandom_access) {
           // Add permission for each fandom
-          for (const fandomId of user.fandomIds) {
+          for (const fandomId of user.fandom_access) {
             permissions.push({
               action,
               resource: fandomId,
@@ -286,7 +286,7 @@ export class AdminPermissions {
    */
   static isFandomAdmin(user: AdminUser, fandomId: string): boolean {
     return (
-      user.role === 'FandomAdmin' && Boolean(user.fandomIds?.includes(fandomId))
+      user.role === 'FandomAdmin' && Boolean(user.fandom_access?.includes(fandomId))
     );
   }
 
@@ -305,15 +305,22 @@ export class AdminPermissions {
   ): Partial<AdminUser> {
     const permissions = this.getUserPermissions({
       role,
-      fandomIds,
+      fandom_access: fandomIds,
+      id: userId,
+      email: '',
+      name: '',
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+      permissions: []
     } as AdminUser);
 
     return {
       role,
-      fandomIds: role === 'FandomAdmin' ? fandomIds : undefined,
-      permissions,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      fandom_access: role === 'FandomAdmin' ? fandomIds : undefined,
+      permissions: permissions as any, // TODO: Fix type mismatch
+      created_at: new Date(),
+      updated_at: new Date(),
     };
   }
 

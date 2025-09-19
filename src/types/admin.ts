@@ -8,20 +8,29 @@
  * @version 1.0.0
  */
 
-import { User } from './index';
-
 // ============================================================================
 // ADMIN USER & PERMISSIONS
 // ============================================================================
 
 export type AdminRole = 'ProjectAdmin' | 'FandomAdmin';
 
-export interface AdminUser extends User {
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
   role: AdminRole;
-  fandomIds?: string[]; // Only for FandomAdmin - assigned fandoms
-  permissions: AdminPermission[];
-  createdAt: Date;
-  updatedAt: Date;
+  fandom_access?: string[]; // For FandomAdmin role - assigned fandoms
+  permissions: Array<{
+    id: string;
+    name: string;
+    description: string;
+    scope: 'global' | 'fandom' | 'content';
+  }>;
+  is_active: boolean;
+  last_login_at?: Date;
+  preferences?: Record<string, any>;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface AdminPermission {
@@ -104,19 +113,24 @@ export type MessageSeverity = 'error' | 'warning' | 'info';
 
 export interface ValidationRule {
   id: string;
-  fandomId: string;
   name: string;
   description?: string;
-  templateId?: string; // Reference to RuleTemplate if based on template
-  ruleDefinition: RuleDefinition;
-  priority: number; // Execution order (1 = highest priority)
-  isActive: boolean;
-  createdBy: string; // AdminUser ID
-  lastModifiedBy: string; // AdminUser ID
-  version: number; // Incremental version for this rule
-  parentVersion?: number; // For rollback tracking
-  createdAt: Date;
-  updatedAt: Date;
+  fandom_id: string;
+  category: string;
+  priority: number;
+  is_active: boolean;
+  applies_to: string[];
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+  published_at?: Date;
+  version: string;
+  template_id?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
+  // These would be loaded separately in a full implementation
+  conditions?: any[];
+  actions?: any[];
 }
 
 export interface RuleDefinition {

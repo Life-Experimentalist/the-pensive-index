@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import {
   ChartBarIcon,
   UsersIcon,
@@ -123,11 +123,11 @@ const systemHealth = {
 };
 
 export default function Analytics() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
   const [selectedFandom, setSelectedFandom] = useState('all');
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
 

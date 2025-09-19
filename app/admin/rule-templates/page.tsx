@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import {
   DocumentDuplicateIcon,
@@ -202,7 +202,7 @@ const complexityColors = {
 };
 
 export default function RuleTemplates() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFandom, setSelectedFandom] = useState('all');
@@ -212,7 +212,7 @@ export default function RuleTemplates() {
   );
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
 

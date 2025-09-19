@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import {
   TagIcon,
   PlusIcon,
@@ -219,7 +219,7 @@ const severityIcons = {
 };
 
 export default function TagClasses() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFandom, setSelectedFandom] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -228,10 +228,10 @@ export default function TagClasses() {
   );
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
-  const userFandom = (session?.user as any)?.fandom; // For FandomAdmin users
+  const userFandom = (user as any)?.fandom; // For FandomAdmin users
 
   const filteredTagClasses = useMemo(() => {
     return mockTagClasses.filter(tagClass => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { getDatabase, closeDatabase } from '@/lib/database';
+import { DatabaseManager } from '@/lib/database';
 import type { DatabaseConnection } from '@/lib/database';
 
 /**
@@ -20,7 +20,13 @@ describe('Admin Permissions API Contract Tests', () => {
   let regularUserHeaders: HeadersInit;
 
   beforeAll(async () => {
-    db = await getDatabase();
+    // Initialize test database
+    const dbManager = DatabaseManager.getInstance();
+    await dbManager.initialize({
+      type: 'sqlite',
+      url: ':memory:', // Use in-memory database for tests
+    });
+    db = dbManager.getConnection();
 
     // Mock authentication headers that would be set by NextAuth
     projectAdminHeaders = {
@@ -40,7 +46,8 @@ describe('Admin Permissions API Contract Tests', () => {
   });
 
   afterAll(async () => {
-    await closeDatabase();
+    const dbManager = DatabaseManager.getInstance();
+    await dbManager.close();
   });
 
   describe('GET /api/admin/permissions', () => {

@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import {
   DocumentTextIcon,
@@ -53,7 +53,7 @@ const fandoms = [
 ];
 
 export default function CreateValidationRule() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
   const [formData, setFormData] = useState<RuleFormData>({
     name: '',
@@ -72,7 +72,7 @@ export default function CreateValidationRule() {
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
 

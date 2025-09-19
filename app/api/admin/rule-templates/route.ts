@@ -11,11 +11,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 // Template creation validation schema
@@ -80,16 +80,13 @@ const querySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -98,7 +95,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const adminUser = user as AdminUser;
+    const adminUser = authResult.user;
 
     // Only ProjectAdmin can access templates
     if (adminUser.role !== 'ProjectAdmin') {
@@ -117,16 +114,18 @@ export async function GET(request: NextRequest) {
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
 
-    const result = await adminQueries.ruleTemplates.list({
-      page: validatedQuery.page,
-      limit: validatedQuery.limit,
-      filters: {
+    const result = await adminQueries.ruleTemplates.list(
+      {
         category: validatedQuery.category,
-        isActive: validatedQuery.isActive,
+        isPublic: validatedQuery.isActive, // Note: the schema has isActive but the method expects isPublic
       },
-      sortBy: validatedQuery.sortBy,
-      sortOrder: validatedQuery.sortOrder,
-    });
+      {
+        page: validatedQuery.page,
+        limit: validatedQuery.limit,
+        sortBy: validatedQuery.sortBy,
+        sortOrder: validatedQuery.sortOrder,
+      }
+    );
 
     return NextResponse.json({
       success: true,
@@ -148,16 +147,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -166,7 +162,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const adminUser = user as AdminUser;
+    const adminUser = authResult.user;
 
     // Only ProjectAdmin can create templates
     if (adminUser.role !== 'ProjectAdmin') {

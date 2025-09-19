@@ -1,10 +1,13 @@
 import { DatabaseConnection } from '@/lib/database';
 import { eq, and, inArray, isNull, sql } from 'drizzle-orm';
 import { plotBlocks, tags, tagClasses } from '@/lib/database/schema';
+import { executeRawQuery, getCountValue } from './db-compatibility';
 
 /**
  * Performance-optimized tree query utilities for The Pensieve Index
- * Provides efficient hierarchical data retrieval with minimal database calls
+ * Provides efficient hierarchical data retrieval wi    const total = totalCount[0]?.count !== undefined ? Number(totalCount[0]?.count) : 0;
+    const rootNodes = rootCount[0]?.count !== undefined ? Number(rootCount[0]?.count) : 0;
+    const maxDepth = depthResult[0]?.max_depth !== undefined ? Number(depthResult[0]?.max_depth) : 0;minimal database calls
  */
 export class TreeQueryOptimizer {
   private db: DatabaseConnection;
@@ -106,34 +109,46 @@ export class TreeQueryOptimizer {
       }
     }
 
-    // Single optimized query with joins
-    const query = this.db
-      .select({
-        tag_id: tags.id,
-        tag_name: tags.name,
-        tag_description: tags.description,
-        tag_category: tags.category,
-        tag_class_id: tags.tag_class_id,
-        tag_class_name: tagClasses.name,
-        tag_class_description: tagClasses.description,
-        tag_is_active: tags.is_active,
-        tag_created_at: tags.created_at,
-        tag_updated_at: tags.updated_at,
-      })
-      .from(tags)
-      .leftJoin(tagClasses, eq(tags.tag_class_id, tagClasses.id))
-      .where(
-        and(
-          eq(tags.fandom_id, fandomId),
-          options.includeInactive ? undefined : eq(tags.is_active, true),
-          options.tagClassId
-            ? eq(tags.tag_class_id, options.tagClassId)
-            : undefined
-        )
-      )
-      .orderBy(tagClasses.name, tags.category, tags.name);
+    // Single optimized query with joins using raw SQL
+    const rawQuery = sql`
+      SELECT
+        t.id as tag_id,
+        t.name as tag_name,
+        t.description as tag_description,
+        t.category as tag_category,
+        t.tag_class_id as tag_class_id,
+        tc.name as tag_class_name,
+        tc.description as tag_class_description,
+        t.is_active as tag_is_active,
+        t.created_at as tag_created_at,
+        t.updated_at as tag_updated_at
+      FROM
+        tags t
+      LEFT JOIN
+        tag_classes tc ON t.tag_class_id = tc.id
+    `;
 
-    const results = await query;
+    // Build the WHERE clause
+    let whereClause = sql`WHERE t.fandom_id = ${fandomId}`;
+
+    // Add inactive filter if needed
+    if (!options.includeInactive) {
+      whereClause = sql`${whereClause} AND t.is_active = true`;
+    }
+
+    // Add tag class filter if needed
+    if (options.tagClassId) {
+      whereClause = sql`${whereClause} AND t.tag_class_id = ${options.tagClassId}`;
+    }
+
+    // Complete the query with ORDER BY
+    const completeQuery = sql`
+      ${rawQuery}
+      ${whereClause}
+      ORDER BY tc.name, t.category, t.name
+    `;
+
+    const results = await executeRawQuery(this.db, completeQuery);
     const hierarchy = this.buildTagHierarchy(results);
 
     // Cache results
@@ -352,31 +367,21 @@ export class TreeQueryOptimizer {
     average_children: number;
   }> {
     const [totalCount, rootCount, depthResult] = await Promise.all([
-      this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(plotBlocks)
-        .where(
-          and(
-            eq(plotBlocks.fandom_id, fandomId),
-            eq(plotBlocks.is_active, true)
-          )
-        ),
-      this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(plotBlocks)
-        .where(
-          and(
-            eq(plotBlocks.fandom_id, fandomId),
-            eq(plotBlocks.is_active, true),
-            isNull(plotBlocks.parent_id)
-          )
-        ),
+      executeRawQuery(
+        this.db,
+        sql`SELECT COUNT(*) as count FROM plot_blocks
+            WHERE fandom_id = ${fandomId} AND is_active = true`
+      ),
+      executeRawQuery(
+        this.db,
+        sql`SELECT COUNT(*) as count FROM plot_blocks
+            WHERE fandom_id = ${fandomId} AND is_active = true AND parent_id IS NULL`
+      ),
       // TODO: Fix complex CTE query - temporarily using simple count
-      this.db
-        .select({ max_depth: sql<number>`0` })
-        .from(plotBlocks)
-        .where(eq(plotBlocks.fandom_id, fandomId))
-        .limit(1),
+      executeRawQuery(
+        this.db,
+        sql`SELECT 0 as max_depth FROM plot_blocks WHERE fandom_id = ${fandomId} LIMIT 1`
+      ),
     ]);
 
     const total = totalCount[0]?.count || 0;
@@ -397,23 +402,29 @@ export class TreeQueryOptimizer {
     by_class: Record<string, number>;
     unclassified: number;
   }> {
-    const results = await this.db
-      .select({
-        tag_class_id: tags.tag_class_id,
-        tag_class_name: tagClasses.name,
-        count: sql<number>`count(*)`,
-      })
-      .from(tags)
-      .leftJoin(tagClasses, eq(tags.tag_class_id, tagClasses.id))
-      .where(and(eq(tags.fandom_id, fandomId), eq(tags.is_active, true)))
-      .groupBy(tags.tag_class_id, tagClasses.name);
+    const query = sql`
+      SELECT
+        t.tag_class_id,
+        tc.name as tag_class_name,
+        COUNT(*) as count
+      FROM
+        tags t
+      LEFT JOIN
+        tag_classes tc ON t.tag_class_id = tc.id
+      WHERE
+        t.fandom_id = ${fandomId} AND t.is_active = true
+      GROUP BY
+        t.tag_class_id, tc.name
+    `;
+
+    const results = await executeRawQuery(this.db, query);
 
     const byClass: Record<string, number> = {};
     let unclassified = 0;
     let total = 0;
 
     results.forEach(row => {
-      const count = row.count || 0;
+      const count = Number(row.count || 0);
       total += count;
 
       if (row.tag_class_id && row.tag_class_name) {

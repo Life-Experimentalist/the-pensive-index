@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import {
   PlayIcon,
   ClockIcon,
@@ -56,7 +56,7 @@ const mockRules = [
 ];
 
 export default function TestingSandbox() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [selectedFandom, setSelectedFandom] = useState('hp');
   const [selectedRules, setSelectedRules] = useState<string[]>([]);
   const [testPathway, setTestPathway] = useState<TestPathway>({
@@ -497,7 +497,7 @@ export default function TestingSandbox() {
                         disabled={isLoading}
                         className="w-full text-left px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
                       >
-                        Test "{rule.name}"
+                        Test &quot;{rule.name}&quot;
                       </button>
                     ))}
                   </div>

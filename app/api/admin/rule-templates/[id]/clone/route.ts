@@ -11,11 +11,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 const cloneTemplateSchema = z.object({
@@ -26,7 +26,7 @@ const cloneTemplateSchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -36,16 +36,13 @@ interface RouteParams {
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -54,8 +51,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const templateId = params.id;
+    const adminUser = authResult.user;
+    const { id: templateId } = await params;
 
     // Parse and validate request body
     let body;
@@ -103,7 +100,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Get database connection and check template exists
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const template = await adminQueries.ruleTemplates.getById(templateId);
+    const template = await adminQueries.ruleTemplates.findById(templateId);
 
     if (!template) {
       return NextResponse.json(

@@ -586,11 +586,11 @@ export class RuleEngine {
     const legacyRules: LegacyValidationRule[] = rules.map(rule => ({
       id: rule.id,
       name: rule.name,
-      fandomId: rule.fandomId,
+      fandomId: rule.fandom_id,
       conditions: [], // Will be converted properly later
       actions: [], // Will be converted properly later
       logicOperator: 'AND',
-      isActive: rule.isActive,
+      isActive: rule.is_active,
       priority: rule.priority,
     }));
 

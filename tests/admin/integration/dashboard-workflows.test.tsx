@@ -11,6 +11,7 @@ import {
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
+import AdminDashboard from '@/components/admin/AdminDashboard';
 
 /**
  * T013: Dashboard Workflows Integration Tests
@@ -333,7 +334,7 @@ describe('Dashboard Workflows Integration Tests', () => {
   describe('Dashboard Navigation', () => {
     it('should render main dashboard with navigation', () => {
       // This test MUST FAIL initially - component doesn't exist
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       expect(screen.getByTestId('admin-dashboard')).toBeInTheDocument();
       expect(screen.getByTestId('dashboard-nav')).toBeInTheDocument();
@@ -351,7 +352,7 @@ describe('Dashboard Workflows Integration Tests', () => {
     it('should switch between dashboard tabs', async () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       // Default to overview
       expect(screen.getByTestId('overview-tab')).toBeInTheDocument();
@@ -367,7 +368,7 @@ describe('Dashboard Workflows Integration Tests', () => {
 
     it('should handle initial tab from URL', () => {
       // This test MUST FAIL initially
-      render(<MockAdminDashboard initialTab="rules" />);
+      render(<AdminDashboard initialTab="rules" />);
 
       expect(screen.getByTestId('rules-tab')).toBeInTheDocument();
       expect(screen.getByTestId('nav-rules')).toHaveAttribute(
@@ -685,7 +686,7 @@ describe('Dashboard Workflows Integration Tests', () => {
       // This test MUST FAIL initially
       const startTime = performance.now();
 
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       const endTime = performance.now();
       const loadTime = endTime - startTime;
@@ -768,7 +769,7 @@ describe('Dashboard Workflows Integration Tests', () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
 
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       // Should be able to navigate tabs with keyboard
       await user.tab();
@@ -780,7 +781,7 @@ describe('Dashboard Workflows Integration Tests', () => {
 
     it('should have proper ARIA labels and roles', () => {
       // This test MUST FAIL initially
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       expect(screen.getByTestId('dashboard-nav')).toHaveAttribute(
         'role',
@@ -796,7 +797,7 @@ describe('Dashboard Workflows Integration Tests', () => {
       // This test MUST FAIL initially
       const user = userEvent.setup();
 
-      render(<MockAdminDashboard />);
+      render(<AdminDashboard />);
 
       await user.click(screen.getByTestId('nav-rules'));
 

@@ -12,12 +12,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { RuleEngine } from '@/lib/admin/rule-engine';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 // Pathway validation test schema
@@ -75,16 +75,13 @@ export async function POST(request: NextRequest) {
  */
 async function handleValidatePathway(request: NextRequest) {
   // Get session and validate admin access
-  const session = await getServerSession();
+  const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
+    }
 
-  if (!session?.user) {
-    return NextResponse.json(
-      { success: false, error: 'Authentication required' },
-      { status: 401 }
-    );
-  }
-
-  const user = session.user as any;
+  const user = authResult.user as any;
 
   if (!AdminPermissions.isAdmin(user)) {
     return NextResponse.json(
@@ -93,7 +90,7 @@ async function handleValidatePathway(request: NextRequest) {
     );
   }
 
-  const adminUser = user as AdminUser;
+  const adminUser = authResult.user;
 
   // Parse and validate request body
   let body;
@@ -146,36 +143,47 @@ async function handleValidatePathway(request: NextRequest) {
   if (testData.ruleIds && testData.ruleIds.length > 0) {
     // Test specific rules
     rules = await Promise.all(
-      testData.ruleIds.map(id => adminQueries.validationRules.getById(id))
+      testData.ruleIds.map(id => adminQueries.validationRules.findById(id))
     );
     rules = rules.filter(Boolean); // Remove null results
   } else {
     // Test all active rules for fandom
     const result = await adminQueries.validationRules.listByFandom(
       testData.fandomId,
-      { isActive: !testData.includeInactive }
+      { is_active: !testData.includeInactive }
     );
-    rules = result.rules;
+    rules = result.data;
   }
 
   // Initialize rule engine and test pathway
-  const ruleEngine = new RuleEngine();
 
   // Convert rules to engine format
-  const engineRules = rules.map(rule => ({
-    id: rule.id,
-    name: rule.name,
-    category: rule.category,
-    priority: rule.priority,
-    conditions: rule.conditions || [],
-    actions: rule.actions || [],
-    isActive: rule.isActive,
-  }));
+  const engineRules = rules
+    .filter(rule => rule !== null)
+    .map(rule => ({
+      id: rule.id,
+      name: rule.name,
+      fandomId: rule.fandom_id,
+      conditions: rule.conditions || [],
+      actions: rule.actions || [],
+      logicOperator: 'AND' as const,
+      isActive: rule.is_active,
+      priority: rule.priority,
+    }));
 
   // Perform validation
   const startTime = performance.now();
-  const validationResults = await ruleEngine.validatePathway(
-    testData.pathway,
+
+  // Convert test data to proper input format
+  const validationInput = {
+    fandomId: testData.fandomId,
+    selectedTags: testData.pathway.tags,
+    selectedPlotBlocks: testData.pathway.plotBlocks,
+    tagClasses: {}, // Will be populated from database if needed
+  };
+
+  const validationResults = await RuleEngine.validatePathway(
+    validationInput,
     engineRules
   );
   const endTime = performance.now();
@@ -187,11 +195,11 @@ async function handleValidatePathway(request: NextRequest) {
       isValid: validationResults.isValid,
       errors: validationResults.errors,
       warnings: validationResults.warnings,
-      info: validationResults.info,
-      appliedRules: validationResults.appliedRules,
+      suggestions: validationResults.suggestions,
       executionTime: `${executionTime.toFixed(2)}ms`,
       testedRules: engineRules.length,
       pathway: testData.pathway,
+      rulesEvaluated: validationResults.rulesEvaluated,
     },
   });
 }
@@ -201,16 +209,13 @@ async function handleValidatePathway(request: NextRequest) {
  */
 async function handleTestRule(request: NextRequest) {
   // Get session and validate admin access
-  const session = await getServerSession();
+  const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
+    }
 
-  if (!session?.user) {
-    return NextResponse.json(
-      { success: false, error: 'Authentication required' },
-      { status: 401 }
-    );
-  }
-
-  const user = session.user as any;
+  const user = authResult.user as any;
 
   if (!AdminPermissions.isAdmin(user)) {
     return NextResponse.json(
@@ -219,7 +224,7 @@ async function handleTestRule(request: NextRequest) {
     );
   }
 
-  const adminUser = user as AdminUser;
+  const adminUser = authResult.user;
 
   // Parse and validate request body
   let body;
@@ -249,7 +254,7 @@ async function handleTestRule(request: NextRequest) {
   // Get rule and check permissions
   const db = await getDatabase();
   const adminQueries = new AdminQueries(db);
-  const rule = await adminQueries.validationRules.getById(testData.ruleId);
+  const rule = await adminQueries.validationRules.findById(testData.ruleId);
 
   if (!rule) {
     return NextResponse.json(
@@ -262,7 +267,7 @@ async function handleTestRule(request: NextRequest) {
   const permissionResult = AdminPermissions.validatePermission(
     adminUser,
     'rule:read',
-    rule.fandomId
+    rule.fandom_id
   );
 
   if (!permissionResult.hasPermission) {
@@ -277,17 +282,17 @@ async function handleTestRule(request: NextRequest) {
   }
 
   // Initialize rule engine and test rule
-  const ruleEngine = new RuleEngine();
 
   // Convert rule to engine format
   const engineRule = {
     id: rule.id,
     name: rule.name,
-    category: rule.category,
-    priority: rule.priority,
+    fandomId: rule.fandom_id,
     conditions: rule.conditions || [],
     actions: rule.actions || [],
-    isActive: rule.isActive,
+    logicOperator: 'AND' as const,
+    isActive: rule.is_active,
+    priority: rule.priority,
   };
 
   // Test individual conditions if provided
@@ -296,10 +301,18 @@ async function handleTestRule(request: NextRequest) {
     for (const condition of rule.conditions) {
       try {
         const startTime = performance.now();
-        const result = await ruleEngine.evaluateCondition(
+
+        // Convert test data to proper input format
+        const conditionInput = {
+          fandomId: rule.fandom_id,
+          selectedTags: testData.testData.tags,
+          selectedPlotBlocks: testData.testData.plotBlocks,
+          tagClasses: {},
+        };
+
+        const result = await RuleEngine.evaluateCondition(
           condition,
-          testData.testData,
-          testData.mockContext
+          conditionInput
         );
         const endTime = performance.now();
 
@@ -321,10 +334,18 @@ async function handleTestRule(request: NextRequest) {
 
   // Test full rule
   const startTime = performance.now();
-  const validationResults = await ruleEngine.validatePathway(
-    testData.testData,
-    [engineRule]
-  );
+
+  // Convert test data to proper input format
+  const ruleInput = {
+    fandomId: rule.fandom_id,
+    selectedTags: testData.testData.tags,
+    selectedPlotBlocks: testData.testData.plotBlocks,
+    tagClasses: {},
+  };
+
+  const validationResults = await RuleEngine.validatePathway(ruleInput, [
+    engineRule,
+  ]);
   const endTime = performance.now();
   const executionTime = endTime - startTime;
 
@@ -336,16 +357,16 @@ async function handleTestRule(request: NextRequest) {
         name: rule.name,
         category: rule.category,
         priority: rule.priority,
-        isActive: rule.isActive,
+        isActive: rule.is_active,
       },
       conditionResults,
       overallResult: {
         isValid: validationResults.isValid,
         errors: validationResults.errors,
         warnings: validationResults.warnings,
-        info: validationResults.info,
-        appliedRules: validationResults.appliedRules,
+        suggestions: validationResults.suggestions,
         executionTime: `${executionTime.toFixed(2)}ms`,
+        rulesEvaluated: validationResults.rulesEvaluated,
       },
       testData: testData.testData,
       mockContext: testData.mockContext,

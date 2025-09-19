@@ -12,11 +12,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
+import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
-import type { AdminUser } from '@/types/admin';
+
 import { z } from 'zod';
 
 // Update template validation schema
@@ -64,7 +64,7 @@ const cloneTemplateSchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -74,16 +74,13 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -92,8 +89,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const templateId = params.id;
+    const adminUser = authResult.user;
+    const { id: templateId } = await params;
 
     // Only ProjectAdmin can access templates
     if (adminUser.role !== 'ProjectAdmin') {
@@ -106,7 +103,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Get the template
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const template = await adminQueries.ruleTemplates.getById(templateId);
+    const template = await adminQueries.ruleTemplates.findById(templateId);
 
     if (!template) {
       return NextResponse.json(
@@ -135,16 +132,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -153,8 +147,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const templateId = params.id;
+    const adminUser = authResult.user;
+    const { id: templateId } = await params;
 
     // Only ProjectAdmin can update templates
     if (adminUser.role !== 'ProjectAdmin') {
@@ -193,7 +187,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Check if template exists
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingTemplate = await adminQueries.ruleTemplates.getById(
+    const existingTemplate = await adminQueries.ruleTemplates.findById(
       templateId
     );
 
@@ -207,8 +201,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Update the template
     const updatedTemplate = await adminQueries.ruleTemplates.update(
       templateId,
-      validationResult.data as any, // Type assertion for complex nested type
-      adminUser.id
+      validationResult.data as any // Type assertion for complex nested type
     );
 
     return NextResponse.json({
@@ -231,16 +224,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
-    const session = await getServerSession();
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required' },
-        { status: 401 }
-      );
+    const authResult = await checkAdminAuth();
+    
+    if (!authResult.success) {
+      return authResult.response!;
     }
 
-    const user = session.user as any;
+    const user = authResult.user as any;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -249,8 +239,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const adminUser = user as AdminUser;
-    const templateId = params.id;
+    const adminUser = authResult.user;
+    const { id: templateId } = await params;
 
     // Only ProjectAdmin can delete templates
     if (adminUser.role !== 'ProjectAdmin') {
@@ -266,7 +256,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Check if template exists
     const db = await getDatabase();
     const adminQueries = new AdminQueries(db);
-    const existingTemplate = await adminQueries.ruleTemplates.getById(
+    const existingTemplate = await adminQueries.ruleTemplates.findById(
       templateId
     );
 
@@ -278,7 +268,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete the template
-    await adminQueries.ruleTemplates.delete(templateId, adminUser.id);
+    await adminQueries.ruleTemplates.deactivate(templateId);
 
     return NextResponse.json({
       success: true,

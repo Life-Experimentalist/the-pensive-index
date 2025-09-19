@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react';
+import { useUser } from '@clerk/nextjs';
 import {
   UsersIcon,
   MagnifyingGlassIcon,
@@ -206,7 +206,7 @@ const roleColors = {
 };
 
 export default function UserManagement() {
-  const { data: session } = useSession();
+  const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedFandom, setSelectedFandom] = useState('all');
@@ -214,9 +214,31 @@ export default function UserManagement() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const userRole = (session?.user as any)?.role as
+  const userRole = (user as any)?.role as
     | 'ProjectAdmin'
     | 'FandomAdmin';
+
+  const filteredUsers = useMemo(() => {
+    return mockUsers.filter(user => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+
+      const matchesFandom =
+        selectedFandom === 'all' ||
+        (user.fandom &&
+          user.fandom.toLowerCase().replace(' ', '-') === selectedFandom);
+
+      const matchesStatus =
+        selectedStatus === 'all' ||
+        (selectedStatus === 'active' && user.isActive) ||
+        (selectedStatus === 'inactive' && !user.isActive);
+
+      return matchesSearch && matchesRole && matchesFandom && matchesStatus;
+    });
+  }, [searchTerm, selectedRole, selectedFandom, selectedStatus]);
 
   // Only ProjectAdmin can access this page
   if (userRole !== 'ProjectAdmin') {
@@ -234,31 +256,6 @@ export default function UserManagement() {
       </AdminLayout>
     );
   }
-
-  const filteredUsers = useMemo(() => {
-    return mockUsers.filter(user => {
-      const matchesSearch =
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-
-      const matchesFandom =
-        selectedFandom === 'all' ||
-        (user.fandom &&
-          user.fandom.toLowerCase().replace(' ', '-') === selectedFandom) ||
-        (selectedFandom === 'no-fandom' && !user.fandom);
-
-      const matchesStatus =
-        selectedStatus === 'all' ||
-        (selectedStatus === 'active' && user.isActive) ||
-        (selectedStatus === 'inactive' && !user.isActive) ||
-        (selectedStatus === 'verified' && user.isVerified) ||
-        (selectedStatus === 'unverified' && !user.isVerified);
-
-      return matchesSearch && matchesRole && matchesFandom && matchesStatus;
-    });
-  }, [searchTerm, selectedRole, selectedFandom, selectedStatus]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

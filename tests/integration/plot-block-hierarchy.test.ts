@@ -5,6 +5,7 @@ import { eq, and, isNull, isNotNull, sql } from 'drizzle-orm';
 import type { DatabaseConnection } from '@/lib/database';
 import { createTestFandom, createTestPlotBlock } from '../utils/test-data';
 import { randomUUID } from 'crypto';
+import { SQLiteTableWithColumns, SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 /**
  * Integration Test for Scenario 3: Plot Block Hierarchy
@@ -825,7 +826,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
       // Create 5-level deep tree
       for (let level = 0; level < 5; level++) {
-        const [node] = await db
+        const [node]: any = await db
           .insert(plotBlocks)
           .values(
             createTestPlotBlock({

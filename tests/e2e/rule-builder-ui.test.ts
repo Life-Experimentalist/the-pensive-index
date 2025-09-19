@@ -28,7 +28,7 @@ import {
 
 // E2E Test Configuration
 const E2E_TIMEOUT = 30000; // 30 second timeout for E2E tests
-const TEST_PORT = 3001;
+const TEST_PORT = 3000;
 const TEST_URL = `http://localhost:${TEST_PORT}`;
 
 // Mock DOM and browser APIs for E2E testing

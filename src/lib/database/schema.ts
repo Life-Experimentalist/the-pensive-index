@@ -231,7 +231,8 @@ export const adminUsers = sqliteTable('admin_users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
-  role: text('role').notNull().$type<'admin' | 'moderator' | 'contributor'>(),
+  role: text('role').notNull().$type<'ProjectAdmin' | 'FandomAdmin'>(),
+  fandom_access: text('fandom_access', { mode: 'json' }).$type<string[]>(), // For FandomAdmin role
   permissions: text('permissions', { mode: 'json' }).notNull().$type<
     Array<{
       id: string;
@@ -247,6 +248,8 @@ export const adminUsers = sqliteTable('admin_users', {
   updated_at: integer('updated_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
+  last_login_at: integer('last_login_at', { mode: 'timestamp' }),
+  preferences: text('preferences', { mode: 'json' }).$type<Record<string, any>>(),
 });
 
 // Define relationships
@@ -363,6 +366,14 @@ export type DatabaseSchema = {
   storyPlotBlocks: typeof storyPlotBlocks;
   storySubmissions: typeof storySubmissions;
   adminUsers: typeof adminUsers;
+  validationRules: typeof validationRules;
+  ruleConditions: typeof ruleConditions;
+  ruleActions: typeof ruleActions;
+  ruleTemplates: typeof ruleTemplates;
+  ruleTests: typeof ruleTests;
+  plotBlockHierarchies: typeof plotBlockHierarchies;
+  testScenarios: typeof testScenarios;
+  ruleSetExports: typeof ruleSetExports;
   fandomsRelations: typeof fandomsRelations;
   tagsRelations: typeof tagsRelations;
   tagClassesRelations: typeof tagClassesRelations;
@@ -508,6 +519,72 @@ export const ruleTests = sqliteTable('rule_tests', {
     .default(sql`(unixepoch())`),
 });
 
+// Plot Block Hierarchy table
+export const plotBlockHierarchies = sqliteTable('plot_block_hierarchies', {
+  id: text('id').primaryKey(),
+  fandom_id: text('fandom_id')
+    .notNull()
+    .references(() => fandoms.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  root_blocks: text('root_blocks', { mode: 'json' }).$type<string[]>().notNull(),
+  hierarchy_rules: text('hierarchy_rules', { mode: 'json' }).$type<Record<string, any>[]>().notNull(),
+  conditional_branches: text('conditional_branches', { mode: 'json' }).$type<Record<string, any>[]>().notNull(),
+  created_by: text('created_by').notNull(),
+  version: integer('version').notNull().default(1),
+  is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Test Scenarios table
+export const testScenarios = sqliteTable('test_scenarios', {
+  id: text('id').primaryKey(),
+  fandom_id: text('fandom_id')
+    .notNull()
+    .references(() => fandoms.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().notNull(),
+  plot_blocks: text('plot_blocks', { mode: 'json' }).$type<string[]>().notNull(),
+  expected_valid: integer('expected_valid', { mode: 'boolean' }).notNull(),
+  expected_errors: text('expected_errors', { mode: 'json' }).$type<string[]>(),
+  created_by: text('created_by').notNull(),
+  last_run_at: integer('last_run_at', { mode: 'timestamp' }),
+  last_run_result: text('last_run_result', { mode: 'json' }).$type<Record<string, any>>(),
+  is_passing: integer('is_passing', { mode: 'boolean' }),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Rule Set Exports table
+export const ruleSetExports = sqliteTable('rule_set_exports', {
+  id: text('id').primaryKey(),
+  fandom_id: text('fandom_id')
+    .notNull()
+    .references(() => fandoms.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  rule_ids: text('rule_ids', { mode: 'json' }).$type<string[]>().notNull(),
+  template_ids: text('template_ids', { mode: 'json' }).$type<string[]>().notNull(),
+  export_data: text('export_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  created_by: text('created_by').notNull(),
+  export_format: text('export_format').notNull().default('json'),
+  download_count: integer('download_count').notNull().default(0),
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  expires_at: integer('expires_at', { mode: 'timestamp' }),
+});
+
 export type ValidationRule = typeof validationRules.$inferSelect;
 export type NewValidationRule = typeof validationRules.$inferInsert;
 
@@ -522,6 +599,15 @@ export type NewRuleTemplate = typeof ruleTemplates.$inferInsert;
 
 export type RuleTest = typeof ruleTests.$inferSelect;
 export type NewRuleTest = typeof ruleTests.$inferInsert;
+
+export type PlotBlockHierarchy = typeof plotBlockHierarchies.$inferSelect;
+export type NewPlotBlockHierarchy = typeof plotBlockHierarchies.$inferInsert;
+
+export type TestScenario = typeof testScenarios.$inferSelect;
+export type NewTestScenario = typeof testScenarios.$inferInsert;
+
+export type RuleSetExport = typeof ruleSetExports.$inferSelect;
+export type NewRuleSetExport = typeof ruleSetExports.$inferInsert;
 
 // Export schema object for easy access to all tables
 export const schema = {
@@ -540,4 +626,7 @@ export const schema = {
   ruleActions,
   ruleTemplates,
   ruleTests,
+  plotBlockHierarchies,
+  testScenarios,
+  ruleSetExports,
 } as const;

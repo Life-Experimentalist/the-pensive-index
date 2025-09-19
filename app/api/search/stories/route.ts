@@ -17,7 +17,25 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const searchContext = storySearchContextSchema.parse(body);
+    const parseResult = storySearchContextSchema.safeParse(body);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid search parameters',
+          details: parseResult.error.issues,
+        },
+        { status: 400 }
+      );
+    }
+
+    const searchContext = parseResult.data;
+    const filters = (searchContext.filters as any) || {
+      sort_by: 'relevance' as const,
+      sort_order: 'desc' as const,
+      limit: 20,
+      offset: 0,
+    };
 
     // Build the search query based on context
     // This is a placeholder implementation - real search would be more complex
@@ -26,7 +44,9 @@ export async function POST(request: NextRequest) {
         const conditions = [];
 
         if (searchContext.fandom_id) {
-          conditions.push(eq(stories.fandom_id, searchContext.fandom_id));
+          conditions.push(
+            eq(stories.fandom_id, searchContext.fandom_id as string)
+          );
         }
 
         // TODO: Implement complex tag and plot block filtering
@@ -34,20 +54,20 @@ export async function POST(request: NextRequest) {
 
         return conditions.length > 0 ? and(...conditions) : undefined;
       },
-      limit: searchContext.filters.limit,
-      offset: searchContext.filters.offset,
+      limit: filters.limit,
+      offset: filters.offset,
       orderBy: (stories, { desc, asc }) => {
-        switch (searchContext.filters.sort_by) {
+        switch (filters.sort_by) {
           case 'word_count':
-            return searchContext.filters.sort_order === 'desc'
+            return filters.sort_order === 'desc'
               ? [desc(stories.word_count)]
               : [asc(stories.word_count)];
           case 'updated_at':
-            return searchContext.filters.sort_order === 'desc'
+            return filters.sort_order === 'desc'
               ? [desc(stories.updated_at)]
               : [asc(stories.updated_at)];
           case 'created_at':
-            return searchContext.filters.sort_order === 'desc'
+            return filters.sort_order === 'desc'
               ? [desc(stories.created_at)]
               : [asc(stories.created_at)];
           default: // relevance
@@ -64,17 +84,15 @@ export async function POST(request: NextRequest) {
       matching_plot_blocks: [], // Placeholder array
     }));
 
-    const page =
-      Math.floor(searchContext.filters.offset / searchContext.filters.limit) +
-      1;
+    const page = Math.floor(filters.offset / filters.limit) + 1;
 
     const response = {
       data: storiesWithRelevance,
       pagination: {
         page,
-        limit: searchContext.filters.limit,
+        limit: filters.limit,
         total: stories.length,
-        totalPages: Math.ceil(stories.length / searchContext.filters.limit),
+        totalPages: Math.ceil(stories.length / filters.limit),
       },
       search_metadata: {
         total_matches: stories.length,

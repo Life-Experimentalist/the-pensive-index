@@ -1,6 +1,8 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { drizzle as drizzleLibSQL } from 'drizzle-orm/libsql';
+import { drizzle as drizzleBetterSQLite3 } from 'drizzle-orm/better-sqlite3';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { DrizzleD1Database } from 'drizzle-orm/d1';
 import { migrate } from 'drizzle-orm/d1/migrator';
 import { migrate as migrateLibSQL } from 'drizzle-orm/libsql/migrator';
@@ -27,7 +29,8 @@ import * as schema from './schema';
 // Database connection types
 export type DatabaseConnection =
   | DrizzleD1Database<typeof schema>
-  | LibSQLDatabase<typeof schema>;
+  | LibSQLDatabase<typeof schema>
+  | BetterSQLite3Database<typeof schema>;
 
 // Database configuration interface
 export interface DatabaseConfig {
@@ -76,15 +79,22 @@ export class DatabaseManager {
           if (!config.url) {
             throw new Error('Database URL is required for LibSQL/SQLite');
           }
-          // Note: This requires @libsql/client to be installed
-          // For now, we'll create a mock connection
-          this.connection = drizzleLibSQL(
-            {
-              url: config.url,
-              authToken: config.authToken,
-            } as any,
-            { schema }
-          );
+
+          // Use better-sqlite3 for local development
+          if (config.url.startsWith('./') || config.url.includes('.db')) {
+            const Database = require('better-sqlite3');
+            const db = new Database(config.url);
+            this.connection = drizzleBetterSQLite3(db, { schema });
+          } else {
+            // Use libsql for remote connections
+            this.connection = drizzleLibSQL(
+              {
+                url: config.url,
+                authToken: config.authToken,
+              } as any,
+              { schema }
+            );
+          }
           break;
 
         default:
@@ -181,9 +191,15 @@ export class TransactionManager {
    * Execute operations within a transaction
    */
   public async execute<T>(operation: (tx: any) => Promise<T>): Promise<T> {
-    return await this.db.transaction(async (tx: any) => {
-      return await operation(tx);
-    });
+    // Handle different database transaction signatures
+    try {
+      return await (this.db as any).transaction(operation);
+    } catch (error) {
+      // Fallback for different transaction patterns
+      return await (this.db as any).transaction(async (tx: any) => {
+        return await operation(tx);
+      });
+    }
   }
 
   /**
@@ -192,14 +208,25 @@ export class TransactionManager {
   public async executeMultiple<T>(
     operations: Array<(tx: any) => Promise<T>>
   ): Promise<T[]> {
-    return await this.db.transaction(async (tx: any) => {
+    // Handle different database transaction signatures
+    try {
+      return await (this.db as any).transaction(async (tx: any) => {
+        const results: T[] = [];
+        for (const operation of operations) {
+          const result = await operation(tx);
+          results.push(result);
+        }
+        return results;
+      });
+    } catch (error) {
+      // Fallback for database types that don't support async transactions
       const results: T[] = [];
       for (const operation of operations) {
-        const result = await operation(tx);
+        const result = await operation(this.db as any);
         results.push(result);
       }
       return results;
-    });
+    }
   }
 
   /**
@@ -212,28 +239,39 @@ export class TransactionManager {
       rollbackOn?: (error: Error) => boolean;
     }>
   ): Promise<Array<{ name: string; result?: T; error?: Error }>> {
-    return await this.db.transaction(async (tx: any) => {
-      const results: Array<{ name: string; result?: T; error?: Error }> = [];
-
-      for (const { name, operation, rollbackOn } of operations) {
-        try {
-          const result = await operation(tx);
-          results.push({ name, result });
-        } catch (error) {
-          const shouldRollback = rollbackOn ? rollbackOn(error as Error) : true;
-
-          if (shouldRollback) {
+    // Try async transaction (D1/LibSQL)
+    try {
+      return await (this.db as any).transaction(async (tx: any) => {
+        const results: Array<{ name: string; result?: T; error?: Error }> = [];
+        for (const { name, operation, rollbackOn } of operations) {
+          try {
+            const result = await operation(tx);
+            results.push({ name, result });
+          } catch (error) {
+            const shouldRollback = rollbackOn
+              ? rollbackOn(error as Error)
+              : true;
             results.push({ name, error: error as Error });
-            throw error; // This will rollback the entire transaction
-          } else {
-            results.push({ name, error: error as Error });
-            // Continue with next operation
+            if (shouldRollback) throw error;
+            // else continue
           }
         }
+        return results;
+      });
+    } catch (err) {
+      // Fallback for sync-only transaction (better-sqlite3)
+      const results: Array<{ name: string; result?: T; error?: Error }> = [];
+      for (const { name, operation, rollbackOn } of operations) {
+        try {
+          const result = await operation(this.db as any);
+          results.push({ name, result });
+        } catch (error) {
+          results.push({ name, error: error as Error });
+          if (rollbackOn ? rollbackOn(error as Error) : true) break;
+        }
       }
-
       return results;
-    });
+    }
   }
 }
 
@@ -424,7 +462,7 @@ export class DatabaseSeeder {
         id: 'admin-1',
         email: 'admin@pensieve-index.com',
         name: 'System Administrator',
-        role: 'admin' as const,
+        role: 'ProjectAdmin' as const,
         permissions: [],
         is_active: true,
       },
@@ -457,18 +495,67 @@ export class DatabaseSeeder {
 
   private async seedTestFandoms(db: DatabaseConnection): Promise<void> {
     // Implementation for test data
+    const testFandoms = [
+      {
+        id: 'star-trek',
+        name: 'Star Trek',
+        description: 'Science fiction franchise created by Gene Roddenberry',
+        slug: 'star-trek',
+        is_active: true,
+      }
+    ];
+    await db.insert(schema.fandoms).values(testFandoms).onConflictDoNothing();
   }
 
   private async seedTestTags(db: DatabaseConnection): Promise<void> {
     // Implementation for test data
+    const testTags = [
+      {
+        id: 'test-tag-1',
+        name: 'Test Tag 1',
+        fandom_id: 'star-trek',
+        description: 'Test tag for development',
+        category: 'test',
+        is_active: true,
+      }
+    ];
+    await db.insert(schema.tags).values(testTags).onConflictDoNothing();
   }
 
   private async seedTestPlotBlocks(db: DatabaseConnection): Promise<void> {
     // Implementation for test data
+    const testPlotBlocks = [
+      {
+        id: 'test-plot-block-1',
+        name: 'Test Plot Block 1',
+        fandom_id: 'star-trek',
+        description: 'Test plot block for development',
+        category: 'test',
+        is_active: true,
+      }
+    ];
+    await db.insert(schema.plotBlocks).values(testPlotBlocks).onConflictDoNothing();
   }
 
   private async seedTestStories(db: DatabaseConnection): Promise<void> {
     // Implementation for test data
+    const testStories = [
+      {
+        id: 'test-story-1',
+        title: 'Test Story 1',
+        author: 'Test Author',
+        fandom_id: 'star-trek',
+        description: 'Test story for development',
+        url: 'https://example.com/test-story-1',
+        word_count: 1000,
+        chapter_count: 1,
+        status: 'complete' as const,
+        rating: 'G',
+        warnings: ['none'],
+        is_active: true,
+      }
+    ];
+    await db.insert(schema.stories).values(testStories).onConflictDoNothing();
   }
 }
 
@@ -478,6 +565,7 @@ export class ConnectionPool {
   private availableConnections: DatabaseConnection[] = [];
   private config: DatabaseConfig;
   private maxConnections: number;
+  private waiting: Array<(connection: DatabaseConnection) => void> = [];
 
   constructor(config: DatabaseConfig, maxConnections: number = 10) {
     this.config = config;
@@ -489,7 +577,8 @@ export class ConnectionPool {
    */
   public async initialize(): Promise<void> {
     for (let i = 0; i < this.maxConnections; i++) {
-      const manager = DatabaseManager.getInstance();
+      // Create a new manager for each connection to ensure they are distinct
+      const manager = new (DatabaseManager as any)();
       await manager.initialize(this.config);
       const connection = manager.getConnection();
       this.connections.push(connection);
@@ -500,21 +589,32 @@ export class ConnectionPool {
   /**
    * Get a connection from the pool
    */
-  public async getConnection(): Promise<{
+  public getConnection(): Promise<{
     connection: DatabaseConnection;
     release: () => void;
   }> {
-    if (this.availableConnections.length === 0) {
-      throw new Error('No available connections in pool');
-    }
-
-    const connection = this.availableConnections.pop()!;
-
-    const release = () => {
-      this.availableConnections.push(connection);
-    };
-
-    return { connection, release };
+    return new Promise(resolve => {
+      const acquire = () => {
+        if (this.availableConnections.length > 0) {
+          const connection = this.availableConnections.pop()!;
+          const release = () => {
+            if (this.waiting.length > 0) {
+              const next = this.waiting.shift()!;
+              next(connection);
+            } else {
+              this.availableConnections.push(connection);
+            }
+          };
+          resolve({ connection, release });
+        } else {
+          this.waiting.push(() => {
+            // This will be called when a connection is released
+            acquire();
+          });
+        }
+      };
+      acquire();
+    });
   }
 
   /**
@@ -613,15 +713,8 @@ export class DatabaseHealthChecker {
   }
 
   private async checkTables(): Promise<any> {
-    const requiredTables = [
-      'fandoms',
-      'tags',
-      'tagClasses',
-      'plotBlocks',
-      'plotBlockConditions',
-      'stories',
-      'adminUsers',
-    ];
+    // List of tables to check (used implicitly in the checks below)
+    // fandoms, tags, tagClasses, plotBlocks, plotBlockConditions, stories, adminUsers
 
     try {
       // Check each table individually with proper schema references
@@ -651,12 +744,12 @@ export class DatabaseHealthChecker {
     try {
       // Check for orphaned records
       const orphanedTags = await this.db
-        .select({ count: sql<number>`count(*)` })
+        .select()
         .from(schema.tags)
         .leftJoin(schema.fandoms, eq(schema.tags.fandom_id, schema.fandoms.id))
         .where(isNull(schema.fandoms.id));
 
-      const orphanCount = Number(orphanedTags[0]?.count || 0);
+      const orphanCount = orphanedTags.length || 0;
 
       if (orphanCount > 0) {
         return {

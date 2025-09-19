@@ -9,23 +9,26 @@
  */
 
 // ============================================================================
-// ADMIN USER & PERMISSIONS
+// ADMIN USER & PERMISSIONS - HIERARCHICAL SYSTEM
 // ============================================================================
 
 export type AdminRole = 'ProjectAdmin' | 'FandomAdmin';
 
-export interface AdminUser {
+export interface AdminRoleDefinition {
   id: string;
+  name: AdminRole;
+  description: string;
+  level: number; // 1 = Project, 2 = Fandom
+  permissions: string[]; // Array of permission strings
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface AdminUser {
+  id: string; // Clerk user ID
   email: string;
   name: string;
-  role: AdminRole;
-  fandom_access?: string[]; // For FandomAdmin role - assigned fandoms
-  permissions: Array<{
-    id: string;
-    name: string;
-    description: string;
-    scope: 'global' | 'fandom' | 'content';
-  }>;
+  assignments: AdminAssignment[]; // Multiple role assignments possible
   is_active: boolean;
   last_login_at?: Date;
   preferences?: Record<string, any>;
@@ -33,11 +36,111 @@ export interface AdminUser {
   updated_at: Date;
 }
 
+export interface AdminAssignment {
+  id: string;
+  user_id: string;
+  role: AdminRoleDefinition;
+  fandom_id?: string; // Required for FandomAdmin, null for ProjectAdmin
+  fandom_name?: string; // Denormalized for display
+  assigned_by: string; // User ID of assigning admin
+  is_active: boolean;
+  expires_at?: Date;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface AdminPermission {
-  action: string; // e.g., 'rule:create', 'template:manage', 'fandom:access'
+  action: string; // e.g., 'fandom:create', 'admin:assign', 'tags:manage'
   resource?: string; // e.g., fandomId for scoped permissions
   granted: boolean;
+  scope: 'global' | 'fandom'; // Permission scope
 }
+
+// ============================================================================
+// ADMIN INVITATIONS
+// ============================================================================
+
+export interface AdminInvitation {
+  id: string;
+  email: string;
+  role_id: string;
+  role_name: AdminRole;
+  fandom_id?: string;
+  fandom_name?: string;
+  invited_by: string;
+  invited_by_name?: string; // Denormalized for display
+  invitation_token: string;
+  message?: string;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  expires_at: Date;
+  accepted_at?: Date;
+  accepted_by?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// ============================================================================
+// AUDIT LOGGING
+// ============================================================================
+
+export interface AdminAuditLog {
+  id: string;
+  user_id: string;
+  user_email: string;
+  action: string; // Action type (e.g., 'admin:assign', 'fandom:create')
+  resource_type: string; // Type of affected resource
+  resource_id?: string; // ID of affected resource
+  fandom_id?: string; // Associated fandom (if applicable)
+  details: Record<string, any>; // Action-specific details
+  ip_address?: string;
+  user_agent?: string;
+  success: boolean;
+  error_message?: string;
+  timestamp: Date;
+}
+
+// ============================================================================
+// PERMISSION UTILITIES
+// ============================================================================
+
+export interface PermissionCheck {
+  user_id: string;
+  permission: string;
+  fandom_id?: string; // For fandom-scoped permissions
+  granted: boolean;
+  expires_at?: Date;
+  last_updated: Date;
+}
+
+export interface AdminContext {
+  user: AdminUser;
+  activeAssignments: AdminAssignment[];
+  permissions: AdminPermission[];
+  currentFandom?: string; // Context for fandom-scoped operations
+}
+
+// Permission constants for type safety
+export const ADMIN_PERMISSIONS = {
+  // Project Admin permissions
+  FANDOM_CREATE: 'fandom:create',
+  FANDOM_EDIT: 'fandom:edit',
+  FANDOM_DELETE: 'fandom:delete',
+  ADMIN_ASSIGN: 'admin:assign',
+  ADMIN_REVOKE: 'admin:revoke',
+  VALIDATION_GLOBAL: 'validation:global',
+  AUDIT_VIEW: 'audit:view',
+  USERS_MANAGE: 'users:manage',
+
+  // Fandom Admin permissions
+  TAGS_MANAGE: 'tags:manage',
+  PLOTBLOCKS_MANAGE: 'plotblocks:manage',
+  VALIDATION_FANDOM: 'validation:fandom',
+  SUBMISSIONS_REVIEW: 'submissions:review',
+  CONTENT_MODERATE: 'content:moderate',
+} as const;
+
+export type AdminPermissionKey = keyof typeof ADMIN_PERMISSIONS;
+export type AdminPermissionValue = typeof ADMIN_PERMISSIONS[AdminPermissionKey];
 
 // ============================================================================
 // RULE TEMPLATES

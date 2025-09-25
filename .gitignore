@@ -83,3 +83,4 @@ temp/
 # Spec-kit generated files
 specs/*/
 !specs/.gitkeep
+backup/*

@@ -8,16 +8,8 @@
  */
 
 import { eq, and, desc, asc, like, sql, inArray } from 'drizzle-orm';
-import { getDatabase } from '@/lib/database/connection';
-import {
-  fandoms,
-  fandomTemplates,
-  fandomContentItems,
-  type Fandom,
-  type NewFandom,
-  type FandomTemplate,
-  type FandomContentItem,
-} from '@/lib/database/schemas';
+import { getDatabase } from './config';
+import { fandoms, type Fandom, type NewFandom } from '@/lib/database/schema';
 
 export class FandomQueries {
   private db = getDatabase();

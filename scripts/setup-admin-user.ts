@@ -37,9 +37,7 @@ async function createTestAdmin() {
     console.log('');
     console.log('🚨 IMPORTANT: Use "Public metadata", NOT "Private metadata"');
     console.log('');
-    console.log(
-      'Need help? Check docs/CLERK-ADMIN-SETUP.md for detailed steps!'
-    );
+    console.log('// See wiki/deployment/CLERK-ADMIN-SETUP.md for more details');
   } catch (error) {
     console.error('❌ Error:', error);
   }

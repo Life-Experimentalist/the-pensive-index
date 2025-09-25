@@ -13,14 +13,17 @@ type RevertVersionRequest = z.infer<typeof RevertVersionSchema>;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
+    // Await params in Next.js 15
+    const resolvedParams = await params;
+
     // Validate content ID
-    const contentId = parseInt(params.id);
+    const contentId = parseInt(resolvedParams.id);
     if (isNaN(contentId)) {
       return NextResponse.json(
         {

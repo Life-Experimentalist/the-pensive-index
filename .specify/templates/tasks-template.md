@@ -72,7 +72,7 @@
 ## Phase 3.5: Polish
 - [ ] T019 [P] Unit tests for validation in tests/unit/test_validation.py
 - [ ] T020 Performance tests (<200ms)
-- [ ] T021 [P] Update docs/api.md
+- [ ] T021 [P] Update            wiki/api.md
 - [ ] T022 Remove duplication
 - [ ] T023 Run manual-testing.md
 
@@ -103,11 +103,11 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 1. **From Contracts**:
    - Each contract file → contract test task [P]
    - Each endpoint → implementation task
-   
+
 2. **From Data Model**:
    - Each entity → model creation task [P]
    - Relationships → service layer tasks
-   
+
 3. **From User Stories**:
    - Each story → integration test [P]
    - Quickstart scenarios → validation tasks

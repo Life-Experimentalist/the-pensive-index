@@ -88,7 +88,7 @@ The **Hierarchical Admin System has been fully implemented and deployed** with c
 - **Production-ready documentation suite**
 - **Documentation Coverage:**
 
-#### API Documentation (`docs/admin-guide/api-documentation.md`)
+#### API Documentation (`wiki/api/admin-api-documentation.md`)
 - Complete API reference for all admin endpoints
 - Authentication and authorization guide
 - Role hierarchy and permission matrices
@@ -96,7 +96,7 @@ The **Hierarchical Admin System has been fully implemented and deployed** with c
 - Rate limiting and security considerations
 - GDPR compliance guidelines
 
-#### User Guide (`docs/admin-guide/user-guide.md`)
+#### User Guide (`wiki/user-guide/user-guide.md`)
 - Comprehensive user interface documentation
 - Role-specific feature guides
 - Step-by-step workflow instructions
@@ -104,7 +104,7 @@ The **Hierarchical Admin System has been fully implemented and deployed** with c
 - FAQ and common scenarios
 - Troubleshooting quick reference
 
-#### Troubleshooting Guide (`docs/admin-guide/troubleshooting-guide.md`)
+#### Troubleshooting Guide (`wiki/development/troubleshooting-guide.md`)
 - Emergency response procedures
 - Common issue diagnosis and resolution
 - Performance optimization guides
@@ -112,7 +112,7 @@ The **Hierarchical Admin System has been fully implemented and deployed** with c
 - System recovery procedures
 - Preventive maintenance checklists
 
-#### Production Deployment Guide (`docs/deployment/production-deployment-guide.md`)
+#### Production Deployment Guide (`wiki/deployment/production-deployment-guide.md`)
 - Complete production setup instructions
 - Security configuration and hardening
 - Monitoring and alerting setup

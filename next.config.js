@@ -1,5 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable static site generation for GitHub Pages
+  output: 'export',
+
+  // Configure for custom domain deployment
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  basePath: '',
+
+  // Enable trailing slash for proper routing
+  trailingSlash: true,
+
+  // Disable image optimization for static export
+  images: {
+    unoptimized: true,
+  },
+
   // Optimize bundle size and performance
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Optimize bundle splitting
@@ -27,11 +42,7 @@ const nextConfig = {
   // Enable compression
   compress: true,
 
-  // Optimize images
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
-  },
+  // Images handled above in static export config
 
   // Security headers
   async headers() {

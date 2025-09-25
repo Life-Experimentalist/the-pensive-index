@@ -1,22 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>The Pensive Index - Library-First Story Discovery Platform</title>
+
+    <!-- SEO Meta Tags -->
+    <title>The Pensive Index - Library-First Fanfiction Story Discovery Platform | Find Tagged Stories & Generate Prompts</title>
     <meta
       name="description"
-      content="Intelligent story discovery and prompt generation for fanfiction. Find existing tagged stories or generate novel prompts with our library-first approach."
+      content="Discover fanfiction stories with precision using our intelligent tagging system. Search existing tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, and more fandoms. Library-first approach to story discovery."
     />
+    <meta name="keywords" content="fanfiction, story discovery, fanfic search, Harry Potter fanfiction, Percy Jackson fanfiction, story prompts, tagged stories, fandom library, fiction generator, story finder, fanfic tags, plot blocks" />
+    <meta name="author" content="VKrishna04" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://pensive.vkrishna04.me/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Pensive Index" />
+    <meta property="og:title" content="The Pensive Index - Library-First Fanfiction Story Discovery Platform" />
+    <meta property="og:description" content="Discover fanfiction stories with precision using our intelligent tagging system. Search existing tagged stories or generate detailed prompts for multiple fandoms." />
+    <meta property="og:url" content="https://pensive.vkrishna04.me/" />
+    <meta property="og:image" content="https://pensive.vkrishna04.me/assets/icon.png" />
+    <meta property="og:image:alt" content="The Pensive Index - Fanfiction Discovery Platform" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Pensive Index - Library-First Fanfiction Story Discovery" />
+    <meta name="twitter:description" content="Discover fanfiction stories with precision using our intelligent tagging system. Find existing tagged stories or generate detailed prompts." />
+    <meta name="twitter:image" content="https://pensive.vkrishna04.me/assets/icon.png" />
+    <meta name="twitter:image:alt" content="The Pensive Index Platform" />
+    <meta name="twitter:creator" content="@VKrishna04" />
+    <meta name="twitter:site" content="@VKrishna04" />
+
+    <!-- Geo-location and Regional Optimization -->
+    <meta name="geo.region" content="US" />
+    <meta name="geo.placename" content="United States" />
+    <meta name="geo.position" content="39.8283;-98.5795" />
+    <meta name="ICBM" content="39.8283, -98.5795" />
+    <meta name="DC.coverage" content="Worldwide" />
+    <meta name="distribution" content="global" />
+
+    <!-- Language and Accessibility -->
+    <meta name="language" content="English" />
+    <meta name="rating" content="General" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+
+    <!-- Dark Reader Extension Optimization -->
+    <meta name="darkreader-lock" />
+    <meta name="theme-color" content="#3373dc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e293b" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//cdn.tailwindcss.com" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/icon.png" />
-    <link rel="apple-touch-icon" href="../assets/icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icon.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon.png" />
+    <link rel="manifest" href="./manifest.json" />
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "The Pensive Index",
+      "description": "Library-first fanfiction story discovery platform with intelligent tagging and prompt generation",
+      "url": "https://pensive.vkrishna04.me",
+      "author": {
+        "@type": "Person",
+        "name": "VKrishna04",
+        "url": "https://vkrishna04.me"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Life Experimentalists",
+        "url": "https://github.com/Life-Experimentalists"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://pensive.vkrishna04.me/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "applicationCategory": "Entertainment",
+      "operatingSystem": "Web",
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Fanfiction readers and writers"
+      }
+    }
+    </script>
+
+    <!-- Performance Optimized Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <script>
+      // Tailwind config with Dark Reader optimizations
       tailwind.config = {
+        darkMode: 'media', // Respects system preference and Dark Reader
         theme: {
           extend: {
             colors: {
@@ -28,50 +116,171 @@
             fontFamily: {
               display: ['Inter', 'system-ui', 'sans-serif'],
             },
+            screens: {
+              'xs': '475px',
+            }
           },
         },
+        plugins: [],
+        // Optimize for better performance
+        corePlugins: {
+          preflight: true,
+        }
       };
     </script>
 
+    <!-- Geo-targeting and SEO Performance -->
+    <link rel="alternate" hreflang="en-us" href="https://pensive.vkrishna04.me/" />
+    <link rel="alternate" hreflang="en" href="https://pensive.vkrishna04.me/" />
+    <link rel="alternate" hreflang="x-default" href="https://pensive.vkrishna04.me/" />
+
+    <!-- Sitemap and Robots -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+    <!-- Critical Resource Hints for Performance -->
+  <link rel="preload" href="/assets/icon.png" as="image" type="image/png" />
+    <link rel="prefetch" href="/search" />
+    <link rel="prefetch" href="/generate" />
+
     <!-- Custom Styles -->
     <style>
-      .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      /* Dark Reader Extension Optimized Variables */
+      :root {
+        --primary-bg: #ffffff;
+        --secondary-bg: #f8fafc;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --accent-color: #3373dc;
+        --accent-hover: #2563eb;
+        --border-color: #e2e8f0;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+        --gradient-start: #667eea;
+        --gradient-end: #764ba2;
       }
+
+      /* Dark Reader will automatically invert these when needed */
+      [data-darkreader-mode="dynamic"] {
+        --primary-bg: #0f172a;
+        --secondary-bg: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --shadow-color: rgba(0, 0, 0, 0.3);
+      }
+
+      .gradient-bg {
+        background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        /* Dark Reader compatible fallback */
+        background-color: var(--accent-color);
+      }
+
       .feature-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--primary-bg);
+        border: 1px solid var(--border-color);
       }
+
       .feature-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 40px var(--shadow-color);
       }
+
       .scroll-reveal {
         opacity: 0;
         transform: translateY(30px);
         transition: all 0.6s ease;
       }
+
       .scroll-reveal.revealed {
         opacity: 1;
         transform: translateY(0);
       }
+
       @keyframes float {
-        0%,
-        100% {
+        0%, 100% {
           transform: translateY(0px);
         }
         50% {
           transform: translateY(-10px);
         }
       }
+
       .floating {
         animation: float 6s ease-in-out infinite;
       }
+
+      /* Dark Reader optimization: prevent inversion of specific elements */
+      .dark-reader-preserve {
+        filter: invert(0) !important;
+      }
+
+      /* Ensure proper contrast for accessibility and Dark Reader */
+      .text-contrast {
+        color: var(--text-primary);
+      }
+
+      .bg-adaptive {
+        background-color: var(--primary-bg);
+        color: var(--text-primary);
+      }
+
+      /* Performance optimization for animations */
+      .gpu-accelerated {
+        will-change: transform;
+        transform: translateZ(0);
+      }
     </style>
+    <!-- Performance and Analytics (Placeholder for future implementation) -->
+    <script>
+      // Performance monitoring
+      window.addEventListener('load', function() {
+        // Core Web Vitals tracking
+        if ('performance' in window) {
+          const navigation = performance.getEntriesByType('navigation')[0];
+          const paint = performance.getEntriesByType('paint');
+
+          // Log performance metrics for optimization
+          console.log('Page Load Performance:', {
+            domContentLoaded: navigation?.domContentLoadedEventEnd - navigation?.domContentLoadedEventStart,
+            firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime,
+            loadComplete: navigation?.loadEventEnd - navigation?.loadEventStart
+          });
+        }
+
+        // Dark Reader detection and optimization
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // Intersection Observer for scroll animations (performance optimized)
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              observer.unobserve(entry.target); // Stop observing once revealed
+            }
+          });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+      });
+    </script>
   </head>
-  <body class="font-display">
+  <body class="font-display bg-adaptive" itemscope itemtype="https://schema.org/WebPage">
+    <!-- Skip to content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-pensive-blue text-white px-4 py-2 rounded-md z-50">
+      Skip to main content
+    </a>
+
     <!-- Navigation -->
     <nav
-      class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200"
+      class="fixed top-0 left-0 right-0 z-50 bg-adaptive backdrop-blur-md border-b border-gray-200 dark:border-gray-700"
+      role="navigation"
+      aria-label="Main navigation"
     >
       <div class="container mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
@@ -124,24 +333,33 @@
     </nav>
 
     <!-- Hero Section -->
-    <section
-      class="gradient-bg min-h-screen flex items-center justify-center relative overflow-hidden"
-    >
-      <div class="container mx-auto px-6 text-center relative z-10">
+    <main id="main-content">
+      <section
+        class="gradient-bg min-h-screen flex items-center justify-center relative overflow-hidden"
+        itemscope
+        itemtype="https://schema.org/WebPageElement"
+        role="banner"
+        aria-labelledby="hero-title"
+      >
+        <div class="container mx-auto px-6 text-center relative z-10 gpu-accelerated">
         <div class="floating">
           <h1
+            id="hero-title"
             class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+            itemprop="headline"
           >
-            Discover Stories<br />
-            <span class="text-cyan-300">Library First</span>
+            Discover <span itemprop="about">Fanfiction Stories</span><br />
+            <span class="text-cyan-300" itemprop="description">Library First</span>
           </h1>
         </div>
         <p
-        class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed"
+          class="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed"
+          itemprop="description"
         >
-        The intelligent story discovery platform that prioritizes finding
-        existing tagged stories before generating new prompts. Built for
-          readers who want precision and writers who want inspiration.
+          The intelligent <strong>fanfiction story discovery platform</strong> that prioritizes finding
+          existing tagged stories before generating new prompts. Built for
+          readers who want <em>precision</em> and writers who want <em>inspiration</em> across
+          <strong>Harry Potter, Percy Jackson, and more fandoms</strong>.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <button
@@ -819,6 +1037,117 @@
       console.log('🌟 Welcome to The Pensive Index!');
       console.log('📚 Library-first story discovery at your fingertips');
       console.log('🛠️ Built with Next.js, TypeScript, and lots of ❤️');
+
+      // Dark Reader Extension Enhanced Support
+      const darkReaderSupport = {
+        // Preserve brand colors in dark mode
+        preserveColors: ['#3373dc', '#06b6d4', '#667eea', '#764ba2'],
+
+        // Optimize for Dark Reader detection
+        detectDarkReader: function() {
+          return document.querySelector('meta[name="darkreader-lock"]') !== null ||
+                 window.getComputedStyle(document.body).filter?.includes('invert');
+        },
+
+        // Add Dark Reader optimized CSS variables
+        addDarkReaderOptimizations: function() {
+          if (this.detectDarkReader()) {
+            document.documentElement.style.setProperty('--darkreader-neutral-background', '#1a1a1a');
+            document.documentElement.style.setProperty('--darkreader-neutral-text', '#e8e6e3');
+            document.documentElement.classList.add('darkreader-optimized');
+          }
+        }
+      };
+
+      // Initialize Dark Reader optimizations
+      darkReaderSupport.addDarkReaderOptimizations();
+
+      // Monitor for Dark Reader changes
+      const darkModeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            darkReaderSupport.addDarkReaderOptimizations();
+          }
+        });
+      });
+
+      darkModeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+
+      // Performance monitoring for SEO
+      if ('PerformanceObserver' in window) {
+        const perfObserver = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.entryType === 'largest-contentful-paint') {
+              console.log('LCP:', entry.startTime);
+            }
+            if (entry.entryType === 'first-input') {
+              console.log('FID:', entry.processingStart - entry.startTime);
+            }
+          }
+        });
+
+        try {
+          perfObserver.observe({entryTypes: ['largest-contentful-paint', 'first-input']});
+        } catch (e) {
+          // Fallback for older browsers
+          console.log('Performance observer not fully supported');
+        }
+      }
+
+      // Enhanced accessibility for screen readers
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          document.body.classList.add('keyboard-navigation');
+        }
+      });
+
+      document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-navigation');
+      });
+
     </script>
+
+    <!-- Additional SEO and Performance optimizations -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "The Pensive Index",
+      "url": "https://pensive.vkrishna04.me",
+      "logo": "https://pensive.vkrishna04.me/assets/icon.png",
+      "description": "Library-first fanfiction story discovery platform",
+      "founder": {
+        "@type": "Person",
+        "name": "VKrishna04"
+      },
+      "sameAs": [
+        "https://github.com/Life-Experimentalists/the-pensive-index",
+        "https://vkrishna04.me"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "technical support",
+        "url": "https://github.com/Life-Experimentalists/the-pensive-index/issues"
+      }
+    }
+    </script>
+
+    <!-- Geo-targeting and regional optimization -->
+    <script>
+      // Detect user's timezone and region for better content delivery
+      const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const userLocale = navigator.language || navigator.userLanguage;
+
+      // Log for analytics (replace with actual analytics when implemented)
+      console.log('User geo data:', {
+        timezone: userTimezone,
+        locale: userLocale,
+        referrer: document.referrer
+      });
+    </script>
+
   </body>
 </html>

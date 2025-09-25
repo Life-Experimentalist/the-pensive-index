@@ -5,7 +5,9 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "next build",
+        "build": "next build && npm run build:docs",
+        "build:nextjs": "next build",
+        "build:docs": "node scripts/build-docs.js",
         "start": "next start",
         "lint": "next lint",
         "type-check": "tsc --noEmit",

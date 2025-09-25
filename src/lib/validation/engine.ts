@@ -659,7 +659,9 @@ export class ValidationEngine {
   /**
    * Validate character dynamics and plot development warnings
    */
-  private validateCharacterDynamics(context: ValidationContext): ValidationResult {
+  private validateCharacterDynamics(
+    context: ValidationContext
+  ): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const suggestions: ValidationSuggestion[] = [];
@@ -676,12 +678,20 @@ export class ValidationEngine {
     // Process each applicable template
     for (const template of applicableTemplates) {
       // Check if all conditions are met
-      const conditionsMet = this.evaluateTemplateConditions(template, context, selectedPlotBlocks);
+      const conditionsMet = this.evaluateTemplateConditions(
+        template,
+        context,
+        selectedPlotBlocks
+      );
 
       if (conditionsMet) {
         // Execute template actions
         for (const action of template.actions) {
-          const result = this.executeTemplateAction(action, context, selectedPlotBlocks);
+          const result = this.executeTemplateAction(
+            action,
+            context,
+            selectedPlotBlocks
+          );
 
           switch (result.type) {
             case 'plot_warning':
@@ -689,7 +699,9 @@ export class ValidationEngine {
                 type: 'plot_development_risk',
                 message: result.message,
                 field: result.targetIds?.join(', '),
-                suggestion: `Template: ${template.id}. ${result.plotGuidance?.conflictDescription || ''}`
+                suggestion: `Template: ${template.id}. ${
+                  result.plotGuidance?.conflictDescription || ''
+                }`,
               });
               break;
 
@@ -698,7 +710,7 @@ export class ValidationEngine {
                 type: 'character_dynamic_concern',
                 message: result.message,
                 field: result.characterDynamics?.characters.join(', '),
-                suggestion: result.characterDynamics?.guidanceNote
+                suggestion: result.characterDynamics?.guidanceNote,
               });
               break;
 
@@ -709,7 +721,7 @@ export class ValidationEngine {
                   message: result.message,
                   action: result.suggestedAction,
                   target_id: result.targetIds[0],
-                  alternative_ids: result.targetIds
+                  alternative_ids: result.targetIds,
                 });
               }
               break;
@@ -729,7 +741,11 @@ export class ValidationEngine {
   /**
    * Evaluate if template conditions are met
    */
-  private evaluateTemplateConditions(template: any, context: ValidationContext, selectedPlotBlocks: string[]): boolean {
+  private evaluateTemplateConditions(
+    template: any,
+    context: ValidationContext,
+    selectedPlotBlocks: string[]
+  ): boolean {
     return template.conditions.every((condition: any) => {
       switch (condition.operator) {
         case 'contains_all':
@@ -770,16 +786,23 @@ export class ValidationEngine {
   /**
    * Execute template action and return result
    */
-  private executeTemplateAction(action: any, context: ValidationContext, selectedPlotBlocks: string[]): ActionExecutionResult {
+  private executeTemplateAction(
+    action: any,
+    context: ValidationContext,
+    selectedPlotBlocks: string[]
+  ): ActionExecutionResult {
     // Create a compiler-compatible validation context
     const compilerContext: CompilerValidationContext = {
       fandomId: context.metadata?.fandom_id || 'default',
       selectedTags: context.applied_tags,
       selectedPlotBlocks: selectedPlotBlocks,
-      pathway: context.applied_tags.map(tag => ({ id: tag, type: 'tag' as const })),
+      pathway: context.applied_tags.map(tag => ({
+        id: tag,
+        type: 'tag' as const,
+      })),
       tagData: new Map(),
       plotBlockData: new Map(),
-      metadata: context.metadata
+      metadata: context.metadata,
     };
 
     const compiler = new ValidationRuleCompiler();

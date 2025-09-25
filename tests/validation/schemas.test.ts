@@ -18,7 +18,7 @@ import {
   tagSchema as TagSchema,
   tagClassSchema as TagClassSchema,
   plotBlockSchema as PlotBlockSchema,
-  plotBlockConditionSchema as PlotBlockConditionSchema
+  plotBlockConditionSchema as PlotBlockConditionSchema,
 } from '../../src/lib/validation/schemas';
 
 describe('Zod Schema Validation Tests', () => {

@@ -20,6 +20,8 @@ export {
   type PlotBlockCondition,
   type NewPlotBlockCondition,
 } from './plot-block-condition';
+
+// Fandom management schemas
 export {
   validationRules,
   ruleConditions,

@@ -26,7 +26,10 @@ import {
   XCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
-import AdminLayout from '@/components/admin/AdminLayout';
+import ProtectedAdminLayout, {
+  PermissionGate,
+} from '@/components/admin/ProtectedAdminLayout';
+import NewUserManagement from '@/components/admin/UserManagement';
 
 interface User {
   id: string;
@@ -214,9 +217,7 @@ export default function UserManagement() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const userRole = (user as any)?.role as
-    | 'ProjectAdmin'
-    | 'FandomAdmin';
+  const userRole = (user as any)?.role as 'ProjectAdmin' | 'FandomAdmin';
 
   const filteredUsers = useMemo(() => {
     return mockUsers.filter(user => {
@@ -243,7 +244,7 @@ export default function UserManagement() {
   // Only ProjectAdmin can access this page
   if (userRole !== 'ProjectAdmin') {
     return (
-      <AdminLayout>
+      <ProtectedAdminLayout>
         <div className="text-center py-12">
           <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-red-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
@@ -253,7 +254,7 @@ export default function UserManagement() {
             Only Project Administrators can access user management.
           </p>
         </div>
-      </AdminLayout>
+      </ProtectedAdminLayout>
     );
   }
 
@@ -381,7 +382,10 @@ export default function UserManagement() {
   };
 
   return (
-    <AdminLayout>
+    <ProtectedAdminLayout
+      title="User Management"
+      requiredPermission="canViewUsers"
+    >
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -632,6 +636,6 @@ export default function UserManagement() {
 
         {renderRoleModal()}
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }

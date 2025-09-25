@@ -373,6 +373,61 @@ export interface AdminPermission {
   scope: 'global' | 'fandom' | 'content';
 }
 
+// ============================================================================
+// FANDOM MANAGEMENT PERMISSIONS
+// ============================================================================
+
+export type FandomManagementPermission =
+  // Core fandom permissions
+  | 'create:fandom'
+  | 'update:fandom'
+  | 'delete:fandom'
+
+  // Fandom management permissions (modular system)
+  | 'manage:fandom_templates'
+  | 'create:fandom_from_template'
+  | 'manage:fandom_content'
+  | 'approve:fandom_content'
+  | 'bulk:import_content'
+  | 'bulk:export_content'
+  | 'manage:content_versions'
+  | 'view:fandom_analytics'
+  | 'configure:fandom_taxonomy'
+  | 'manage:approval_workflows'
+
+  // Content-specific permissions within fandoms
+  | 'create:fandom_tag'
+  | 'update:fandom_tag'
+  | 'delete:fandom_tag'
+  | 'create:fandom_plot_block'
+  | 'update:fandom_plot_block'
+  | 'delete:fandom_plot_block'
+  | 'create:fandom_character'
+  | 'update:fandom_character'
+  | 'delete:fandom_character'
+  | 'create:fandom_validation_rule'
+  | 'update:fandom_validation_rule'
+  | 'delete:fandom_validation_rule';
+
+export interface FandomPermissionContext {
+  user_id: string;
+  fandom_id?: number;
+  required_permission: FandomManagementPermission;
+  additional_checks?: {
+    content_type?: 'tag' | 'plot_block' | 'character' | 'validation_rule';
+    ownership_required?: boolean;
+    approval_level_required?: number;
+  };
+}
+
+export interface FandomPermissionResult {
+  granted: boolean;
+  reason?: string;
+  suggested_action?: string;
+  escalation_path?: string;
+  expires_at?: Date;
+}
+
 // UI and interaction types
 export interface PathwayElement {
   id: string;
@@ -547,3 +602,81 @@ export type ValidationCtx = ValidationContext;
 export type ConflictDetectionCtx = ConflictDetectionContext;
 export type DependencyValidationCtx = DependencyValidationContext;
 export type CircularReferenceCtx = CircularReferenceContext;
+
+// ============================================================================
+// CONTENT VERSIONING & APPROVAL TYPES
+// ============================================================================
+
+export interface ContentVersion {
+  id: string;
+  content_type: 'tag' | 'plot_block' | 'validation_rule' | 'fandom_config';
+  content_id: string;
+  fandom_id: string;
+  version_number: number;
+  parent_version_id?: string;
+  content_snapshot: Record<string, any>;
+  changes_summary: string[];
+  change_reason?: string;
+  created_by: string;
+  created_at: Date;
+  is_active: boolean;
+}
+
+export interface ApprovalWorkflow {
+  id: string;
+  name: string;
+  description?: string;
+  content_types: string[];
+  fandom_id?: string;
+  approval_levels: ApprovalLevel[];
+  auto_approval_rules?: AutoApprovalRule[];
+  timeout_hours?: number;
+  is_active: boolean;
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface ApprovalLevel {
+  level: number;
+  required_role: 'ProjectAdmin' | 'FandomAdmin';
+  required_permissions: string[];
+  fandom_scope?: string;
+  parallel_approvers?: number;
+}
+
+export interface AutoApprovalRule {
+  condition_type: 'creator_role' | 'content_size' | 'content_type';
+  condition_value: any;
+  description: string;
+}
+
+export interface ContentApproval {
+  id: string;
+  content_version_id: string;
+  workflow_id: string;
+  fandom_id: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired';
+  current_level: number;
+  submitted_by: string;
+  submitted_at: Date;
+  approved_by: string[];
+  approved_at?: Date;
+  rejection_reason?: string;
+  rejected_by?: string;
+  rejected_at?: Date;
+}
+
+export interface BulkOperation {
+  id: string;
+  operation_type: 'import' | 'export' | 'bulk_update' | 'bulk_delete';
+  fandom_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total_items: number;
+  processed_items: number;
+  failed_items: number;
+  error_log?: string[];
+  initiated_by: string;
+  started_at: Date;
+  completed_at?: Date;
+}

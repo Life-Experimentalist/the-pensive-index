@@ -21,6 +21,28 @@ export {
   type NewPlotBlockCondition,
 } from './plot-block-condition';
 
+// Fandom management schemas
+export {
+  fandomTemplates,
+  type FandomTemplate,
+  type NewFandomTemplate,
+  type TemplateConfiguration
+} from './fandom-template';
+export {
+  fandomContentItems,
+  fandomContentVersions,
+  fandomContentApprovals,
+  fandomImportExportSessions,
+  type FandomContentItem,
+  type NewFandomContentItem,
+  type FandomContentVersion,
+  type NewFandomContentVersion,
+  type FandomContentApproval,
+  type NewFandomContentApproval,
+  type FandomImportExportSession,
+  type NewFandomImportExportSession
+} from './fandom-content';
+
 // Schema registry for Drizzle ORM
 export const schema = {
   fandoms: () => import('./fandom').then(m => m.fandoms),
@@ -29,6 +51,13 @@ export const schema = {
   plotBlocks: () => import('./plot-block').then(m => m.plotBlocks),
   plotBlockConditions: () =>
     import('./plot-block-condition').then(m => m.plotBlockConditions),
+
+  // Fandom management schemas
+  fandomTemplates: () => import('./fandom-template').then(m => m.fandomTemplates),
+  fandomContentItems: () => import('./fandom-content').then(m => m.fandomContentItems),
+  fandomContentVersions: () => import('./fandom-content').then(m => m.fandomContentVersions),
+  fandomContentApprovals: () => import('./fandom-content').then(m => m.fandomContentApprovals),
+  fandomImportExportSessions: () => import('./fandom-content').then(m => m.fandomImportExportSessions),
 };
 
 /**

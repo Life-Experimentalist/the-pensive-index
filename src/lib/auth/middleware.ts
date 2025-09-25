@@ -36,7 +36,33 @@ export const PERMISSIONS = {
   UPDATE_FANDOM: 'update:fandom',
   DELETE_FANDOM: 'delete:fandom',
 
-  // Tag permissions
+  // Fandom management permissions (modular system)
+  MANAGE_FANDOM_TEMPLATES: 'manage:fandom_templates',
+  CREATE_FANDOM_FROM_TEMPLATE: 'create:fandom_from_template',
+  MANAGE_FANDOM_CONTENT: 'manage:fandom_content',
+  APPROVE_FANDOM_CONTENT: 'approve:fandom_content',
+  BULK_IMPORT_CONTENT: 'bulk:import_content',
+  BULK_EXPORT_CONTENT: 'bulk:export_content',
+  MANAGE_CONTENT_VERSIONS: 'manage:content_versions',
+  VIEW_FANDOM_ANALYTICS: 'view:fandom_analytics',
+  CONFIGURE_FANDOM_TAXONOMY: 'configure:fandom_taxonomy',
+  MANAGE_APPROVAL_WORKFLOWS: 'manage:approval_workflows',
+
+  // Content-specific permissions
+  CREATE_FANDOM_TAG: 'create:fandom_tag',
+  UPDATE_FANDOM_TAG: 'update:fandom_tag',
+  DELETE_FANDOM_TAG: 'delete:fandom_tag',
+  CREATE_FANDOM_PLOT_BLOCK: 'create:fandom_plot_block',
+  UPDATE_FANDOM_PLOT_BLOCK: 'update:fandom_plot_block',
+  DELETE_FANDOM_PLOT_BLOCK: 'delete:fandom_plot_block',
+  CREATE_FANDOM_CHARACTER: 'create:fandom_character',
+  UPDATE_FANDOM_CHARACTER: 'update:fandom_character',
+  DELETE_FANDOM_CHARACTER: 'delete:fandom_character',
+  CREATE_FANDOM_VALIDATION_RULE: 'create:fandom_validation_rule',
+  UPDATE_FANDOM_VALIDATION_RULE: 'update:fandom_validation_rule',
+  DELETE_FANDOM_VALIDATION_RULE: 'delete:fandom_validation_rule',
+
+  // Tag permissions (legacy)
   CREATE_TAG: 'create:tag',
   UPDATE_TAG: 'update:tag',
   DELETE_TAG: 'delete:tag',
@@ -46,7 +72,7 @@ export const PERMISSIONS = {
   UPDATE_TAG_CLASS: 'update:tag_class',
   DELETE_TAG_CLASS: 'delete:tag_class',
 
-  // Plot block permissions
+  // Plot block permissions (legacy)
   CREATE_PLOT_BLOCK: 'create:plot_block',
   UPDATE_PLOT_BLOCK: 'update:plot_block',
   DELETE_PLOT_BLOCK: 'delete:plot_block',

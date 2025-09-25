@@ -23,25 +23,25 @@ export {
 
 // Fandom management schemas
 export {
-  validationRules,
-  ruleConditions,
-  ruleActions,
-  ruleTemplates,
-  ruleTests,
-  ruleVersions,
-  type ValidationRule,
-  type NewValidationRule,
-  type RuleCondition,
-  type NewRuleCondition,
-  type RuleAction,
-  type NewRuleAction,
-  type RuleTemplate,
-  type NewRuleTemplate,
-  type RuleTest,
-  type NewRuleTest,
-  type RuleVersion,
-  type NewRuleVersion,
-} from './validation-rules';
+  fandomTemplates,
+  type FandomTemplate,
+  type NewFandomTemplate,
+  type TemplateConfiguration,
+} from './fandom-template';
+export {
+  fandomContentItems,
+  fandomContentVersions,
+  fandomContentApprovals,
+  fandomImportExportSessions,
+  type FandomContentItem,
+  type NewFandomContentItem,
+  type FandomContentVersion,
+  type NewFandomContentVersion,
+  type FandomContentApproval,
+  type NewFandomContentApproval,
+  type FandomImportExportSession,
+  type NewFandomImportExportSession,
+} from './fandom-content';
 
 // Schema registry for Drizzle ORM
 export const schema = {
@@ -51,6 +51,18 @@ export const schema = {
   plotBlocks: () => import('./plot-block').then(m => m.plotBlocks),
   plotBlockConditions: () =>
     import('./plot-block-condition').then(m => m.plotBlockConditions),
+
+  // Fandom management schemas
+  fandomTemplates: () =>
+    import('./fandom-template').then(m => m.fandomTemplates),
+  fandomContentItems: () =>
+    import('./fandom-content').then(m => m.fandomContentItems),
+  fandomContentVersions: () =>
+    import('./fandom-content').then(m => m.fandomContentVersions),
+  fandomContentApprovals: () =>
+    import('./fandom-content').then(m => m.fandomContentApprovals),
+  fandomImportExportSessions: () =>
+    import('./fandom-content').then(m => m.fandomImportExportSessions),
   validationRules: () =>
     import('./validation-rules').then(m => m.validationRules),
   ruleConditions: () =>
@@ -87,6 +99,9 @@ export function initializeDatabase(database: Database.Database) {
  * Production would use proper Drizzle migrations.
  */
 function createTablesIfNotExist(database: Database.Database) {
+  // Enable foreign keys
+  database.pragma('foreign_keys = ON');
+
   // Create fandoms table - matches test expectations
   database.exec(`
     CREATE TABLE IF NOT EXISTS fandoms (
@@ -96,19 +111,27 @@ function createTablesIfNotExist(database: Database.Database) {
       description TEXT,
       metadata TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
     );
   `);
 
-  // Create unique constraints
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS fandoms_name_unique ON fandoms(name);
-  `);
+  // Create unique constraints (with IF NOT EXISTS protection)
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX fandoms_name_unique ON fandoms(name);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS fandoms_slug_unique ON fandoms(slug);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX fandoms_slug_unique ON fandoms(slug);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
   // Create performance indexes
   database.exec(`
@@ -135,22 +158,30 @@ function createTablesIfNotExist(database: Database.Database) {
       parent_id TEXT,
       metadata TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY (fandom_id) REFERENCES fandoms(id),
-      FOREIGN KEY (tag_class_id) REFERENCES tag_classes(id),
-      FOREIGN KEY (parent_id) REFERENCES tags(id)
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE,
+      FOREIGN KEY (tag_class_id) REFERENCES tag_classes(id) ON DELETE SET NULL,
+      FOREIGN KEY (parent_id) REFERENCES tags(id) ON DELETE CASCADE
     );
   `);
 
   // Create unique constraints for tags (scoped to fandom)
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS tags_fandom_name_unique ON tags(fandom_id, name);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX tags_fandom_name_unique ON tags(fandom_id, name);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS tags_fandom_slug_unique ON tags(fandom_id, slug);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX tags_fandom_slug_unique ON tags(fandom_id, slug);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
   // Create performance indexes for tags
   database.exec(`
@@ -180,20 +211,28 @@ function createTablesIfNotExist(database: Database.Database) {
       validation_rules TEXT,
       metadata TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY (fandom_id) REFERENCES fandoms(id)
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE
     );
   `);
 
   // Create unique constraints for tag_classes (scoped to fandom)
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS tag_classes_fandom_name_unique ON tag_classes(fandom_id, name);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX tag_classes_fandom_name_unique ON tag_classes(fandom_id, name);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
-  database.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS tag_classes_fandom_slug_unique ON tag_classes(fandom_id, slug);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX tag_classes_fandom_slug_unique ON tag_classes(fandom_id, slug);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
   // Create performance indexes for tag_classes
   database.exec(`
@@ -205,35 +244,40 @@ function createTablesIfNotExist(database: Database.Database) {
   `);
 
   // Create plot_blocks table - matches test expectations
-  // Drop existing table first to ensure we have the correct structure
-  database.exec(`DROP TABLE IF EXISTS plot_blocks`);
-
   database.exec(`
-    CREATE TABLE plot_blocks (
+    CREATE TABLE IF NOT EXISTS plot_blocks (
       id TEXT NOT NULL PRIMARY KEY,
       fandom_id TEXT NOT NULL,
       parent_id TEXT,
       name TEXT NOT NULL,
       slug TEXT NOT NULL,
       description TEXT,
-      display_order INTEGER NOT NULL,
+      display_order INTEGER NOT NULL DEFAULT 0,
       is_active INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY (fandom_id) REFERENCES fandoms(id),
-      FOREIGN KEY (parent_id) REFERENCES plot_blocks(id)
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE,
+      FOREIGN KEY (parent_id) REFERENCES plot_blocks(id) ON DELETE CASCADE
     );
   `);
 
   // Create unique constraints for plot_blocks (scoped to fandom and parent)
   // Handle NULL parent_id specially - use COALESCE to treat NULL as empty string
-  database.exec(`
-    CREATE UNIQUE INDEX plot_blocks_fandom_parent_name_unique ON plot_blocks(fandom_id, COALESCE(parent_id, ''), name);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX plot_blocks_fandom_parent_name_unique ON plot_blocks(fandom_id, COALESCE(parent_id, ''), name);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
-  database.exec(`
-    CREATE UNIQUE INDEX plot_blocks_fandom_parent_slug_unique ON plot_blocks(fandom_id, COALESCE(parent_id, ''), slug);
-  `);
+  try {
+    database.exec(`
+      CREATE UNIQUE INDEX plot_blocks_fandom_parent_slug_unique ON plot_blocks(fandom_id, COALESCE(parent_id, ''), slug);
+    `);
+  } catch (e) {
+    // Index already exists, ignore
+  }
 
   // Create performance indexes for plot_blocks
   database.exec(`
@@ -257,11 +301,8 @@ function createTablesIfNotExist(database: Database.Database) {
   `);
 
   // Create plot_block_conditions table - matches test expectations
-  // Drop existing table first to ensure we have the correct structure
-  database.exec(`DROP TABLE IF EXISTS plot_block_conditions`);
-
   database.exec(`
-    CREATE TABLE plot_block_conditions (
+    CREATE TABLE IF NOT EXISTS plot_block_conditions (
       id TEXT NOT NULL PRIMARY KEY,
       plot_block_id TEXT NOT NULL,
       condition_type TEXT NOT NULL,
@@ -270,11 +311,11 @@ function createTablesIfNotExist(database: Database.Database) {
       operator TEXT NOT NULL,
       value TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY (plot_block_id) REFERENCES plot_blocks(id),
-      FOREIGN KEY (target_block_id) REFERENCES plot_blocks(id),
-      FOREIGN KEY (target_tag_id) REFERENCES tags(id)
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (plot_block_id) REFERENCES plot_blocks(id) ON DELETE CASCADE,
+      FOREIGN KEY (target_block_id) REFERENCES plot_blocks(id) ON DELETE CASCADE,
+      FOREIGN KEY (target_tag_id) REFERENCES tags(id) ON DELETE CASCADE
     );
   `);
 
@@ -298,4 +339,143 @@ function createTablesIfNotExist(database: Database.Database) {
   database.exec(`
     CREATE INDEX IF NOT EXISTS plot_block_conditions_is_active_idx ON plot_block_conditions(is_active);
   `);
+
+  // Create fandom_templates table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS fandom_templates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      genre TEXT NOT NULL,
+      description TEXT,
+      base_templates TEXT, -- JSON array of template IDs
+      default_tags TEXT, -- JSON array of template tags
+      default_plot_blocks TEXT, -- JSON array of template plot blocks
+      validation_rules TEXT, -- JSON array of validation rules
+      metadata TEXT, -- JSON object for flexible metadata
+      is_active INTEGER DEFAULT 1 NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+  `);
+
+  // Create content_versions table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS content_versions (
+      id TEXT PRIMARY KEY,
+      content_type TEXT NOT NULL CHECK (content_type IN ('tag', 'plot_block', 'validation_rule', 'fandom_config')),
+      content_id TEXT NOT NULL,
+      fandom_id TEXT NOT NULL,
+      version_number INTEGER NOT NULL,
+      parent_version_id TEXT,
+      content_snapshot TEXT NOT NULL, -- JSON object
+      changes_summary TEXT NOT NULL, -- JSON array of change descriptions
+      change_reason TEXT,
+      created_by TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      is_active INTEGER DEFAULT 0 NOT NULL,
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE,
+      FOREIGN KEY (parent_version_id) REFERENCES content_versions(id)
+    );
+  `);
+
+  // Create approval_workflows table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS approval_workflows (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      content_types TEXT NOT NULL, -- JSON array
+      fandom_id TEXT, -- NULL for global workflows
+      approval_levels TEXT NOT NULL, -- JSON array of ApprovalLevel objects
+      auto_approval_rules TEXT, -- JSON array of AutoApprovalRule objects
+      timeout_hours INTEGER,
+      is_active INTEGER DEFAULT 1 NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create content_approvals table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS content_approvals (
+      id TEXT PRIMARY KEY,
+      content_version_id TEXT NOT NULL,
+      workflow_id TEXT NOT NULL,
+      fandom_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled', 'expired')),
+      current_level INTEGER NOT NULL DEFAULT 1,
+      submitted_by TEXT NOT NULL,
+      submitted_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      approved_by TEXT, -- JSON array of admin user IDs
+      approved_at INTEGER,
+      rejected_by TEXT,
+      rejected_at INTEGER,
+      rejection_reason TEXT,
+      expires_at INTEGER,
+      notes TEXT,
+      FOREIGN KEY (content_version_id) REFERENCES content_versions(id) ON DELETE CASCADE,
+      FOREIGN KEY (workflow_id) REFERENCES approval_workflows(id),
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create bulk_operations table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS bulk_operations (
+      id TEXT PRIMARY KEY,
+      operation_type TEXT NOT NULL CHECK (operation_type IN ('import', 'export')),
+      content_type TEXT NOT NULL CHECK (content_type IN ('tags', 'plot_blocks', 'validation_rules', 'fandom_template')),
+      fandom_id TEXT NOT NULL,
+      file_format TEXT NOT NULL CHECK (file_format IN ('csv', 'json')),
+      file_path TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
+      total_items INTEGER DEFAULT 0 NOT NULL,
+      successful_items INTEGER DEFAULT 0 NOT NULL,
+      failed_items INTEGER DEFAULT 0 NOT NULL,
+      error_log TEXT, -- JSON array of BulkOperationError objects
+      preview_data TEXT, -- JSON array for preview
+      initiated_by TEXT NOT NULL,
+      started_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      completed_at INTEGER,
+      estimated_duration INTEGER,
+      FOREIGN KEY (fandom_id) REFERENCES fandoms(id) ON DELETE CASCADE
+    );
+  `);
+
+  // Create indexes for new tables
+  try {
+    database.exec(
+      `CREATE INDEX fandom_templates_genre_idx ON fandom_templates(genre);`
+    );
+    database.exec(
+      `CREATE INDEX fandom_templates_active_idx ON fandom_templates(is_active);`
+    );
+    database.exec(
+      `CREATE INDEX content_versions_fandom_idx ON content_versions(fandom_id);`
+    );
+    database.exec(
+      `CREATE INDEX content_versions_content_idx ON content_versions(content_type, content_id);`
+    );
+    database.exec(
+      `CREATE INDEX content_versions_active_idx ON content_versions(is_active);`
+    );
+    database.exec(
+      `CREATE INDEX content_approvals_status_idx ON content_approvals(status);`
+    );
+    database.exec(
+      `CREATE INDEX content_approvals_fandom_idx ON content_approvals(fandom_id);`
+    );
+    database.exec(
+      `CREATE INDEX bulk_operations_status_idx ON bulk_operations(status);`
+    );
+    database.exec(
+      `CREATE INDEX bulk_operations_fandom_idx ON bulk_operations(fandom_id);`
+    );
+  } catch (e) {
+    // Indexes already exist, ignore
+  }
 }

@@ -9,6 +9,26 @@ import {
   ConflictDetectionContext,
 } from '@/types';
 
+// Export the new validation classes
+export { CircularReferenceDetector } from './circular-references';
+export { DependencyValidator } from './dependencies';
+export { PlotBlockConflictDetector } from './plot-conflicts';
+
+export type {
+  CircularReferenceContext,
+  CircularReferenceResult,
+} from './circular-references';
+
+export type {
+  DependencyContext,
+  DependencyValidationResult,
+} from './dependencies';
+
+export type {
+  PlotBlockConflictContext,
+  PlotBlockConflictResult,
+} from './plot-conflicts';
+
 import {
   characterWarningTemplates,
   getWarningTemplateByTags,

@@ -1,6 +1,6 @@
 {
     "name": "the-pensive-index",
-    "version": "1.0.0",
+    "version": "0.5.0",
     "description": "A story discovery platform and intelligent prompt generator for fanfiction",
     "private": true,
     "scripts": {

@@ -4,7 +4,9 @@ Auto-generated from all feature plans. Last updated: 2025-09-18
 
 ## Project Overview
 
-The Pensieve Index is a **library-first story discovery platform** and intelligent prompt generator for fanfiction. It prioritizes finding existing tagged stories before generating new story prompts, enabling readers to find precisely matching stories and writers to discover gaps for new content.
+The Pensieve Index is a **library-first story discovery platform** and intelligent prompt generator for fanfiction. It
+prioritizes finding existing tagged stories before generating new story prompts, enabling readers to find precisely
+matching stories and writers to discover gaps for new content.
 
 ## Core User Journey
 
@@ -12,10 +14,13 @@ The Pensieve Index is a **library-first story discovery platform** and intellige
 2. **Library Search**: System searches existing tagged stories with relevance scoring
 3. **Dual Output**: Shows matching stories + "Create New Story" prompt with novelty highlights
 4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
+4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
 
 ## Active Technologies
-- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (004-build-a-hierarchical)
-- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (004-build-a-hierarchical)
+
+- TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+,
+  dnd-kit 6.1+ (005-create-a-modular)
+- SQLite via better-sqlite3 with Drizzle ORM schema extensions (005-create-a-modular)
 
 - TypeScript 5.x with Next.js 13+ (App Router)
 - React 18+ with Tailwind CSS for styling
@@ -32,6 +37,10 @@ app/                    # Next.js app directory
 ├── api/               # API routes
 ├── admin/             # Admin dashboard
 └── fandom/            # Fandom-specific pages
+├── (auth)/            # Auth route groups
+├── api/               # API routes
+├── admin/             # Admin dashboard
+└── fandom/            # Fandom-specific pages
 
 src/
 ├── components/        # React components
@@ -43,8 +52,21 @@ src/
 │   └── database/     # Database utilities
 ├── types/            # TypeScript definitions
 └── hooks/            # Custom React hooks
+├── components/        # React components
+│   ├── ui/           # Base UI components
+│   ├── drag-drop/    # Drag & drop interface
+│   └── admin/        # Admin components
+├── lib/              # Utility libraries
+│   ├── validation/   # Validation engine
+│   └── database/     # Database utilities
+├── types/            # TypeScript definitions
+└── hooks/            # Custom React hooks
 
 tests/
+├── components/       # Component tests
+├── validation/       # Validation engine tests
+├── integration/      # Integration tests
+└── e2e/             # End-to-end tests
 ├── components/       # Component tests
 ├── validation/       # Validation engine tests
 ├── integration/      # Integration tests
@@ -66,6 +88,25 @@ Plot Blocks support conditional branching with tree dependencies:
 
 ```
 Goblin Inheritance
+├── Black Lordship
+│   ├── After Sirius Death
+│   │   ├── Black Head of Family
+│   │   ├── Gryffindor Head of Family
+│   │   ├── Slytherin Lordship
+│   │   ├── Potter Heritage
+│   │   ├── Peverell Lordship
+│   │   └── Lord of Azkaban
+│   └── Emancipation Route
+│       ├── Triwizard Tournament Trigger
+│       ├── Name from Goblet Trigger
+│       └── Post-Tournament Inheritance
+├── Slytherin Lordship
+│   ├── Via Lily Potter Heritage
+│   ├── Via Voldemort Defeat (3+ times)
+│   └── Conquest Right
+└── Potter Heritage
+    ├── Multiple House Control → Hogwarts Control
+    └── Traditional Inheritance
 ├── Black Lordship
 │   ├── After Sirius Death
 │   │   ├── Black Head of Family
@@ -162,7 +203,7 @@ npm run type-check      # TypeScript validation
 - Keyboard navigation support
 
 ## Recent Changes
-- 004-build-a-hierarchical: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+- 005-create-a-modular: Added TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+, dnd-kit 6.1+
 
 - 2025-09-17: Initial project setup with constitution and templates
 - Next.js app directory structure established
@@ -170,5 +211,3 @@ npm run type-check      # TypeScript validation
 <!-- MANUAL ADDITIONS START -->
 <!-- Add project-specific guidelines, coding standards, or team preferences here -->
 <!-- MANUAL ADDITIONS END -->
-
-

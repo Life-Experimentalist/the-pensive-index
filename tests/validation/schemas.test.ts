@@ -437,6 +437,10 @@ describe('Zod Schema Validation Tests', () => {
         slug: 'invalid slug!',
       };
 
+      expect(() => {
+        FandomSchema.parse(invalidFandom);
+      }).toThrow();
+
       try {
         FandomSchema.parse(invalidFandom);
         expect(true).toBe(false); // Should not reach here
@@ -459,6 +463,10 @@ describe('Zod Schema Validation Tests', () => {
         slug: 'valid-slug',
         fandom_id: 'not-a-number', // Wrong type
       };
+
+      expect(() => {
+        TagSchema.parse(invalidTag);
+      }).toThrow();
 
       try {
         TagSchema.parse(invalidTag);
@@ -509,13 +517,10 @@ describe('Zod Schema Validation Tests', () => {
         fandom_id: 1,
         category: 'structure',
         complexity: 'epic',
-        tags: Array.from(
-          { length: 50 },
-          (_, i) =>
-            `123e4567-e89b-12d3-a456-42661417400${i
-              .toString()
-              .padStart(1, '0')}`
-        ),
+        tags: Array.from({ length: 50 }, (_, i) => {
+          const suffix = i.toString().padStart(2, '0');
+          return `123e4567-e89b-12d3-a456-42661417${suffix}`;
+        }),
         metadata: {
           chapters: Array.from({ length: 100 }, (_, i) => ({
             number: i + 1,

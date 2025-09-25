@@ -38,16 +38,16 @@ interface Tag {
   enhances?: string[];
 }
 
-interface DependencyValidationContext {
-  selected_plot_blocks: PlotBlock[];
-  selected_conditions: PlotBlockCondition[];
-  selected_tags: string[];
-  all_plot_blocks: PlotBlock[];
-  all_conditions: PlotBlockCondition[];
-  all_tags: Tag[];
+interface DependencyContext {
+  plot_blocks: PlotBlock[];
+  conditions: PlotBlockCondition[];
+  tags: Tag[];
+  selected_plot_blocks?: string[];
+  selected_conditions?: string[];
+  selected_tags?: string[];
 }
 
-interface DependencyResult {
+interface DependencyValidationResult {
   is_valid: boolean;
   missing_requirements: Array<{
     type: 'plot_block' | 'condition' | 'tag';
@@ -72,76 +72,13 @@ interface DependencyResult {
   }>;
 }
 
-// Mock implementation - will be replaced with actual DependencyValidator
-class DependencyValidator {
-  static validateDependencies(
-    context: DependencyValidationContext
-  ): DependencyResult {
-    // Mock implementation that always returns valid
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static validatePlotBlockDependencies(
-    plotBlocks: PlotBlock[],
-    allPlotBlocks: PlotBlock[]
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static validateConditionDependencies(
-    conditions: PlotBlockCondition[],
-    plotBlocks: PlotBlock[],
-    allConditions: PlotBlockCondition[]
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static validateTagDependencies(
-    tagIds: string[],
-    allTags: Tag[]
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static buildDependencyChain(
-    context: DependencyValidationContext
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static detectCircularDependencies(
-    context: DependencyValidationContext
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-
-  static suggestEnhancements(
-    context: DependencyValidationContext
-  ): DependencyResult {
-    return {
-      is_valid: true,
-      missing_requirements: [],
-    };
-  }
-}
+// Import the actual implementation
+import { DependencyValidator } from '../../src/lib/validation/dependencies';
+import type {
+  DependencyContext,
+  DependencyValidationResult,
+} from '../../src/lib/validation/dependencies';
+import type { PlotBlock, PlotBlockCondition, Tag } from '../../src/types';
 
 describe('DependencyValidator', () => {
   let samplePlotBlocks: PlotBlock[];
@@ -336,13 +273,13 @@ describe('DependencyValidator', () => {
 
   describe('Plot Block Dependencies', () => {
     it('should validate missing hard requirements', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[1]], // Marauders Era Travel (requires Time Travel Setup)
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -359,13 +296,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should validate satisfied dependencies', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel Setup + Marauders Era Travel
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -375,13 +312,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should handle soft requirements with warnings', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel Setup + Founders Era Travel (missing Historical Knowledge)
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -398,7 +335,7 @@ describe('DependencyValidator', () => {
     });
 
     it('should detect enabled_by relationships', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0],
           samplePlotBlocks[1],
@@ -406,9 +343,9 @@ describe('DependencyValidator', () => {
         ], // Includes Character Interaction
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -420,13 +357,13 @@ describe('DependencyValidator', () => {
 
   describe('Condition Dependencies', () => {
     it('should validate condition requirements within same plot block', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
         selected_conditions: [sampleConditions[1]], // Befriend James (requires Meet James)
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -440,13 +377,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should validate cross-plot-block condition requirements', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel + Founders Era (missing Historical Knowledge)
         selected_conditions: [sampleConditions[2]], // Meet Godric (requires Historical Knowledge plot block)
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -460,7 +397,7 @@ describe('DependencyValidator', () => {
     });
 
     it('should validate complex cross-dependencies', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0], // Time Travel Setup
           samplePlotBlocks[1], // Marauders Era Travel
@@ -468,9 +405,9 @@ describe('DependencyValidator', () => {
         ],
         selected_conditions: [sampleConditions[3]], // First Kiss (requires Befriend James from different plot block)
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -484,13 +421,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should handle condition enables relationships', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
         selected_conditions: [sampleConditions[0], sampleConditions[1]], // Meet James + Befriend James
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -502,13 +439,13 @@ describe('DependencyValidator', () => {
 
   describe('Tag Dependencies', () => {
     it('should validate tag requirements', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [],
         selected_conditions: [],
         selected_tags: ['tag-2'], // marauders-era (requires time-travel)
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -522,13 +459,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should validate satisfied tag dependencies', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [],
         selected_conditions: [],
         selected_tags: ['tag-1', 'tag-2'], // time-travel + marauders-era
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -538,13 +475,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should handle tag enhancement relationships', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [],
         selected_conditions: [],
         selected_tags: ['tag-1', 'tag-2', 'tag-4'], // time-travel + marauders-era + james-potter
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -556,7 +493,7 @@ describe('DependencyValidator', () => {
 
   describe('Dependency Chain Building', () => {
     it('should build complete dependency chain', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0], // Time Travel Setup (level 0)
           samplePlotBlocks[1], // Marauders Era Travel (level 1, requires pb-1)
@@ -565,9 +502,9 @@ describe('DependencyValidator', () => {
         ],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.buildDependencyChain(context);
@@ -583,7 +520,7 @@ describe('DependencyValidator', () => {
     });
 
     it('should detect deep dependency chains', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0], // Level 0
           samplePlotBlocks[1], // Level 1
@@ -593,9 +530,9 @@ describe('DependencyValidator', () => {
         ],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.buildDependencyChain(context);
@@ -605,7 +542,7 @@ describe('DependencyValidator', () => {
     });
 
     it('should handle parallel dependency branches', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0], // Time Travel Setup (level 0)
           samplePlotBlocks[1], // Marauders Era Travel (level 1)
@@ -614,9 +551,9 @@ describe('DependencyValidator', () => {
         ],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.buildDependencyChain(context);
@@ -633,13 +570,13 @@ describe('DependencyValidator', () => {
 
   describe('Circular Dependency Detection', () => {
     it('should detect simple circular dependencies', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[7], samplePlotBlocks[8]], // Circular Dependency A + B
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.detectCircularDependencies(context);
@@ -672,13 +609,13 @@ describe('DependencyValidator', () => {
         },
       ];
 
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: complexCircularBlocks,
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: [...samplePlotBlocks, ...complexCircularBlocks],
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: [...samplePlotBlocks, ...complexCircularBlocks],
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.detectCircularDependencies(context);
@@ -692,7 +629,7 @@ describe('DependencyValidator', () => {
     });
 
     it('should not flag valid dependency chains as circular', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [
           samplePlotBlocks[0], // Time Travel Setup
           samplePlotBlocks[1], // Marauders Era Travel (requires Time Travel)
@@ -700,9 +637,9 @@ describe('DependencyValidator', () => {
         ],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.detectCircularDependencies(context);
@@ -718,13 +655,13 @@ describe('DependencyValidator', () => {
 
   describe('Enhancement Suggestions', () => {
     it('should suggest required additions', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[1]], // Marauders Era Travel (requires Time Travel Setup)
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.suggestEnhancements(context);
@@ -738,13 +675,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should suggest enhancement opportunities', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
         selected_conditions: [],
         selected_tags: ['tag-1', 'tag-2'], // time-travel + marauders-era
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.suggestEnhancements(context);
@@ -758,13 +695,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should suggest soft requirement additions', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel + Founders Era (missing soft requirement)
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.suggestEnhancements(context);
@@ -792,13 +729,13 @@ describe('DependencyValidator', () => {
           requires: i > 0 ? [`large-pb-${i - 1}`] : undefined, // Chain dependency
         }));
 
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: manyPlotBlocks.slice(0, 50),
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: manyPlotBlocks,
-        all_conditions: [],
-        all_tags: [],
+        plot_blocks: manyPlotBlocks,
+        conditions: [],
+        tags: [],
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -823,13 +760,13 @@ describe('DependencyValidator', () => {
           ],
         }));
 
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: complexGraph.slice(0, 20),
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: complexGraph,
-        all_conditions: [],
-        all_tags: [],
+        plot_blocks: complexGraph,
+        conditions: [],
+        tags: [],
       };
 
       const result = DependencyValidator.detectCircularDependencies(context);
@@ -842,13 +779,13 @@ describe('DependencyValidator', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty selections gracefully', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -863,13 +800,13 @@ describe('DependencyValidator', () => {
         requires: ['nonexistent-plot-block'],
       };
 
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [malformedPlotBlock],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: [malformedPlotBlock],
-        all_conditions: [],
-        all_tags: [],
+        plot_blocks: [malformedPlotBlock],
+        conditions: [],
+        tags: [],
       };
 
       expect(() => {
@@ -883,13 +820,13 @@ describe('DependencyValidator', () => {
         requires: [samplePlotBlocks[0].id], // Self-dependency
       };
 
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [selfDependent],
         selected_conditions: [],
         selected_tags: [],
-        all_plot_blocks: [selfDependent],
-        all_conditions: [],
-        all_tags: [],
+        plot_blocks: [selfDependent],
+        conditions: [],
+        tags: [],
       };
 
       const result = DependencyValidator.validateDependencies(context);
@@ -904,13 +841,13 @@ describe('DependencyValidator', () => {
     });
 
     it('should handle mixed dependency types', () => {
-      const context: DependencyValidationContext = {
+      const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
         selected_conditions: [sampleConditions[0]], // Meet James
         selected_tags: ['tag-1', 'tag-2'], // time-travel + marauders-era
-        all_plot_blocks: samplePlotBlocks,
-        all_conditions: sampleConditions,
-        all_tags: sampleTags,
+        plot_blocks: samplePlotBlocks,
+        conditions: sampleConditions,
+        tags: sampleTags,
       };
 
       const result = DependencyValidator.validateDependencies(context);

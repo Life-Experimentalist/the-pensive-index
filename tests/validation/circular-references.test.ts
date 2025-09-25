@@ -1,169 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { CircularReferenceDetector } from '../../src/lib/validation/circular-references';
+import type {
+  CircularReferenceContext,
+  CircularReferenceResult,
+} from '../../src/lib/validation/circular-references';
+import type { PlotBlock, PlotBlockCondition, Tag } from '../../src/types';
 
-// Mock imports - these will be replaced with actual implementations
-interface PlotBlock {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  enables?: string[];
-  parent_id?: string;
-  children?: string[];
-}
+// Using actual types from src/types and src/lib/validation/circular-references
 
-interface PlotBlockCondition {
-  id: string;
-  plot_block_id: string;
-  parent_id?: string;
-  name: string;
-  description: string;
-  order: number;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  enables?: string[];
-  children?: string[];
-}
-
-interface Tag {
-  id: string;
-  name: string;
-  fandom_id: string;
-  category?: string;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  enhances?: string[];
-}
-
-interface CircularReferenceContext {
-  plot_blocks: PlotBlock[];
-  conditions: PlotBlockCondition[];
-  tags: Tag[];
-}
-
-interface CircularReferenceResult {
-  has_circular_references: boolean;
-  circular_chains: Array<{
-    type: 'plot_block' | 'condition' | 'tag' | 'mixed';
-    chain: Array<{
-      id: string;
-      type: 'plot_block' | 'condition' | 'tag';
-      name: string;
-    }>;
-    relationship_type:
-      | 'requires'
-      | 'enables'
-      | 'enhances'
-      | 'parent_child'
-      | 'mixed';
-    severity: 'error' | 'warning';
-    message: string;
-  }>;
-  affected_elements: Array<{
-    id: string;
-    type: 'plot_block' | 'condition' | 'tag';
-    circular_chains_involved: number;
-    can_break_cycle: boolean;
-    suggested_resolution?: {
-      action: 'remove_dependency' | 'remove_element' | 'change_hierarchy';
-      target_relationship: string;
-      reason: string;
-    };
-  }>;
-  suggested_resolutions?: Array<{
-    action: 'remove_dependency' | 'restructure_hierarchy' | 'remove_element';
-    target_ids: string[];
-    impact: 'minimal' | 'moderate' | 'major';
-    reason: string;
-    alternative_structure?: any;
-  }>;
-}
-
-// Mock implementation - will be replaced with actual CircularReferenceDetector
-class CircularReferenceDetector {
-  static detectCircularReferences(
-    context: CircularReferenceContext
-  ): CircularReferenceResult {
-    // Mock implementation that always returns no circular references
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static detectPlotBlockCircles(
-    plotBlocks: PlotBlock[]
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static detectConditionCircles(
-    conditions: PlotBlockCondition[]
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static detectTagCircles(tags: Tag[]): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static detectMixedCircles(
-    context: CircularReferenceContext
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static detectHierarchyCircles(
-    items: Array<{ id: string; parent_id?: string; children?: string[] }>
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static findShortestCircle(
-    context: CircularReferenceContext
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-
-  static suggestCircleResolution(
-    context: CircularReferenceContext
-  ): CircularReferenceResult {
-    return {
-      has_circular_references: false,
-      circular_chains: [],
-      affected_elements: [],
-    };
-  }
-}
+// Using actual implementation from src/lib/validation/circular-references
 
 describe('CircularReferenceDetector', () => {
   let samplePlotBlocks: PlotBlock[];
@@ -179,6 +24,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Time Travel Setup',
         category: 'temporal',
         description: 'Establishes time travel mechanics',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -187,6 +34,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Marauders Era Travel',
         category: 'temporal',
         description: 'Travel to Marauders era',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-1'],
@@ -197,6 +46,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Circular A',
         category: 'test',
         description: 'First element in circular chain',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-circle-b'], // A requires B
@@ -206,6 +57,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Circular B',
         category: 'test',
         description: 'Second element in circular chain',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-circle-a'], // B requires A (creates circle)
@@ -216,6 +69,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Circular A',
         category: 'test',
         description: 'First in complex chain',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-complex-b'],
@@ -225,6 +80,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Circular B',
         category: 'test',
         description: 'Second in complex chain',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-complex-c'],
@@ -234,6 +91,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Circular C',
         category: 'test',
         description: 'Third in complex chain',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-complex-a'], // Completes circle
@@ -244,6 +103,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Self Reference',
         category: 'test',
         description: 'References itself',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-self'], // Self-reference
@@ -254,6 +115,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Parent Block',
         category: 'test',
         description: 'Parent in hierarchy',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         children: ['pb-child'],
@@ -263,6 +126,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Child Block',
         category: 'test',
         description: 'Child in hierarchy',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         parent_id: 'pb-parent',
@@ -277,6 +142,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Time Travel Preparation',
         description: 'Prepares for time travel',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -286,6 +152,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Arrive in Marauders Era',
         description: 'Successfully arrives in past',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['cond-1'],
@@ -297,6 +164,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Condition Circular A',
         description: 'First condition in circle',
         order: 2,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['cond-circle-b'],
@@ -307,6 +175,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Condition Circular B',
         description: 'Second condition in circle',
         order: 3,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['cond-circle-a'], // Creates circle
@@ -318,6 +187,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Parent Condition',
         description: 'Parent condition',
         order: 4,
+        is_active: true,
         created_at: now,
         updated_at: now,
         children: ['cond-child'],
@@ -329,6 +199,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Child Condition',
         description: 'Child condition',
         order: 5,
+        is_active: true,
         created_at: now,
         updated_at: now,
         parent_id: 'cond-parent',
@@ -341,6 +212,7 @@ describe('CircularReferenceDetector', () => {
         name: 'time-travel',
         fandom_id: 'fandom-1',
         category: 'plot',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -349,6 +221,7 @@ describe('CircularReferenceDetector', () => {
         name: 'marauders-era',
         fandom_id: 'fandom-1',
         category: 'setting',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-1'],
@@ -359,6 +232,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Tag Circular A',
         fandom_id: 'fandom-1',
         category: 'test',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-circle-b'],
@@ -368,6 +242,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Tag Circular B',
         fandom_id: 'fandom-1',
         category: 'test',
+        is_active: true,
         created_at: now,
         updated_at: now,
         enhances: ['tag-circle-a'], // Different relationship type in circle
@@ -378,6 +253,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Tag A',
         fandom_id: 'fandom-1',
         category: 'test',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-complex-b'],
@@ -387,6 +263,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Tag B',
         fandom_id: 'fandom-1',
         category: 'test',
+        is_active: true,
         created_at: now,
         updated_at: now,
         enhances: ['tag-complex-c'],
@@ -396,6 +273,7 @@ describe('CircularReferenceDetector', () => {
         name: 'Complex Tag C',
         fandom_id: 'fandom-1',
         category: 'test',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-complex-a'], // Completes mixed-relationship circle
@@ -526,6 +404,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Overlap A',
           category: 'test',
           description: 'Part of two circles',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['overlap-b'],
@@ -535,6 +415,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Overlap B',
           category: 'test',
           description: 'Central to both circles',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['overlap-a', 'overlap-c'], // Part of both circles
@@ -544,6 +426,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Overlap C',
           category: 'test',
           description: 'Part of second circle',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['overlap-b'],
@@ -691,6 +575,8 @@ describe('CircularReferenceDetector', () => {
           name: `Deep Hierarchy ${i}`,
           category: 'test',
           description: 'Part of deep hierarchy',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           parent_id: i === 0 ? `deep-${3}` : `deep-${i - 1}`, // Creates circular parent chain
@@ -801,6 +687,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Multi A',
           category: 'test',
           description: 'Central element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['multi-b'], // Short path
@@ -810,6 +698,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Multi B',
           category: 'test',
           description: 'Short path element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['multi-a'], // Completes short circle
@@ -819,6 +709,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Multi C',
           category: 'test',
           description: 'Long path start',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['multi-a'], // Also points to A, creating longer circle
@@ -828,6 +720,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Multi D',
           category: 'test',
           description: 'Long path middle',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['multi-c'],
@@ -857,6 +751,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Equal A1',
           category: 'test',
           description: 'First circle first element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['equal-b1'],
@@ -866,6 +762,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Equal B1',
           category: 'test',
           description: 'First circle second element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['equal-a1'],
@@ -875,6 +773,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Equal A2',
           category: 'test',
           description: 'Second circle first element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['equal-b2'],
@@ -884,6 +784,8 @@ describe('CircularReferenceDetector', () => {
           name: 'Equal B2',
           category: 'test',
           description: 'Second circle second element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: ['equal-a2'],
@@ -916,6 +818,8 @@ describe('CircularReferenceDetector', () => {
           name: `Large Element ${i}`,
           category: 'test',
           description: 'Large graph element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: [
@@ -949,6 +853,8 @@ describe('CircularReferenceDetector', () => {
           name: `Deep Chain ${i}`,
           category: 'test',
           description: 'Deep chain element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: [`deep-chain-${(i + 1) % 200}`], // Creates one very long circle
@@ -991,6 +897,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Malformed Block',
         category: 'test',
         description: 'Has nonexistent references',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
         requires: ['nonexistent-1', 'nonexistent-2'],
@@ -1013,6 +921,8 @@ describe('CircularReferenceDetector', () => {
         name: 'Mixed References',
         category: 'test',
         description: 'Has both valid and invalid references',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
         requires: ['pb-1', 'nonexistent'], // Valid + invalid
@@ -1038,6 +948,8 @@ describe('CircularReferenceDetector', () => {
           name: `Web Element ${i}`,
           category: 'test',
           description: 'Interconnected web element',
+          fandom_id: 'test-fandom',
+          is_active: true,
           created_at: new Date(),
           updated_at: new Date(),
           requires: [

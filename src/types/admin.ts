@@ -49,34 +49,65 @@ export interface AdminAssignment {
   updated_at: Date;
 }
 
-export interface AdminPermission {
-  action: string; // e.g., 'fandom:create', 'admin:assign', 'tags:manage'
-  resource?: string; // e.g., fandomId for scoped permissions
-  granted: boolean;
-  scope: 'global' | 'fandom'; // Permission scope
-}
+// Alias for backward compatibility
+export type FandomAssignment = AdminAssignment;
 
 // ============================================================================
-// ADMIN INVITATIONS
+// INVITATIONS
 // ============================================================================
 
 export interface AdminInvitation {
   id: string;
   email: string;
-  role_id: string;
-  role_name: AdminRole;
+  role: AdminRoleDefinition;
+  role_id?: string;
+  role_name?: AdminRole;
   fandom_id?: string;
   fandom_name?: string;
   invited_by: string;
   invited_by_name?: string; // Denormalized for display
-  invitation_token: string;
-  message?: string;
-  status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  invited_at: Date;
+  status:
+    | 'pending'
+    | 'accepted'
+    | 'expired'
+    | 'rejected'
+    | 'cancelled'
+    | 'revoked';
   expires_at: Date;
   accepted_at?: Date;
   accepted_by?: string;
+  token: string;
+  invitation_token?: string;
+  message?: string;
   created_at: Date;
   updated_at: Date;
+}
+
+// ============================================================================
+// AUDIT LOGGING
+// ============================================================================
+
+export interface AuditLogEntry {
+  id: string;
+  actor_id: string;
+  actor_name: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string;
+  fandom_id?: string;
+  details: Record<string, any>;
+  ip_address?: string;
+  user_agent?: string;
+  timestamp: Date;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface AdminPermission {
+  action: string; // e.g., 'fandom:create', 'admin:assign', 'tags:manage'
+  resource?: string; // e.g., fandomId for scoped permissions
+  granted: boolean;
+  scope: 'global' | 'fandom'; // Permission scope
 }
 
 // ============================================================================
@@ -107,6 +138,7 @@ export interface PermissionCheck {
   user_id: string;
   permission: string;
   fandom_id?: string; // For fandom-scoped permissions
+  scope?: 'global' | 'fandom'; // Permission scope
   granted: boolean;
   expires_at?: Date;
   last_updated: Date;

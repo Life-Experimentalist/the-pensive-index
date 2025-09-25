@@ -12,6 +12,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { AdminUser, AdminAssignment } from '@/types/admin';
 import { ADMIN_PERMISSIONS } from '@/types/admin';
 
+// Import AdminUserModel for test setup
+import { AdminUserModel } from '../../src/lib/admin/models/AdminUser';
+
 // Mock services that will be implemented later
 import { AdminPermissionService } from '@/lib/admin/services/AdminPermissionService';
 import { FandomContentService } from '@/lib/admin/services/FandomContentService';
@@ -100,10 +103,17 @@ describe('Fandom Admin Role Restrictions', () => {
       created_at: new Date(),
       updated_at: new Date(),
     };
+
+    // Set up test data in AdminUserModel
+    const adminModel = AdminUserModel.getInstance();
+    adminModel.setTestUser(fandomAdminUser);
+    adminModel.setTestUser(otherFandomAdminUser);
   });
 
   afterEach(async () => {
     // Cleanup test data
+    const adminModel = AdminUserModel.getInstance();
+    adminModel.clearTestUsers();
   });
 
   describe('Fandom-Scoped Permissions', () => {
@@ -390,6 +400,10 @@ describe('Fandom Admin Role Restrictions', () => {
         ],
       };
 
+      // Update the user in AdminUserModel
+      const adminModel = AdminUserModel.getInstance();
+      adminModel.setTestUser(multiFandomAdmin);
+
       const permissionService = new AdminPermissionService();
 
       // Should have access to both fandoms
@@ -421,6 +435,10 @@ describe('Fandom Admin Role Restrictions', () => {
         ],
       };
 
+      // Update the user in AdminUserModel
+      const adminModel = AdminUserModel.getInstance();
+      adminModel.setTestUser(inactiveAdmin);
+
       const permissionService = new AdminPermissionService();
 
       const hasPermission = await permissionService.checkPermission(
@@ -443,6 +461,10 @@ describe('Fandom Admin Role Restrictions', () => {
           },
         ],
       };
+
+      // Update the user in AdminUserModel
+      const adminModel = AdminUserModel.getInstance();
+      adminModel.setTestUser(expiredAdmin);
 
       const permissionService = new AdminPermissionService();
 

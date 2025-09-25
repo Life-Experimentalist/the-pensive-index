@@ -31,7 +31,93 @@ export class PermissionValidator {
   }
 
   /**
-   * Check if user has a specific permission
+   * Check if user has a specific permission (async version for user ID)
+   */
+  static async checkPermissionAsync(
+    userId: string,
+    permission: string,
+    options?: { fandomId?: string }
+  ): Promise<boolean> {
+    try {
+      const adminModel = AdminUserModel.getInstance();
+      const userObj = await adminModel.getAdminUser(userId);
+
+      if (!userObj) {
+        return false;
+      }
+
+      return this.checkPermission(userObj, permission, options);
+    } catch (error) {
+      console.error('Error checking permission:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if user has a specific permission (sync version for AdminUser object)
+   */
+  static checkPermission(
+    user: AdminUser,
+    permission: string,
+    options?: { fandomId?: string }
+  ): boolean {
+    try {
+      if (!user || !user.assignments || user.assignments.length === 0) {
+        return false;
+      }
+
+      const fandomId = options?.fandomId;
+
+      // Check each assignment for the permission
+      for (const assignment of user.assignments) {
+        if (!assignment.is_active) continue;
+
+        // Check if assignment has expired
+        if (
+          assignment.expires_at &&
+          new Date(assignment.expires_at) < new Date()
+        ) {
+          continue;
+        }
+
+        // Check direct permission match
+        if (assignment.role.permissions.includes(permission)) {
+          // For global permissions (ProjectAdmin), always grant access
+          if (!assignment.fandom_id) {
+            return true;
+          }
+
+          // For fandom-specific permissions, check fandom match
+          if (fandomId && assignment.fandom_id === fandomId) {
+            return true;
+          }
+        }
+
+        // Project Admins can access any fandom content
+        if (assignment.role.name === 'ProjectAdmin' && !assignment.fandom_id) {
+          const fandomPermissions = [
+            'tags:manage',
+            'plotblocks:manage',
+            'validation:fandom',
+            'submissions:review',
+            'content:moderate',
+          ];
+
+          if (fandomPermissions.includes(permission)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error checking permission:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if user has a specific permission (legacy method for backward compatibility)
    */
   async checkPermission(
     userId: string,
@@ -39,18 +125,6 @@ export class PermissionValidator {
     fandomId?: string
   ): Promise<PermissionCheck> {
     try {
-      const user = await this.adminModel.getAdminUser(userId);
-
-      if (!user) {
-        return {
-          user_id: userId,
-          permission,
-          fandom_id: fandomId,
-          granted: false,
-          scope: fandomId ? 'fandom' : 'global',
-        };
-      }
-
       const hasPermission = await this.adminModel.hasPermission(
         userId,
         permission,

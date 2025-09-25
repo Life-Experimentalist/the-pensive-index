@@ -10,11 +10,13 @@
 
 import type { AdminAssignment, AdminRole } from '@/types/admin';
 import { AdminUserModel } from '@/lib/admin/models/AdminUser';
-import { AuditLogService } from '@/lib/admin/services/AuditLogService';
+import { AuditLogService } from './AuditLogService';
+import { PermissionValidator } from '../utils/PermissionValidator';
 
 export class RoleAssignmentService {
   private adminModel: AdminUserModel;
   private auditService: AuditLogService;
+  private assignments: Map<string, AdminAssignment> = new Map();
 
   constructor() {
     this.adminModel = AdminUserModel.getInstance();
@@ -33,9 +35,15 @@ export class RoleAssignmentService {
   ): Promise<AdminAssignment> {
     try {
       // Validate assigning user has permission
-      const hasPermission = await this.adminModel.hasPermission(
-        assignedBy,
-        'admin:assign'
+      const assigningUser = await this.adminModel.getAdminUser(assignedBy);
+      if (!assigningUser) {
+        throw new Error('Assigning user not found');
+      }
+
+      const hasPermission = PermissionValidator.checkPermission(
+        assigningUser,
+        'admin:assign',
+        { fandomId }
       );
 
       if (!hasPermission) {
@@ -132,7 +140,7 @@ export class RoleAssignmentService {
   async revokeRole(assignmentId: string, revokedBy: string): Promise<boolean> {
     try {
       // Validate revoking user has permission
-      const hasPermission = await this.adminModel.hasPermission(
+      const hasPermission = await PermissionValidator.checkPermissionAsync(
         revokedBy,
         'admin:revoke'
       );
@@ -193,9 +201,8 @@ export class RoleAssignmentService {
     assignmentId: string
   ): Promise<AdminAssignment | null> {
     try {
-      // Query database for assignment
-      // This would be implemented with actual database queries
-      return null;
+      // Return from in-memory storage for testing
+      return this.assignments.get(assignmentId) || null;
     } catch (error) {
       console.error('Error fetching assignment:', error);
       return null;
@@ -249,7 +256,7 @@ export class RoleAssignmentService {
   ): Promise<boolean> {
     try {
       // Validate user has permission
-      const hasPermission = await this.adminModel.hasPermission(
+      const hasPermission = await PermissionValidator.checkPermissionAsync(
         updatedBy,
         'admin:assign'
       );
@@ -408,16 +415,21 @@ export class RoleAssignmentService {
   }
 
   private async saveAssignment(assignment: AdminAssignment): Promise<void> {
-    // This would save the assignment to the database
-    // Implementation would depend on the database layer
+    // Save to in-memory storage for testing
+    this.assignments.set(assignment.id, assignment);
   }
 
   private async deactivateAssignment(
     assignmentId: string,
     revokedBy: string
   ): Promise<void> {
-    // This would update the assignment to set is_active = false
-    // and update the updated_at timestamp
+    // Update in-memory storage for testing
+    const assignment = this.assignments.get(assignmentId);
+    if (assignment) {
+      assignment.is_active = false;
+      assignment.updated_at = new Date();
+      this.assignments.set(assignmentId, assignment);
+    }
   }
 
   private async updateAssignmentField(
@@ -425,6 +437,19 @@ export class RoleAssignmentService {
     field: string,
     value: any
   ): Promise<void> {
-    // This would update a specific field in the assignment record
+    // Update specific field in in-memory storage for testing
+    const assignment = this.assignments.get(assignmentId);
+    if (assignment) {
+      (assignment as any)[field] = value;
+      assignment.updated_at = new Date();
+      this.assignments.set(assignmentId, assignment);
+    }
+  }
+
+  /**
+   * Clear all assignments (for testing)
+   */
+  clearTestAssignments(): void {
+    this.assignments.clear();
   }
 }

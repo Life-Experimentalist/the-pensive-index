@@ -10,8 +10,9 @@
 
 import type { AdminAssignment, AdminUser } from '@/types/admin';
 import { AdminUserModel } from '@/lib/admin/models/AdminUser';
-import { RoleAssignmentService } from '@/lib/admin/services/RoleAssignmentService';
-import { AuditLogService } from '@/lib/admin/services/AuditLogService';
+import { RoleAssignmentService } from './RoleAssignmentService';
+import { AuditLogService } from './AuditLogService';
+import { PermissionValidator } from '../utils/PermissionValidator';
 
 export class FandomAssignmentService {
   private adminModel: AdminUserModel;
@@ -34,9 +35,15 @@ export class FandomAssignmentService {
   ): Promise<AdminAssignment> {
     try {
       // Validate assigning user has permission
-      const hasPermission = await this.adminModel.hasPermission(
-        assignedBy,
-        'admin:assign'
+      const assigningUser = await this.adminModel.getAdminUser(assignedBy);
+      if (!assigningUser) {
+        throw new Error('Assigning user not found');
+      }
+
+      const hasPermission = PermissionValidator.checkPermission(
+        assigningUser,
+        'admin:assign',
+        { fandomId }
       );
 
       if (!hasPermission) {
@@ -109,9 +116,15 @@ export class FandomAssignmentService {
   ): Promise<AdminAssignment> {
     try {
       // Validate permissions
-      const hasPermission = await this.adminModel.hasPermission(
-        assignedBy,
-        'admin:assign'
+      const assigningUser = await this.adminModel.getAdminUser(assignedBy);
+      if (!assigningUser) {
+        throw new Error('Assigning user not found');
+      }
+
+      const hasPermission = PermissionValidator.checkPermission(
+        assigningUser,
+        'admin:assign',
+        { fandomId }
       );
 
       if (!hasPermission) {
@@ -237,8 +250,13 @@ export class FandomAssignmentService {
   async hasAccessToFandom(userId: string, fandomId: string): Promise<boolean> {
     try {
       // Check if user is Project Admin (has access to all fandoms)
-      const hasGlobalAccess = await this.adminModel.hasPermission(
-        userId,
+      const user = await this.adminModel.getAdminUser(userId);
+      if (!user) {
+        return false;
+      }
+
+      const hasGlobalAccess = PermissionValidator.checkPermission(
+        user,
         'validation:global'
       );
 

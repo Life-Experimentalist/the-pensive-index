@@ -19,6 +19,7 @@ import { ADMIN_PERMISSIONS } from '@/types/admin';
 
 export class AdminUserModel {
   private static instance: AdminUserModel;
+  private testUsers: Map<string, AdminUser> = new Map();
 
   private constructor() {}
 
@@ -30,10 +31,29 @@ export class AdminUserModel {
   }
 
   /**
+   * Set test data (for testing only)
+   */
+  setTestUser(user: AdminUser): void {
+    this.testUsers.set(user.id, user);
+  }
+
+  /**
+   * Clear test data (for testing only)
+   */
+  clearTestUsers(): void {
+    this.testUsers.clear();
+  }
+
+  /**
    * Get admin user by ID with all assignments and permissions
    */
   async getAdminUser(userId: string): Promise<AdminUser | null> {
     try {
+      // Check if we have test data for this user
+      if (this.testUsers.has(userId)) {
+        return this.testUsers.get(userId)!;
+      }
+
       // This would query the database for the user and their assignments
       // For now, returning a mock structure that matches our tests
 

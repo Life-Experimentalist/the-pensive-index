@@ -13,9 +13,10 @@ import type { AdminUser, AdminAssignment, AdminRole } from '@/types/admin';
 import { ADMIN_PERMISSIONS } from '@/types/admin';
 
 // Mock services that will be implemented later
-import { AdminPermissionService } from '@/lib/admin/services/AdminPermissionService';
-import { RoleAssignmentService } from '@/lib/admin/services/RoleAssignmentService';
-import { FandomAssignmentService } from '@/lib/admin/services/FandomAssignmentService';
+import { AdminPermissionService } from '../../src/lib/admin/services/AdminPermissionService';
+import { RoleAssignmentService } from '../../src/lib/admin/services/RoleAssignmentService';
+import { FandomAssignmentService } from '../../src/lib/admin/services/FandomAssignmentService';
+import { AdminUserModel } from '../../src/lib/admin/models/AdminUser';
 
 describe('Project Admin Role Permissions', () => {
   let projectAdminUser: AdminUser;
@@ -109,10 +110,22 @@ describe('Project Admin Role Permissions', () => {
       created_at: new Date(),
       updated_at: new Date(),
     };
+
+    // Set up test data in AdminUserModel
+    const adminModel = AdminUserModel.getInstance();
+    adminModel.setTestUser(projectAdminUser);
+    adminModel.setTestUser(fandomAdminUser);
+    adminModel.setTestUser(regularUser);
   });
 
   afterEach(async () => {
     // Cleanup test data
+    const adminModel = AdminUserModel.getInstance();
+    adminModel.clearTestUsers();
+
+    // Clear test assignments
+    const roleService = new RoleAssignmentService();
+    roleService.clearTestAssignments();
   });
 
   describe('Project Admin Global Permissions', () => {

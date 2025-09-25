@@ -8,15 +8,21 @@
  * @version 1.0.0
  */
 
-import type { AdminInvitation, AdminRole } from '@/types/admin';
-import { RoleAssignmentService } from '@/lib/admin/services/RoleAssignmentService';
-import { AuditLogService } from '@/lib/admin/services/AuditLogService';
+import type {
+  AdminInvitation,
+  AdminRole,
+  AdminRoleDefinition,
+} from '@/types/admin';
+import { RoleAssignmentService } from './RoleAssignmentService';
+import { AuditLogService } from './AuditLogService';
 import { AdminUserModel } from '@/lib/admin/models/AdminUser';
+import { PermissionValidator } from '../utils/PermissionValidator';
 
 export class InvitationService {
   private roleService: RoleAssignmentService;
   private auditService: AuditLogService;
   private adminModel: AdminUserModel;
+  private invitations: Map<string, AdminInvitation> = new Map();
 
   constructor() {
     this.roleService = new RoleAssignmentService();
@@ -29,16 +35,22 @@ export class InvitationService {
    */
   async createInvitation(
     email: string,
-    role: AdminRole,
+    roleType: AdminRole,
     invitedBy: string,
     fandomId?: string,
     expiresInDays: number = 7
   ): Promise<AdminInvitation> {
     try {
       // Validate inviting user has permission
-      const hasPermission = await this.adminModel.hasPermission(
-        invitedBy,
-        'admin:invite'
+      const invitingUser = await this.adminModel.getAdminUser(invitedBy);
+      if (!invitingUser) {
+        throw new Error('Inviting user not found');
+      }
+
+      const hasPermission = PermissionValidator.checkPermission(
+        invitingUser,
+        'admin:invite',
+        { fandomId }
       );
 
       if (!hasPermission) {
@@ -46,11 +58,11 @@ export class InvitationService {
       }
 
       // Validate role and fandom requirements
-      if (role === 'FandomAdmin' && !fandomId) {
+      if (roleType === 'FandomAdmin' && !fandomId) {
         throw new Error('Fandom ID required for fandom admin invitations');
       }
 
-      if (role === 'ProjectAdmin' && fandomId) {
+      if (roleType === 'ProjectAdmin' && fandomId) {
         throw new Error('Project admin invitations should not specify fandom');
       }
 
@@ -63,6 +75,9 @@ export class InvitationService {
         throw new Error('Active invitation already exists for this email');
       }
 
+      // Create role definition
+      const role = this.createRoleDefinition(roleType);
+
       // Generate unique token
       const token = this.generateInvitationToken();
 
@@ -73,9 +88,11 @@ export class InvitationService {
       const invitation: AdminInvitation = {
         id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         email,
-        role_id: `role_${role.toLowerCase()}`,
-        role_name: role,
+        role: role,
+        role_id: role.id,
+        role_name: role.name,
         fandom_id: fandomId,
+        token: token,
         invitation_token: token,
         invited_by: invitedBy,
         invited_at: new Date(),
@@ -103,7 +120,7 @@ export class InvitationService {
         fandom_id: fandomId,
         details: {
           invited_email: email,
-          role_name: role,
+          role_name: role.name,
           fandom_id: fandomId,
           expires_at: expiresAt.toISOString(),
         },
@@ -254,9 +271,18 @@ export class InvitationService {
       }
 
       // Verify permission to cancel
-      const canCancel =
-        invitation.invited_by === cancelledBy ||
-        (await this.adminModel.hasPermission(cancelledBy, 'admin:invite'));
+      let canCancel = invitation.invited_by === cancelledBy;
+
+      if (!canCancel) {
+        const cancellingUser = await this.adminModel.getAdminUser(cancelledBy);
+        if (cancellingUser) {
+          canCancel = PermissionValidator.checkPermission(
+            cancellingUser,
+            'admin:invite',
+            { fandomId: invitation.fandom_id }
+          );
+        }
+      }
 
       if (!canCancel) {
         throw new Error('Insufficient permissions to cancel invitation');
@@ -310,9 +336,18 @@ export class InvitationService {
       }
 
       // Verify permission to resend
-      const canResend =
-        invitation.invited_by === resentBy ||
-        (await this.adminModel.hasPermission(resentBy, 'admin:invite'));
+      let canResend = invitation.invited_by === resentBy;
+
+      if (!canResend) {
+        const resentByUser = await this.adminModel.getAdminUser(resentBy);
+        if (resentByUser) {
+          canResend = PermissionValidator.checkPermission(
+            resentByUser,
+            'admin:invite',
+            { fandomId: invitation.fandom_id }
+          );
+        }
+      }
 
       if (!canResend) {
         throw new Error('Insufficient permissions to resend invitation');
@@ -467,15 +502,25 @@ export class InvitationService {
   }
 
   private async saveInvitation(invitation: AdminInvitation): Promise<void> {
-    // This would save to database
-    console.log('Saving invitation:', invitation.id);
+    // Save to in-memory storage for testing
+    this.invitations.set(invitation.id, invitation);
   }
 
   private async getActiveInvitation(
     email: string,
     fandomId?: string
   ): Promise<AdminInvitation | null> {
-    // This would query database for active invitation
+    // Check in-memory storage for testing
+    for (const invitation of this.invitations.values()) {
+      if (
+        invitation.email === email &&
+        invitation.status === 'pending' &&
+        invitation.fandom_id === fandomId &&
+        invitation.expires_at > new Date()
+      ) {
+        return invitation;
+      }
+    }
     return null;
   }
 
@@ -496,14 +541,18 @@ export class InvitationService {
     userId: string
   ): Promise<AdminInvitation> {
     // This would update invitation status in database
+    const role = this.createRoleDefinition('FandomAdmin');
     const invitation: AdminInvitation = {
       id,
       email: '',
-      role_id: 'role_fandomadmin',
-      role_name: 'FandomAdmin',
+      role: role,
+      role_id: role.id,
+      role_name: role.name,
       fandom_id: undefined,
+      token: '',
       invitation_token: '',
       invited_by: '',
+      invited_at: new Date(),
       expires_at: new Date(),
       status: 'accepted',
       accepted_at: new Date(),
@@ -519,14 +568,18 @@ export class InvitationService {
     reason?: string
   ): Promise<AdminInvitation> {
     // This would update invitation status in database
+    const role = this.createRoleDefinition('FandomAdmin');
     const invitation: AdminInvitation = {
       id,
       email: '',
-      role_id: 'role_fandomadmin',
-      role_name: 'FandomAdmin',
+      role: role,
+      role_id: role.id,
+      role_name: role.name,
       fandom_id: undefined,
+      token: '',
       invitation_token: '',
       invited_by: '',
+      invited_at: new Date(),
       expires_at: new Date(),
       status: 'revoked', // Using 'revoked' as closest to 'rejected'
       accepted_at: undefined,
@@ -539,14 +592,18 @@ export class InvitationService {
 
   private async markInvitationCancelled(id: string): Promise<AdminInvitation> {
     // This would update invitation status in database
+    const role = this.createRoleDefinition('FandomAdmin');
     const invitation: AdminInvitation = {
       id,
       email: '',
-      role_id: 'role_fandomadmin',
-      role_name: 'FandomAdmin',
+      role: role,
+      role_id: role.id,
+      role_name: role.name,
       fandom_id: undefined,
+      token: '',
       invitation_token: '',
       invited_by: '',
+      invited_at: new Date(),
       expires_at: new Date(),
       status: 'revoked', // Using 'revoked' as closest to 'cancelled'
       accepted_at: undefined,
@@ -559,14 +616,18 @@ export class InvitationService {
 
   private async markInvitationExpired(id: string): Promise<AdminInvitation> {
     // This would update invitation status in database
+    const role = this.createRoleDefinition('FandomAdmin');
     const invitation: AdminInvitation = {
       id,
       email: '',
-      role_id: 'role_fandomadmin',
-      role_name: 'FandomAdmin',
+      role: role,
+      role_id: role.id,
+      role_name: role.name,
       fandom_id: undefined,
+      token: '',
       invitation_token: '',
       invited_by: '',
+      invited_at: new Date(),
       expires_at: new Date(),
       status: 'expired',
       accepted_at: undefined,
@@ -580,5 +641,57 @@ export class InvitationService {
   private async getExpiredInvitations(): Promise<AdminInvitation[]> {
     // This would query database for expired invitations
     return [];
+  }
+
+  /**
+   * Create a role definition based on role type
+   */
+  private createRoleDefinition(roleType: AdminRole): AdminRoleDefinition {
+    const now = new Date();
+
+    if (roleType === 'ProjectAdmin') {
+      return {
+        id: 'project-admin',
+        name: 'ProjectAdmin',
+        description: 'Global admin with full platform permissions',
+        level: 1,
+        permissions: [
+          'fandom:create',
+          'fandom:edit',
+          'fandom:delete',
+          'admin:assign',
+          'admin:revoke',
+          'validation:global',
+          'audit:view',
+          'users:manage',
+        ],
+        created_at: now,
+        updated_at: now,
+      };
+    } else {
+      return {
+        id: 'fandom-admin',
+        name: 'FandomAdmin',
+        description:
+          'Fandom-specific admin with content management permissions',
+        level: 2,
+        permissions: [
+          'tags:manage',
+          'plotblocks:manage',
+          'validation:fandom',
+          'submissions:review',
+          'content:moderate',
+        ],
+        created_at: now,
+        updated_at: now,
+      };
+    }
+  }
+
+  /**
+   * Clear test invitations (for testing)
+   */
+  clearTestInvitations(): void {
+    this.invitations.clear();
   }
 }

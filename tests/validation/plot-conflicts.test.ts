@@ -1,101 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-// Mock imports - these will be replaced with actual implementations
-interface PlotBlock {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  created_at: Date;
-  updated_at: Date;
-  conflicts_with?: string[];
-  requires?: string[];
-  excludes_categories?: string[];
-  max_instances?: number;
-}
-
-interface PlotBlockCondition {
-  id: string;
-  plot_block_id: string;
-  parent_id?: string;
-  name: string;
-  description: string;
-  order: number;
-  created_at: Date;
-  updated_at: Date;
-  conflicts_with?: string[];
-  requires?: string[];
-}
-
-interface ConflictDetectionContext {
-  selected_plot_blocks: PlotBlock[];
-  selected_conditions: PlotBlockCondition[];
-  all_plot_blocks: PlotBlock[];
-  all_conditions: PlotBlockCondition[];
-}
-
-interface ConflictResult {
-  has_conflicts: boolean;
-  conflicts: Array<{
-    type:
-      | 'direct_exclusion'
-      | 'category_exclusion'
-      | 'instance_limit'
-      | 'condition_conflict';
-    source_id: string;
-    target_id: string;
-    message: string;
-    severity: 'error' | 'warning';
-  }>;
-  suggested_resolutions?: Array<{
-    action: 'remove' | 'replace' | 'modify';
-    target_id: string;
-    alternative_ids?: string[];
-    reason: string;
-  }>;
-}
-
-// Mock implementation - will be replaced with actual PlotBlockConflictDetector
-class PlotBlockConflictDetector {
-  static detectConflicts(context: ConflictDetectionContext): ConflictResult {
-    // Mock implementation that always returns no conflicts
-    return {
-      has_conflicts: false,
-      conflicts: [],
-    };
-  }
-
-  static validatePlotBlockCombination(plotBlocks: PlotBlock[]): ConflictResult {
-    return {
-      has_conflicts: false,
-      conflicts: [],
-    };
-  }
-
-  static detectCategoryConflicts(plotBlocks: PlotBlock[]): ConflictResult {
-    return {
-      has_conflicts: false,
-      conflicts: [],
-    };
-  }
-
-  static validateInstanceLimits(plotBlocks: PlotBlock[]): ConflictResult {
-    return {
-      has_conflicts: false,
-      conflicts: [],
-    };
-  }
-
-  static detectConditionConflicts(
-    conditions: PlotBlockCondition[],
-    plotBlocks: PlotBlock[]
-  ): ConflictResult {
-    return {
-      has_conflicts: false,
-      conflicts: [],
-    };
-  }
-}
+// Import the actual implementation and types
+import { PlotBlockConflictDetector } from '../../src/lib/validation/plot-conflicts';
+import type {
+  ConflictDetectionContext,
+  ConflictResult,
+} from '../../src/lib/validation/plot-conflicts';
+import type { PlotBlock, PlotBlockCondition } from '../../src/types';
 
 describe('PlotBlockConflictDetector', () => {
   let samplePlotBlocks: PlotBlock[];
@@ -110,6 +21,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Goblin Inheritance',
         category: 'inheritance',
         description: 'Harry discovers his true inheritance through Gringotts',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         conflicts_with: ['pb-3'], // Conflicts with Muggle Raised
@@ -120,6 +33,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Time Travel',
         category: 'temporal',
         description: 'Character travels back in time',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         excludes_categories: ['multiverse'], // Cannot coexist with multiverse plots
@@ -130,6 +45,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Muggle Raised',
         category: 'background',
         description: 'Character raised in muggle world',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         conflicts_with: ['pb-1'], // Conflicts with Goblin Inheritance
@@ -139,6 +56,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Multiverse Travel',
         category: 'multiverse',
         description: 'Character travels between alternate universes',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -147,6 +66,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Dimensional Shift',
         category: 'multiverse',
         description: 'Reality shifts between dimensions',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -155,6 +76,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Romance Arc',
         category: 'relationship',
         description: 'Central romantic plot',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-7'], // Requires Character Development
@@ -164,6 +87,8 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Character Development',
         category: 'character',
         description: 'Significant character growth',
+        fandom_id: 'test-fandom',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -176,6 +101,7 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Black Lordship',
         description: 'Inherits Black family lordship',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
         conflicts_with: ['cond-3'], // Cannot have both Black and Malfoy lordships
@@ -187,6 +113,7 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Grimmauld Place Control',
         description: 'Gains control of Black family home',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -196,6 +123,7 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Malfoy Lordship',
         description: 'Inherits Malfoy family lordship through conquest',
         order: 2,
+        is_active: true,
         created_at: now,
         updated_at: now,
         conflicts_with: ['cond-1'], // Cannot have both lordships
@@ -207,6 +135,7 @@ describe('PlotBlockConflictDetector', () => {
         name: 'Lucius Defeat',
         description: 'Defeats Lucius Malfoy in combat',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -310,7 +239,7 @@ describe('PlotBlockConflictDetector', () => {
 
     it('should not detect category conflicts when categories are compatible', () => {
       const context: ConflictDetectionContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[5]], // Inheritance + Relationship
+        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[6]], // Inheritance + Character Development
         selected_conditions: [],
         all_plot_blocks: samplePlotBlocks,
         all_conditions: sampleConditions,
@@ -545,10 +474,10 @@ describe('PlotBlockConflictDetector', () => {
       expect(result.suggested_resolutions).toBeDefined();
 
       const removeAction = result.suggested_resolutions!.find(
-        r => r.action === 'remove'
+        r => r.action === 'remove_element'
       );
       expect(removeAction).toBeDefined();
-      expect(removeAction!.alternative_ids).toBeDefined();
+      expect(removeAction!.alternatives).toBeDefined();
     });
   });
 

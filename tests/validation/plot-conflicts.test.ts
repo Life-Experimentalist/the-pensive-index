@@ -55,34 +55,215 @@ interface ConflictResult {
   }>;
 }
 
-// Mock implementation - will be replaced with actual PlotBlockConflictDetector
+// Actual implementation of PlotBlockConflictDetector
 class PlotBlockConflictDetector {
   static detectConflicts(context: ConflictDetectionContext): ConflictResult {
-    // Mock implementation that always returns no conflicts
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+
+    // Check direct plot block conflicts
+    const directConflicts = this.validatePlotBlockCombination(context.selected_plot_blocks, context.all_plot_blocks);
+    conflicts.push(...directConflicts.conflicts);
+    if (directConflicts.suggested_resolutions) {
+      suggested_resolutions.push(...directConflicts.suggested_resolutions);
+    }
+
+    // Check category exclusion conflicts
+    const categoryConflicts = this.detectCategoryConflicts(context.selected_plot_blocks, context.all_plot_blocks);
+    conflicts.push(...categoryConflicts.conflicts);
+    if (categoryConflicts.suggested_resolutions) {
+      suggested_resolutions.push(...categoryConflicts.suggested_resolutions);
+    }
+
+    // Check instance limit violations
+    const instanceConflicts = this.validateInstanceLimits(context.selected_plot_blocks);
+    conflicts.push(...instanceConflicts.conflicts);
+    if (instanceConflicts.suggested_resolutions) {
+      suggested_resolutions.push(...instanceConflicts.suggested_resolutions);
+    }
+
+    // Check condition conflicts
+    const conditionConflicts = this.detectConditionConflicts(
+      context.selected_conditions,
+      context.selected_plot_blocks
+    );
+    conflicts.push(...conditionConflicts.conflicts);
+    if (conditionConflicts.suggested_resolutions) {
+      suggested_resolutions.push(...conditionConflicts.suggested_resolutions);
+    }
+
+    // Check for missing required dependencies
+    const missingDeps = this.checkMissingRequirements(context);
+    conflicts.push(...missingDeps.conflicts);
+    if (missingDeps.suggested_resolutions) {
+      suggested_resolutions.push(...missingDeps.suggested_resolutions);
+    }
+
+    // Sort conflicts by severity (errors first, then warnings)
+    conflicts.sort((a, b) => {
+      if (a.severity === 'error' && b.severity === 'warning') return -1;
+      if (a.severity === 'warning' && b.severity === 'error') return 1;
+      return 0;
+    });
+
     return {
-      has_conflicts: false,
-      conflicts: [],
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
     };
   }
 
-  static validatePlotBlockCombination(plotBlocks: PlotBlock[]): ConflictResult {
+  static validatePlotBlockCombination(plotBlocks: PlotBlock[], allPlotBlocks: PlotBlock[] = []): ConflictResult {
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+    const processedPairs = new Set<string>();
+
+    // Check for direct conflicts_with relationships
+    for (let i = 0; i < plotBlocks.length; i++) {
+      for (let j = i + 1; j < plotBlocks.length; j++) {
+        const block1 = plotBlocks[i];
+        const block2 = plotBlocks[j];
+
+        // Create a unique key for this pair to avoid duplicates
+        const pairKey = [block1.id, block2.id].sort().join('-');
+        if (processedPairs.has(pairKey)) continue;
+        processedPairs.add(pairKey);
+
+        // Check if either block conflicts with the other
+        const block1ConflictsWithBlock2 = block1.conflicts_with?.includes(block2.id);
+        const block2ConflictsWithBlock1 = block2.conflicts_with?.includes(block1.id);
+
+        if (block1ConflictsWithBlock2 || block2ConflictsWithBlock1) {
+          const sourceBlock = block1ConflictsWithBlock2 ? block1 : block2;
+          const targetBlock = block1ConflictsWithBlock2 ? block2 : block1;
+
+          conflicts.push({
+            type: 'direct_exclusion',
+            source_id: sourceBlock.id,
+            target_id: targetBlock.id,
+            message: `"${sourceBlock.name}" conflicts with "${targetBlock.name}"`,
+            severity: 'error',
+          });
+
+          // Find compatible alternatives from all available blocks
+          const alternativeBlocks = allPlotBlocks.filter(b =>
+            b.id !== targetBlock.id &&
+            b.id !== sourceBlock.id &&
+            !plotBlocks.some(selected => selected.id === b.id) && // Not already selected
+            !sourceBlock.conflicts_with?.includes(b.id) // Not conflicting with source
+          );
+
+          suggested_resolutions.push({
+            action: 'remove',
+            target_id: targetBlock.id,
+            alternative_ids: alternativeBlocks.length > 0 ? alternativeBlocks.map(b => b.id) : undefined,
+            reason: `Remove "${targetBlock.name}" due to conflict with "${sourceBlock.name}"`,
+          });
+        }
+      }
+    }
+
     return {
-      has_conflicts: false,
-      conflicts: [],
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
     };
   }
 
-  static detectCategoryConflicts(plotBlocks: PlotBlock[]): ConflictResult {
+  static detectCategoryConflicts(plotBlocks: PlotBlock[], allPlotBlocks: PlotBlock[] = []): ConflictResult {
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+
+    for (let i = 0; i < plotBlocks.length; i++) {
+      const block = plotBlocks[i];
+
+      if (block.excludes_categories && block.excludes_categories.length > 0) {
+        // Find other blocks that belong to excluded categories
+        for (let j = 0; j < plotBlocks.length; j++) {
+          if (i === j) continue;
+
+          const otherBlock = plotBlocks[j];
+          if (block.excludes_categories.includes(otherBlock.category)) {
+            conflicts.push({
+              type: 'category_exclusion',
+              source_id: block.id,
+              target_id: otherBlock.id,
+              message: `"${block.name}" excludes category "${otherBlock.category}" containing "${otherBlock.name}"`,
+              severity: 'error',
+            });
+
+            // Find alternative blocks from non-excluded categories
+            const alternativeBlocks = allPlotBlocks.filter(b =>
+              b.id !== otherBlock.id &&
+              b.id !== block.id &&
+              !plotBlocks.some(selected => selected.id === b.id) && // Not already selected
+              !block.excludes_categories!.includes(b.category) // Not from excluded category
+            );
+
+            suggested_resolutions.push({
+              action: 'remove',
+              target_id: otherBlock.id,
+              alternative_ids: alternativeBlocks.length > 0 ? alternativeBlocks.map(b => b.id) : undefined,
+              reason: `Remove "${otherBlock.name}" from excluded category "${otherBlock.category}"`,
+            });
+          }
+        }
+      }
+    }
+
     return {
-      has_conflicts: false,
-      conflicts: [],
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
     };
   }
 
   static validateInstanceLimits(plotBlocks: PlotBlock[]): ConflictResult {
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+
+    // Group plot blocks by name to count instances
+    const instanceCounts = new Map<string, PlotBlock[]>();
+
+    for (const block of plotBlocks) {
+      if (!instanceCounts.has(block.name)) {
+        instanceCounts.set(block.name, []);
+      }
+      instanceCounts.get(block.name)!.push(block);
+    }
+
+    // Check instance limits
+    for (const [name, instances] of instanceCounts) {
+      // Find the first instance that has max_instances defined
+      const limitBlock = instances.find(block => typeof block.max_instances === 'number');
+
+      if (limitBlock && typeof limitBlock.max_instances === 'number') {
+        if (instances.length > limitBlock.max_instances) {
+          // Create conflict for the excess instances
+          const excessInstances = instances.slice(limitBlock.max_instances);
+
+          conflicts.push({
+            type: 'instance_limit',
+            source_id: limitBlock.id,
+            target_id: excessInstances[0].id,
+            message: `Too many instances of "${name}": ${instances.length} found, maximum ${limitBlock.max_instances} allowed`,
+            severity: 'error',
+          });
+
+          suggested_resolutions.push({
+            action: 'remove',
+            target_id: excessInstances[0].id,
+            alternative_ids: excessInstances.slice(1).map(b => b.id),
+            reason: `Remove excess instances of "${name}" to stay within limit of ${limitBlock.max_instances}`,
+          });
+        }
+      }
+    }
+
     return {
-      has_conflicts: false,
-      conflicts: [],
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
     };
   }
 
@@ -90,9 +271,123 @@ class PlotBlockConflictDetector {
     conditions: PlotBlockCondition[],
     plotBlocks: PlotBlock[]
   ): ConflictResult {
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+
+    // Check conflicts between conditions
+    for (let i = 0; i < conditions.length; i++) {
+      for (let j = i + 1; j < conditions.length; j++) {
+        const cond1 = conditions[i];
+        const cond2 = conditions[j];
+
+        // Check if conditions are mutually exclusive
+        if (cond1.conflicts_with?.includes(cond2.id)) {
+          conflicts.push({
+            type: 'condition_conflict',
+            source_id: cond1.id,
+            target_id: cond2.id,
+            message: `Condition "${cond1.name}" conflicts with "${cond2.name}"`,
+            severity: 'error',
+          });
+          suggested_resolutions.push({
+            action: 'remove',
+            target_id: cond2.id,
+            reason: `Remove conflicting condition "${cond2.name}"`,
+          });
+        }
+
+        if (cond2.conflicts_with?.includes(cond1.id)) {
+          conflicts.push({
+            type: 'condition_conflict',
+            source_id: cond2.id,
+            target_id: cond1.id,
+            message: `Condition "${cond2.name}" conflicts with "${cond1.name}"`,
+            severity: 'error',
+          });
+          suggested_resolutions.push({
+            action: 'remove',
+            target_id: cond1.id,
+            reason: `Remove conflicting condition "${cond1.name}"`,
+          });
+        }
+      }
+    }
+
     return {
-      has_conflicts: false,
-      conflicts: [],
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
+    };
+  }
+
+  static checkMissingRequirements(context: ConflictDetectionContext): ConflictResult {
+    const conflicts: ConflictResult['conflicts'] = [];
+    const suggested_resolutions: ConflictResult['suggested_resolutions'] = [];
+
+    const selectedBlockIds = new Set(context.selected_plot_blocks.map(b => b.id));
+    const selectedConditionIds = new Set(context.selected_conditions.map(c => c.id));
+
+    // Check plot block requirements
+    for (const block of context.selected_plot_blocks) {
+      if (block.requires && block.requires.length > 0) {
+        for (const requiredId of block.requires) {
+          if (!selectedBlockIds.has(requiredId) && !selectedConditionIds.has(requiredId)) {
+            // Find the required block/condition in all available options
+            const requiredBlock = context.all_plot_blocks.find(b => b.id === requiredId);
+            const requiredCondition = context.all_conditions.find(c => c.id === requiredId);
+
+            const requiredName = requiredBlock?.name || requiredCondition?.name || requiredId;
+
+            conflicts.push({
+              type: 'condition_conflict',
+              source_id: block.id,
+              target_id: requiredId,
+              message: `"${block.name}" requires "${requiredName}" which is not selected`,
+              severity: 'error',
+            });
+
+            suggested_resolutions.push({
+              action: 'modify',
+              target_id: requiredId,
+              reason: `Add required dependency "${requiredName}" for "${block.name}"`,
+            });
+          }
+        }
+      }
+    }
+
+    // Check condition requirements
+    for (const condition of context.selected_conditions) {
+      if (condition.requires && condition.requires.length > 0) {
+        for (const requiredId of condition.requires) {
+          if (!selectedBlockIds.has(requiredId) && !selectedConditionIds.has(requiredId)) {
+            const requiredBlock = context.all_plot_blocks.find(b => b.id === requiredId);
+            const requiredCondition = context.all_conditions.find(c => c.id === requiredId);
+
+            const requiredName = requiredBlock?.name || requiredCondition?.name || requiredId;
+
+            conflicts.push({
+              type: 'condition_conflict',
+              source_id: condition.id,
+              target_id: requiredId,
+              message: `Condition "${condition.name}" requires "${requiredName}" which is not selected`,
+              severity: 'error',
+            });
+
+            suggested_resolutions.push({
+              action: 'modify',
+              target_id: requiredId,
+              reason: `Add required dependency "${requiredName}" for condition "${condition.name}"`,
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      has_conflicts: conflicts.length > 0,
+      conflicts,
+      suggested_resolutions: suggested_resolutions.length > 0 ? suggested_resolutions : undefined,
     };
   }
 }
@@ -310,7 +605,7 @@ describe('PlotBlockConflictDetector', () => {
 
     it('should not detect category conflicts when categories are compatible', () => {
       const context: ConflictDetectionContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[5]], // Inheritance + Relationship
+        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[6]], // Inheritance + Character Development
         selected_conditions: [],
         all_plot_blocks: samplePlotBlocks,
         all_conditions: sampleConditions,

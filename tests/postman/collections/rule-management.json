@@ -1,0 +1,531 @@
+{
+    "info": {
+        "name": "Rule Management",
+        "description": "API tests for rule versioning, rollback, and pathway validation",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Validate Complete Pathway (Integration Test)",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Record start time for performance measurement",
+                            "pm.environment.set('pathwayValidationStart', new Date().getTime());"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Performance validation - critical for production use",
+                            "const startTime = pm.environment.get('pathwayValidationStart');",
+                            "const endTime = new Date().getTime();",
+                            "const totalTime = endTime - startTime;",
+                            "const performanceTarget = parseInt(pm.environment.get('performanceTarget')) || 100;",
+                            "",
+                            "pm.test('Pathway validation meets performance target', function () {",
+                            "    pm.expect(totalTime).to.be.below(performanceTarget);",
+                            "});",
+                            "",
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Validation response has complete structure', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('isValid');",
+                            "    pm.expect(jsonData).to.have.property('violations');",
+                            "    pm.expect(jsonData).to.have.property('suggestions');",
+                            "    pm.expect(jsonData).to.have.property('executionTime');",
+                            "    pm.expect(jsonData).to.have.property('rulesEvaluated');",
+                            "    pm.expect(jsonData).to.have.property('performanceTarget');",
+                            "    pm.expect(jsonData).to.have.property('metPerformanceTarget');",
+                            "});",
+                            "",
+                            "pm.test('Performance metrics are accurate', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.executionTime).to.be.a('number');",
+                            "    pm.expect(jsonData.executionTime).to.be.above(0);",
+                            "    pm.expect(jsonData.rulesEvaluated).to.be.a('number');",
+                            "    pm.expect(jsonData.rulesEvaluated).to.be.at.least(0);",
+                            "    pm.expect(jsonData.metPerformanceTarget).to.be.a('boolean');",
+                            "});",
+                            "",
+                            "pm.test('Violations have proper structure when present', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    jsonData.violations.forEach(violation => {",
+                            "        pm.expect(violation).to.have.property('ruleId');",
+                            "        pm.expect(violation).to.have.property('message');",
+                            "        pm.expect(violation).to.have.property('severity');",
+                            "        pm.expect(violation).to.have.property('affectedElements');",
+                            "        pm.expect(['error', 'warning']).to.include(violation.severity);",
+                            "        pm.expect(violation.affectedElements).to.be.an('array');",
+                            "    });",
+                            "});",
+                            "",
+                            "pm.test('Suggestions have proper structure when present', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    jsonData.suggestions.forEach(suggestion => {",
+                            "        pm.expect(suggestion).to.have.property('action');",
+                            "        pm.expect(suggestion).to.have.property('targetType');",
+                            "        pm.expect(suggestion).to.have.property('targetId');",
+                            "        pm.expect(suggestion).to.have.property('reason');",
+                            "        pm.expect(['add', 'remove', 'replace']).to.include(suggestion.action);",
+                            "        pm.expect(['tag', 'plot_block']).to.include(suggestion.targetType);",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"pathway\": {\n    \"id\": \"complex-pathway-001\",\n    \"fandomId\": \"{{fandomId}}\",\n    \"tags\": [\n      \"harry-hermione\",\n      \"time-travel\",\n      \"post-war\",\n      \"marriage-law\",\n      \"independent-harry\"\n    ],\n    \"plotBlocks\": [\n      \"goblin-inheritance\",\n      \"soul-bond\",\n      \"horcrux-hunt\",\n      \"ministry-corruption\"\n    ],\n    \"metadata\": {\n      \"complexity\": \"high\",\n      \"expectedLength\": \"novel\",\n      \"targetAudience\": \"mature\"\n    }\n  },\n  \"performanceTarget\": {{performanceTarget}}\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation/validate-pathway",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation",
+                        "validate-pathway"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Validate Pathway with Specific Rules Only",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Set up specific rule IDs for targeted testing",
+                            "// In a real scenario, these would be actual rule IDs from the system",
+                            "pm.environment.set('testRuleIds', JSON.stringify([",
+                            "    'rule-shipping-constraints-001',",
+                            "    'rule-time-travel-logic-002'",
+                            "]));"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Only specified rules were evaluated', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const requestedRules = JSON.parse(pm.environment.get('testRuleIds'));",
+                            "    pm.expect(jsonData.rulesEvaluated).to.equal(requestedRules.length);",
+                            "});",
+                            "",
+                            "pm.test('Performance is better with fewer rules', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const targetTime = parseInt(pm.environment.get('performanceTarget')) || 100;",
+                            "    // Should be significantly faster with only specific rules",
+                            "    pm.expect(jsonData.executionTime).to.be.below(targetTime * 0.5);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"pathway\": {\n    \"id\": \"targeted-pathway-001\",\n    \"fandomId\": \"{{fandomId}}\",\n    \"tags\": [\n      \"harry-ginny\",\n      \"time-travel\",\n      \"canon-compliant\"\n    ],\n    \"plotBlocks\": [\n      \"epilogue-compliant\",\n      \"temporal-mechanics\"\n    ]\n  },\n  \"ruleIds\": {{testRuleIds}},\n  \"performanceTarget\": {{performanceTarget}}\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation/validate-pathway",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation",
+                        "validate-pathway"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Validate Invalid Pathway (Error Handling)",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 400', function () {",
+                            "    pm.response.to.have.status(400);",
+                            "});",
+                            "",
+                            "pm.test('Error indicates validation issues', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('error');",
+                            "    pm.expect(jsonData).to.have.property('validationErrors');",
+                            "    pm.expect(jsonData.validationErrors).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Specific validation errors identified', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    const errors = jsonData.validationErrors;",
+                            "    pm.expect(errors.length).to.be.greaterThan(0);",
+                            "    errors.forEach(error => {",
+                            "        pm.expect(error).to.have.property('field');",
+                            "        pm.expect(error).to.have.property('message');",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"pathway\": {\n    \"id\": \"\",\n    \"fandomId\": \"invalid-fandom\",\n    \"tags\": [],\n    \"plotBlocks\": [\"nonexistent-plot-block\"]\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation/validate-pathway",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation",
+                        "validate-pathway"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Performance Stress Test - Complex Pathway",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Create a complex pathway with many tags and plot blocks",
+                            "const complexTags = [",
+                            "    'harry-hermione', 'time-travel', 'soul-bond', 'independent-harry',",
+                            "    'manipulative-dumbledore', 'dark-harry', 'powerful-harry',",
+                            "    'post-war', 'marriage-law', 'veela-heritage', 'lord-potter',",
+                            "    'political-intrigue', 'wizengamot', 'gringotts', 'parseltongue'",
+                            "];",
+                            "",
+                            "const complexPlotBlocks = [",
+                            "    'goblin-inheritance', 'horcrux-hunt', 'triwizard-tournament',",
+                            "    'ministry-corruption', 'death-eater-trials', 'hogwarts-rebuilding',",
+                            "    'international-relations', 'magical-creature-rights',",
+                            "    'time-turner-regulations', 'prophecy-investigations'",
+                            "];",
+                            "",
+                            "pm.environment.set('complexTags', JSON.stringify(complexTags));",
+                            "pm.environment.set('complexPlotBlocks', JSON.stringify(complexPlotBlocks));",
+                            "pm.environment.set('stressTestStart', new Date().getTime());"
+                        ]
+                    }
+                },
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "// Critical performance test - this validates production readiness",
+                            "const startTime = pm.environment.get('stressTestStart');",
+                            "const endTime = new Date().getTime();",
+                            "const totalTime = endTime - startTime;",
+                            "const performanceTarget = parseInt(pm.environment.get('performanceTarget')) || 100;",
+                            "",
+                            "pm.test('Complex pathway validation still meets performance target', function () {",
+                            "    pm.expect(totalTime).to.be.below(performanceTarget);",
+                            "});",
+                            "",
+                            "pm.test('Status code is 200 for complex pathway', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Server execution time meets target', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.executionTime).to.be.below(performanceTarget);",
+                            "    pm.expect(jsonData.metPerformanceTarget).to.be.true;",
+                            "});",
+                            "",
+                            "pm.test('Multiple rules evaluated efficiently', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.rulesEvaluated).to.be.greaterThan(0);",
+                            "    // Performance per rule should be reasonable",
+                            "    const timePerRule = jsonData.executionTime / jsonData.rulesEvaluated;",
+                            "    pm.expect(timePerRule).to.be.below(20); // Max 20ms per rule",
+                            "});",
+                            "",
+                            "pm.test('Complex validation produces meaningful results', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    // Complex pathways should trigger some violations or suggestions",
+                            "    const totalFeedback = jsonData.violations.length + jsonData.suggestions.length;",
+                            "    pm.expect(totalFeedback).to.be.greaterThan(0);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"pathway\": {\n    \"id\": \"stress-test-pathway-001\",\n    \"fandomId\": \"{{fandomId}}\",\n    \"tags\": {{complexTags}},\n    \"plotBlocks\": {{complexPlotBlocks}},\n    \"metadata\": {\n      \"complexity\": \"maximum\",\n      \"testType\": \"stress\",\n      \"expectedChallenges\": \"performance\"\n    }\n  },\n  \"performanceTarget\": {{performanceTarget}}\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation/validate-pathway",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation",
+                        "validate-pathway"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Validation Rule Versions",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Versions array returned', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.be.an('array');",
+                            "});",
+                            "",
+                            "pm.test('Version history is properly structured', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.length > 0) {",
+                            "        const version = jsonData[0];",
+                            "        pm.expect(version).to.have.property('versionNumber');",
+                            "        pm.expect(version).to.have.property('snapshot');",
+                            "        pm.expect(version).to.have.property('changeDescription');",
+                            "        pm.expect(version).to.have.property('isActive');",
+                            "        pm.expect(version).to.have.property('createdAt');",
+                            "        pm.expect(version).to.have.property('createdBy');",
+                            "    }",
+                            "});",
+                            "",
+                            "pm.test('Versions are ordered correctly', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    if (jsonData.length > 1) {",
+                            "        for (let i = 1; i < jsonData.length; i++) {",
+                            "            pm.expect(jsonData[i-1].versionNumber).to.be.greaterThan(jsonData[i].versionNumber);",
+                            "        }",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testRuleId}}/versions",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testRuleId}}",
+                        "versions"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Rollback Rule to Previous Version",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "pm.test('Status code is 200', function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test('Rollback successful', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('success');",
+                            "    pm.expect(jsonData.success).to.be.true;",
+                            "});",
+                            "",
+                            "pm.test('Rollback metadata provided', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('rolledBackTo');",
+                            "    pm.expect(jsonData).to.have.property('previousVersion');",
+                            "    pm.expect(jsonData).to.have.property('rollbackTimestamp');",
+                            "});",
+                            "",
+                            "pm.test('Version control integrity maintained', function () {",
+                            "    const jsonData = pm.response.json();",
+                            "    pm.expect(jsonData.rolledBackTo).to.be.a('number');",
+                            "    pm.expect(jsonData.previousVersion).to.be.a('number');",
+                            "    pm.expect(jsonData.rolledBackTo).to.be.below(jsonData.previousVersion);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{adminToken}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"targetVersion\": 1,\n  \"reason\": \"Rolling back to stable version for testing\"\n}"
+                },
+                "url": {
+                    "raw": "{{validationApiUrl}}/validation-rules/{{testRuleId}}/rollback",
+                    "host": [
+                        "{{validationApiUrl}}"
+                    ],
+                    "path": [
+                        "validation-rules",
+                        "{{testRuleId}}",
+                        "rollback"
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global setup for rule management tests",
+                    "if (!pm.environment.get('validationApiUrl')) {",
+                    "    throw new Error('validationApiUrl environment variable not set');",
+                    "}",
+                    "",
+                    "// Set default test rule ID if not already set",
+                    "if (!pm.environment.get('testRuleId')) {",
+                    "    pm.environment.set('testRuleId', 'default-test-rule-001');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global performance assertion for all rule management operations",
+                    "pm.test('Rule management operations are responsive', function () {",
+                    "    const maxResponseTime = 1000; // Rule management can take up to 1 second",
+                    "    pm.expect(pm.response.responseTime).to.be.below(maxResponseTime);",
+                    "});",
+                    "",
+                    "// Global security test",
+                    "pm.test('Proper authentication required', function () {",
+                    "    if (pm.response.code === 401) {",
+                    "        pm.expect(pm.response.json()).to.have.property('error');",
+                    "        pm.expect(pm.response.json().error.toLowerCase()).to.include('auth');",
+                    "    }",
+                    "});"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "complexTags",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "complexPlotBlocks",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "testRuleIds",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

@@ -33,7 +33,7 @@ export const tags = sqliteTable(
     description: text('description'),
 
     // Fandom relationship (tags are scoped to fandoms)
-    fandomId: text('fandom_id').notNull(),
+    fandomId: integer('fandom_id').notNull(),
 
     // Tag class relationship (for validation logic)
     tagClassId: text('tag_class_id'),
@@ -51,7 +51,7 @@ export const tags = sqliteTable(
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
   },
-  (table) => ({
+  table => ({
     // Foreign key constraints
     fandomFk: foreignKey({
       columns: [table.fandomId],

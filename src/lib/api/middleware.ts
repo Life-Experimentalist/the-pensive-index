@@ -84,7 +84,8 @@ export function withRateLimit(config: RateLimitConfig) {
     ): Promise<NextResponse> => {
       // Get client identifier (IP address + user agent hash)
       const forwarded = request.headers.get('x-forwarded-for');
-      const ip = forwarded ? forwarded.split(',')[0] : request.ip || 'unknown';
+      const realIp = request.headers.get('x-real-ip');
+      const ip = forwarded ? forwarded.split(',')[0] : realIp || 'unknown';
       const userAgent = request.headers.get('user-agent') || '';
       const clientKey = `${ip}:${Buffer.from(userAgent)
         .toString('base64')

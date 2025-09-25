@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseManager } from '@/lib/database';
 import { ResponseHandler, withErrorHandling } from '@/lib/api/responses';
 import { CommonMiddleware } from '@/lib/api/middleware';
-import { tagClassSchema } from '@/lib/validation/schemas';
+import { tagClassSchema, updateTagClassSchema } from '@/lib/validation/schemas';
 import { ErrorFactory } from '@/lib/errors';
 import { and, eq } from 'drizzle-orm';
 import { tagClasses, tags } from '@/lib/database/schema';
@@ -53,7 +53,7 @@ export const PUT = CommonMiddleware.admin(
     ) => {
       const tagClassId = params.id;
       const body = await request.json();
-      const validatedData = tagClassSchema.partial().parse(body);
+      const validatedData = updateTagClassSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();
@@ -84,13 +84,66 @@ export const PUT = CommonMiddleware.admin(
         }
       }
 
+      // Transform validation rules if provided
+      const updateData: any = {};
+
+      if (validatedData.name !== undefined)
+        updateData.name = validatedData.name;
+      if (validatedData.description !== undefined)
+        updateData.description = validatedData.description;
+      if (validatedData.is_active !== undefined)
+        updateData.is_active = validatedData.is_active;
+
+      if (validatedData.validation_rules !== undefined) {
+        updateData.validation_rules = validatedData.validation_rules
+          ? {
+              mutual_exclusion: validatedData.validation_rules.mutual_exclusion
+                ? {
+                    within_class: true,
+                    conflicting_tags: Array.isArray(
+                      validatedData.validation_rules.mutual_exclusion
+                    )
+                      ? validatedData.validation_rules.mutual_exclusion
+                      : [],
+                  }
+                : undefined,
+              required_context: validatedData.validation_rules.required_context
+                ? {
+                    required_tags: Array.isArray(
+                      validatedData.validation_rules.required_context
+                    )
+                      ? validatedData.validation_rules.required_context
+                      : [],
+                  }
+                : undefined,
+              instance_limits:
+                validatedData.validation_rules.instance_limits ||
+                validatedData.validation_rules.max_instances
+                  ? {
+                      max_instances:
+                        validatedData.validation_rules.max_instances ||
+                        validatedData.validation_rules.instance_limits
+                          ?.max_instances,
+                    }
+                  : undefined,
+              category_restrictions: validatedData.validation_rules
+                .category_restrictions
+                ? {
+                    applicable_categories:
+                      validatedData.validation_rules.applicable_categories ||
+                      validatedData.validation_rules.category_restrictions
+                        .applicable_categories,
+                  }
+                : undefined,
+              dependencies: validatedData.validation_rules.dependencies,
+            }
+          : {};
+      }
+
       // Update tag class
       const [updatedTagClass] = await db
         .update(tagClasses)
-        .set({
-          ...validatedData,
-          updated_at: new Date(),
-        })
+        .set(updateData)
         .where(eq(tagClasses.id, tagClassId))
         .returning();
 

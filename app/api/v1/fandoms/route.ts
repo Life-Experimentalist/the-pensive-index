@@ -4,7 +4,7 @@ import { QueryBuilder } from '@/lib/database/queries';
 import { schema } from '@/lib/database/schema';
 import { ResponseHandler, withErrorHandling } from '@/lib/api/responses';
 import { CommonMiddleware } from '@/lib/api/middleware';
-import { fandomSchema } from '@/lib/validation/schemas';
+import { fandomSchema, createFandomSchema } from '@/lib/validation/schemas';
 import { ErrorFactory } from '@/lib/errors';
 
 /**
@@ -55,20 +55,28 @@ export const GET = CommonMiddleware.public(
 export const POST = CommonMiddleware.admin(
   withErrorHandling(async (request: NextRequest, authContext: any) => {
     const body = await request.json();
-    const validatedData = fandomSchema.parse(body);
+    const validatedData = createFandomSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
     const db = await dbManager.getConnection();
 
+    // Generate slug if not provided
+    const slug =
+      validatedData.slug ||
+      validatedData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
     // Check if fandom already exists
     const existingFandom = await db.query.fandoms.findFirst({
-      where: (fandoms, { eq }) => eq(fandoms.slug, validatedData.slug),
+      where: (fandoms, { eq }) => eq(fandoms.slug, slug),
     });
 
     if (existingFandom) {
       throw ErrorFactory.businessRule(
         'duplicate_fandom',
-        `Fandom with slug "${validatedData.slug}" already exists`
+        `Fandom with slug "${slug}" already exists`
       );
     }
 
@@ -78,11 +86,9 @@ export const POST = CommonMiddleware.admin(
       .values({
         id: crypto.randomUUID(),
         name: validatedData.name,
-        slug: validatedData.slug,
-        description: validatedData.description,
-        is_active: true,
-        created_at: new Date(),
-        updated_at: new Date(),
+        slug: slug,
+        description: validatedData.description || '',
+        is_active: validatedData.is_active ?? true,
       })
       .returning();
 

@@ -1,6 +1,6 @@
-﻿# The Pensieve Index Development Guidelines
+# The Pensieve Index Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2025-09-17
+Auto-generated from all feature plans. Last updated: 2025-09-18
 
 ## Project Overview
 
@@ -11,9 +11,11 @@ The Pensieve Index is a **library-first story discovery platform** and intellige
 1. **Pathway Creation**: User builds story pathway using drag-and-drop (desktop) or tap-to-select (mobile)
 2. **Library Search**: System searches existing tagged stories with relevance scoring
 3. **Dual Output**: Shows matching stories + "Create New Story" prompt with novelty highlights
-4. **Story Submission**: Community tags new stories via browser extension â†’ GitHub issues â†’ Admin review
+4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
 
 ## Active Technologies
+- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (004-build-a-hierarchical)
+- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (004-build-a-hierarchical)
 
 - TypeScript 5.x with Next.js 13+ (App Router)
 - React 18+ with Tailwind CSS for styling
@@ -26,27 +28,27 @@ The Pensieve Index is a **library-first story discovery platform** and intellige
 
 ```
 app/                    # Next.js app directory
-â”œâ”€â”€ (auth)/            # Auth route groups
-â”œâ”€â”€ api/               # API routes
-â”œâ”€â”€ admin/             # Admin dashboard
-â””â”€â”€ fandom/            # Fandom-specific pages
+├── (auth)/            # Auth route groups
+├── api/               # API routes
+├── admin/             # Admin dashboard
+└── fandom/            # Fandom-specific pages
 
 src/
-â”œâ”€â”€ components/        # React components
-â”‚   â”œâ”€â”€ ui/           # Base UI components
-â”‚   â”œâ”€â”€ drag-drop/    # Drag & drop interface
-â”‚   â””â”€â”€ admin/        # Admin components
-â”œâ”€â”€ lib/              # Utility libraries
-â”‚   â”œâ”€â”€ validation/   # Validation engine
-â”‚   â””â”€â”€ database/     # Database utilities
-â”œâ”€â”€ types/            # TypeScript definitions
-â””â”€â”€ hooks/            # Custom React hooks
+├── components/        # React components
+│   ├── ui/           # Base UI components
+│   ├── drag-drop/    # Drag & drop interface
+│   └── admin/        # Admin components
+├── lib/              # Utility libraries
+│   ├── validation/   # Validation engine
+│   └── database/     # Database utilities
+├── types/            # TypeScript definitions
+└── hooks/            # Custom React hooks
 
 tests/
-â”œâ”€â”€ components/       # Component tests
-â”œâ”€â”€ validation/       # Validation engine tests
-â”œâ”€â”€ integration/      # Integration tests
-â””â”€â”€ e2e/             # End-to-end tests
+├── components/       # Component tests
+├── validation/       # Validation engine tests
+├── integration/      # Integration tests
+└── e2e/             # End-to-end tests
 ```
 
 ## Core Concepts
@@ -64,25 +66,25 @@ Plot Blocks support conditional branching with tree dependencies:
 
 ```
 Goblin Inheritance
-â”œâ”€â”€ Black Lordship
-â”‚   â”œâ”€â”€ After Sirius Death
-â”‚   â”‚   â”œâ”€â”€ Black Head of Family
-â”‚   â”‚   â”œâ”€â”€ Gryffindor Head of Family
-â”‚   â”‚   â”œâ”€â”€ Slytherin Lordship
-â”‚   â”‚   â”œâ”€â”€ Potter Heritage
-â”‚   â”‚   â”œâ”€â”€ Peverell Lordship
-â”‚   â”‚   â””â”€â”€ Lord of Azkaban
-â”‚   â””â”€â”€ Emancipation Route
-â”‚       â”œâ”€â”€ Triwizard Tournament Trigger
-â”‚       â”œâ”€â”€ Name from Goblet Trigger
-â”‚       â””â”€â”€ Post-Tournament Inheritance
-â”œâ”€â”€ Slytherin Lordship
-â”‚   â”œâ”€â”€ Via Lily Potter Heritage
-â”‚   â”œâ”€â”€ Via Voldemort Defeat (3+ times)
-â”‚   â””â”€â”€ Conquest Right
-â””â”€â”€ Potter Heritage
-    â”œâ”€â”€ Multiple House Control â†’ Hogwarts Control
-    â””â”€â”€ Traditional Inheritance
+├── Black Lordship
+│   ├── After Sirius Death
+│   │   ├── Black Head of Family
+│   │   ├── Gryffindor Head of Family
+│   │   ├── Slytherin Lordship
+│   │   ├── Potter Heritage
+│   │   ├── Peverell Lordship
+│   │   └── Lord of Azkaban
+│   └── Emancipation Route
+│       ├── Triwizard Tournament Trigger
+│       ├── Name from Goblet Trigger
+│       └── Post-Tournament Inheritance
+├── Slytherin Lordship
+│   ├── Via Lily Potter Heritage
+│   ├── Via Voldemort Defeat (3+ times)
+│   └── Conquest Right
+└── Potter Heritage
+    ├── Multiple House Control → Hogwarts Control
+    └── Traditional Inheritance
 ```
 
 ### Story Workflow Priority
@@ -160,12 +162,13 @@ npm run type-check      # TypeScript validation
 - Keyboard navigation support
 
 ## Recent Changes
+- 004-build-a-hierarchical: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 
 - 2025-09-17: Initial project setup with constitution and templates
 - Next.js app directory structure established
-- Drag-and-drop validation engine architecture planned
 
 <!-- MANUAL ADDITIONS START -->
 <!-- Add project-specific guidelines, coding standards, or team preferences here -->
 <!-- MANUAL ADDITIONS END -->
+
 

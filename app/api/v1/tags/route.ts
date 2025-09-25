@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { DatabaseManager } from '@/lib/database';
 import { ResponseHandler, withErrorHandling } from '@/lib/api/responses';
 import { CommonMiddleware } from '@/lib/api/middleware';
-import { tagSchema } from '@/lib/validation/schemas';
+import { tagSchema, createTagSchema } from '@/lib/validation/schemas';
 import { ErrorFactory } from '@/lib/errors';
 import { and, eq, ilike } from 'drizzle-orm';
 import { tags, fandoms } from '@/lib/database/schema';
@@ -82,10 +83,18 @@ export const GET = CommonMiddleware.public(
 export const POST = CommonMiddleware.admin(
   withErrorHandling(async (request: NextRequest, authContext: any) => {
     const body = await request.json();
-    const validatedData = tagSchema.parse(body);
+    const validatedData = createTagSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
     const db = await dbManager.getConnection();
+
+    // Ensure fandom_id is provided (since it's required in creation)
+    if (!validatedData.fandom_id) {
+      throw ErrorFactory.businessRule(
+        'missing_fandom_id',
+        'Fandom ID is required for tag creation'
+      );
+    }
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({
@@ -111,13 +120,22 @@ export const POST = CommonMiddleware.admin(
       );
     }
 
+    // Generate ID
+    const id = crypto.randomUUID();
+
     // Create tag
     const [newTag] = await db
       .insert(tags)
       .values({
-        ...validatedData,
-        created_at: new Date(),
-        updated_at: new Date(),
+        id,
+        name: validatedData.name,
+        fandom_id: validatedData.fandom_id,
+        description: validatedData.description,
+        category: validatedData.category,
+        is_active: validatedData.is_active ?? true,
+        requires: validatedData.requires,
+        enhances: validatedData.enhances,
+        tag_class_id: validatedData.tag_class_id,
       })
       .returning();
 

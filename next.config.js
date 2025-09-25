@@ -1,9 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
-
   // Optimize bundle size and performance
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Optimize bundle splitting

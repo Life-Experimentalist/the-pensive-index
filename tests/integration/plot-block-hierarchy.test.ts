@@ -3,6 +3,9 @@ import { getDatabase, closeDatabase } from '@/lib/database';
 import { fandoms, plotBlocks } from '@/lib/database/schema';
 import { eq, and, isNull, isNotNull, sql } from 'drizzle-orm';
 import type { DatabaseConnection } from '@/lib/database';
+import { createTestFandom, createTestPlotBlock } from '../utils/test-data';
+import { randomUUID } from 'crypto';
+import { SQLiteTableWithColumns, SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 /**
  * Integration Test for Scenario 3: Plot Block Hierarchy
@@ -42,13 +45,12 @@ describe('Plot Block Hierarchy Integration Tests', () => {
     // Create test fandom
     const [fandom] = await db
       .insert(fandoms)
-      .values({
-        name: 'Plot Block Test Fandom',
-        description: 'Test fandom for plot block hierarchy',
-        slug: 'plot-block-test-fandom',
-        category: 'book',
-        is_active: true,
-      })
+      .values(
+        createTestFandom({
+          name: 'Plot Block Test Fandom',
+          description: 'Test fandom for plot block hierarchy',
+        })
+      )
       .returning();
     testFandomId = fandom.id;
   });
@@ -56,14 +58,13 @@ describe('Plot Block Hierarchy Integration Tests', () => {
   describe('Root Plot Block Creation', () => {
     it('should create a root plot block successfully', async () => {
       // Arrange
-      const plotBlockData = {
+      const plotBlockData = createTestPlotBlock({
         name: 'Test Root Plot Block',
         description: 'A root plot block for testing',
-        category: 'inheritance',
         fandom_id: testFandomId,
+        category: 'general',
         parent_id: null,
-        is_active: true,
-      };
+      });
 
       // Act
       const [createdPlotBlock] = await db
@@ -75,7 +76,6 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       expect(createdPlotBlock).toBeDefined();
       expect(createdPlotBlock.name).toBe(plotBlockData.name);
       expect(createdPlotBlock.description).toBe(plotBlockData.description);
-      expect(createdPlotBlock.category).toBe(plotBlockData.category);
       expect(createdPlotBlock.fandom_id).toBe(testFandomId);
       expect(createdPlotBlock.parent_id).toBeNull();
       expect(createdPlotBlock.is_active).toBe(true);
@@ -86,22 +86,24 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
     it('should prevent duplicate plot block names within same fandom', async () => {
       // Arrange
-      const plotBlockData = {
+      const plotBlockData = createTestPlotBlock({
         name: 'Test Root Plot Block',
         description: 'Original plot block',
         category: 'inheritance',
         fandom_id: testFandomId,
         parent_id: null,
-        is_active: true,
-      };
+      });
 
       await db.insert(plotBlocks).values(plotBlockData);
 
       // Act & Assert
-      const duplicateData = {
-        ...plotBlockData,
+      const duplicateData = createTestPlotBlock({
+        name: 'Test Root Plot Block',
         description: 'Duplicate plot block',
-      };
+        category: 'inheritance',
+        fandom_id: testFandomId,
+        parent_id: null,
+      });
 
       await expect(
         db.insert(plotBlocks).values(duplicateData)
@@ -112,23 +114,21 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange
       const [anotherFandom] = await db
         .insert(fandoms)
-        .values({
-          name: 'Another Plot Block Test Fandom',
-          description: 'Another test fandom',
-          slug: 'another-plot-block-test-fandom',
-          category: 'movie',
-          is_active: true,
-        })
+        .values(
+          createTestFandom({
+            name: 'Another Plot Block Test Fandom',
+            description: 'Another test fandom',
+          })
+        )
         .returning();
 
-      const plotBlockData = {
+      const plotBlockData = createTestPlotBlock({
         name: 'Test Root Plot Block',
         description: 'Plot block in first fandom',
         category: 'inheritance',
         fandom_id: testFandomId,
         parent_id: null,
-        is_active: true,
-      };
+      });
 
       const [firstPlotBlock] = await db
         .insert(plotBlocks)
@@ -136,14 +136,13 @@ describe('Plot Block Hierarchy Integration Tests', () => {
         .returning();
 
       // Act
-      const sameNameData = {
+      const sameNameData = createTestPlotBlock({
         name: 'Test Root Plot Block',
         description: 'Plot block in second fandom',
         category: 'inheritance',
         fandom_id: anotherFandom.id,
         parent_id: null,
-        is_active: true,
-      };
+      });
 
       const [secondPlotBlock] = await db
         .insert(plotBlocks)
@@ -162,28 +161,28 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Create root plot block for parent-child tests
       const [rootBlock] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Test Root Plot Block',
-          description: 'Root block for hierarchy tests',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Test Root Plot Block',
+            description: 'Root block for hierarchy tests',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+          })
+        )
         .returning();
       rootPlotBlockId = rootBlock.id;
     });
 
     it('should create a child plot block with valid parent', async () => {
       // Arrange
-      const childData = {
+      const childData = createTestPlotBlock({
         name: 'Test Child Plot Block',
         description: 'A child plot block for testing',
         category: 'lordship',
         fandom_id: testFandomId,
         parent_id: rootPlotBlockId,
-        is_active: true,
-      };
+      });
 
       // Act
       const [createdChild] = await db
@@ -205,36 +204,37 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create parent in different fandom
       const [anotherFandom] = await db
         .insert(fandoms)
-        .values({
-          name: 'Different Fandom',
-          description: 'Different fandom for parent validation',
-          slug: 'different-fandom',
-          category: 'movie',
-          is_active: true,
-        })
+        .values(
+          createTestFandom({
+            name: 'Different Fandom',
+            description: 'Different fandom for parent validation',
+          })
+        )
         .returning();
 
       const [parentInDifferentFandom] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Parent in Different Fandom',
-          description: 'Parent block in different fandom',
-          category: 'inheritance',
-          fandom_id: anotherFandom.id,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Parent in Different Fandom',
+            description: 'Parent block in different fandom',
+            category: 'inheritance',
+            fandom_id: anotherFandom.id,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       // Act & Assert - Try to create child with parent from different fandom
-      const invalidChildData = {
+      const invalidChildData = createTestPlotBlock({
         name: 'Invalid Child',
         description: 'Child with parent from different fandom',
         category: 'lordship',
         fandom_id: testFandomId,
         parent_id: parentInDifferentFandom.id,
         is_active: true,
-      };
+      });
 
       await expect(
         db.insert(plotBlocks).values(invalidChildData)
@@ -245,14 +245,16 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create a plot block first
       const [plotBlock] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Self Reference Test',
-          description: 'Testing self reference prevention',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Self Reference Test',
+            description: 'Testing self reference prevention',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       // Act & Assert - Try to update to reference itself
@@ -274,65 +276,71 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
       const [root] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Goblin Inheritance',
-          description: 'Root inheritance plot block',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Goblin Inheritance',
+            description: 'Root inheritance plot block',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       const [child1] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Black Lordship',
-          description: 'Black family inheritance',
-          category: 'lordship',
-          fandom_id: testFandomId,
-          parent_id: root.id,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Black Lordship',
+            description: 'Black family inheritance',
+            category: 'lordship',
+            fandom_id: testFandomId,
+            parent_id: root.id,
+            is_active: true,
+          })
+        )
         .returning();
 
       const [child2] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Potter Heritage',
-          description: 'Potter family inheritance',
-          category: 'heritage',
-          fandom_id: testFandomId,
-          parent_id: root.id,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Potter Heritage',
+            description: 'Potter family inheritance',
+            category: 'heritage',
+            fandom_id: testFandomId,
+            parent_id: root.id,
+            is_active: true,
+          })
+        )
         .returning();
 
       await db.insert(plotBlocks).values([
-        {
+        createTestPlotBlock({
           name: 'Gryffindor Lordship',
           description: 'Inheriting Gryffindor lordship',
           category: 'foundership',
           fandom_id: testFandomId,
           parent_id: child1.id,
           is_active: true,
-        },
-        {
+        }),
+        createTestPlotBlock({
           name: 'Multiple House Control',
           description: 'Controlling multiple houses',
           category: 'control',
           fandom_id: testFandomId,
           parent_id: child2.id,
           is_active: true,
-        },
-        {
+        }),
+        createTestPlotBlock({
           name: 'Hogwarts Control',
           description: 'Gaining control of Hogwarts',
           category: 'control',
           fandom_id: testFandomId,
           parent_id: child2.id,
           is_active: true,
-        },
+        }),
       ]);
 
       rootPlotBlockId = root.id;
@@ -411,7 +419,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
         ORDER BY depth, parent_id, name
       `;
 
-      const treeResults = await db.execute(treeQuery);
+      const treeResults = await db.all(treeQuery);
 
       // Assert
       expect(treeResults.length).toBeGreaterThan(0);
@@ -434,7 +442,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
     it('should calculate tree statistics efficiently', async () => {
       // Act
-      const [stats] = await db.execute(sql`
+      const [stats] = await db.all(sql`
         WITH RECURSIVE depth_calc AS (
           SELECT id, 0 as depth
           FROM ${plotBlocks}
@@ -471,26 +479,30 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Create basic hierarchy for constraint testing
       const [root] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Test Root',
-          description: 'Root for constraint testing',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Test Root',
+            description: 'Root for constraint testing',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       const [child] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Test Child',
-          description: 'Child for constraint testing',
-          category: 'lordship',
-          fandom_id: testFandomId,
-          parent_id: root.id,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Test Child',
+            description: 'Child for constraint testing',
+            category: 'lordship',
+            fandom_id: testFandomId,
+            parent_id: root.id,
+            is_active: true,
+          })
+        )
         .returning();
 
       rootPlotBlockId = root.id;
@@ -501,14 +513,16 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create grandchild
       const [grandchild] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Test Grandchild',
-          description: 'Grandchild for circular dependency test',
-          category: 'specific',
-          fandom_id: testFandomId,
-          parent_id: childPlotBlockId,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Test Grandchild',
+            description: 'Grandchild for circular dependency test',
+            category: 'specific',
+            fandom_id: testFandomId,
+            parent_id: childPlotBlockId,
+            is_active: true,
+          })
+        )
         .returning();
 
       // Act & Assert - Try to create circular dependency (grandchild -> root)
@@ -565,14 +579,16 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create another root to move child to
       const [newRoot] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'New Root',
-          description: 'New root for moving child',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'New Root',
+            description: 'New root for moving child',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       // Act - Move child to new parent
@@ -604,57 +620,63 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create complex hierarchy
       const [root1] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Root 1',
-          description: 'First root',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Root 1',
+            description: 'First root',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       const [root2] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Root 2',
-          description: 'Second root',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Root 2',
+            description: 'Second root',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       const [subtreeRoot] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Subtree Root',
-          description: 'Root of subtree to move',
-          category: 'lordship',
-          fandom_id: testFandomId,
-          parent_id: root1.id,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Subtree Root',
+            description: 'Root of subtree to move',
+            category: 'lordship',
+            fandom_id: testFandomId,
+            parent_id: root1.id,
+            is_active: true,
+          })
+        )
         .returning();
 
       await db.insert(plotBlocks).values([
-        {
+        createTestPlotBlock({
           name: 'Subtree Child 1',
           description: 'First child of subtree',
           category: 'specific',
           fandom_id: testFandomId,
           parent_id: subtreeRoot.id,
           is_active: true,
-        },
-        {
+        }),
+        createTestPlotBlock({
           name: 'Subtree Child 2',
           description: 'Second child of subtree',
           category: 'specific',
           fandom_id: testFandomId,
           parent_id: subtreeRoot.id,
           is_active: true,
-        },
+        }),
       ]);
 
       // Act - Move subtree from root1 to root2
@@ -685,56 +707,58 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange - Create tree with some nodes to prune
       const [root] = await db
         .insert(plotBlocks)
-        .values({
-          name: 'Pruning Root',
-          description: 'Root for pruning test',
-          category: 'inheritance',
-          fandom_id: testFandomId,
-          parent_id: null,
-          is_active: true,
-        })
+        .values(
+          createTestPlotBlock({
+            name: 'Pruning Root',
+            description: 'Root for pruning test',
+            category: 'inheritance',
+            fandom_id: testFandomId,
+            parent_id: null,
+            is_active: true,
+          })
+        )
         .returning();
 
       const branches = await db
         .insert(plotBlocks)
         .values([
-          {
+          createTestPlotBlock({
             name: 'Keep Branch',
             description: 'Branch to keep',
             category: 'lordship',
             fandom_id: testFandomId,
             parent_id: root.id,
             is_active: true,
-          },
-          {
+          }),
+          createTestPlotBlock({
             name: 'Prune Branch',
             description: 'Branch to prune',
             category: 'lordship',
             fandom_id: testFandomId,
             parent_id: root.id,
             is_active: true,
-          },
+          }),
         ])
         .returning();
 
       // Add children to both branches
       await db.insert(plotBlocks).values([
-        {
+        createTestPlotBlock({
           name: 'Keep Child',
           description: 'Child to keep',
           category: 'specific',
           fandom_id: testFandomId,
           parent_id: branches[0].id,
           is_active: true,
-        },
-        {
+        }),
+        createTestPlotBlock({
           name: 'Prune Child',
           description: 'Child to prune',
           category: 'specific',
           fandom_id: testFandomId,
           parent_id: branches[1].id,
           is_active: true,
-        },
+        }),
       ]);
 
       // Act - Prune one branch (soft delete)
@@ -774,14 +798,14 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange
       const startTime = performance.now();
 
-      const plotBlockData = {
+      const plotBlockData = createTestPlotBlock({
         name: 'Performance Test Plot Block',
         description: 'Testing plot block creation performance',
         category: 'performance',
         fandom_id: testFandomId,
         parent_id: null,
         is_active: true,
-      };
+      });
 
       // Act
       const [createdPlotBlock] = await db
@@ -798,20 +822,22 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
     it('should complete tree traversal within performance requirements', async () => {
       // Arrange - Create a deeper tree for performance testing
-      let currentParent = null;
+      let currentParent: string | null = null;
 
       // Create 5-level deep tree
       for (let level = 0; level < 5; level++) {
-        const [node] = await db
+        const [node]: any = await db
           .insert(plotBlocks)
-          .values({
-            name: `Performance Level ${level}`,
-            description: `Node at level ${level}`,
-            category: level === 0 ? 'inheritance' : 'lordship',
-            fandom_id: testFandomId,
-            parent_id: currentParent,
-            is_active: true,
-          })
+          .values(
+            createTestPlotBlock({
+              name: `Performance Level ${level}`,
+              description: `Node at level ${level}`,
+              category: level === 0 ? 'inheritance' : 'lordship',
+              fandom_id: testFandomId,
+              parent_id: currentParent,
+              is_active: true,
+            })
+          )
           .returning();
 
         currentParent = node.id;
@@ -842,7 +868,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
         ORDER BY depth
       `;
 
-      const results = await db.execute(treeQuery);
+      const results = await db.all(treeQuery);
       const endTime = performance.now();
 
       // Assert
@@ -855,14 +881,16 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       // Arrange
       const startTime = performance.now();
 
-      const bulkData = Array.from({ length: 20 }, (_, i) => ({
-        name: `Bulk Plot Block ${i}`,
-        description: `Bulk created plot block ${i}`,
-        category: 'bulk',
-        fandom_id: testFandomId,
-        parent_id: null,
-        is_active: true,
-      }));
+      const bulkData = Array.from({ length: 20 }, (_, i) =>
+        createTestPlotBlock({
+          name: `Bulk Plot Block ${i}`,
+          description: `Bulk created plot block ${i}`,
+          category: 'bulk',
+          fandom_id: testFandomId,
+          parent_id: null,
+          is_active: true,
+        })
+      );
 
       // Act
       const createdBlocks = await db

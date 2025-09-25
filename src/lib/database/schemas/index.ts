@@ -20,6 +20,26 @@ export {
   type PlotBlockCondition,
   type NewPlotBlockCondition,
 } from './plot-block-condition';
+export {
+  validationRules,
+  ruleConditions,
+  ruleActions,
+  ruleTemplates,
+  ruleTests,
+  ruleVersions,
+  type ValidationRule,
+  type NewValidationRule,
+  type RuleCondition,
+  type NewRuleCondition,
+  type RuleAction,
+  type NewRuleAction,
+  type RuleTemplate,
+  type NewRuleTemplate,
+  type RuleTest,
+  type NewRuleTest,
+  type RuleVersion,
+  type NewRuleVersion,
+} from './validation-rules';
 
 // Schema registry for Drizzle ORM
 export const schema = {
@@ -29,6 +49,14 @@ export const schema = {
   plotBlocks: () => import('./plot-block').then(m => m.plotBlocks),
   plotBlockConditions: () =>
     import('./plot-block-condition').then(m => m.plotBlockConditions),
+  validationRules: () =>
+    import('./validation-rules').then(m => m.validationRules),
+  ruleConditions: () =>
+    import('./validation-rules').then(m => m.ruleConditions),
+  ruleActions: () => import('./validation-rules').then(m => m.ruleActions),
+  ruleTemplates: () => import('./validation-rules').then(m => m.ruleTemplates),
+  ruleTests: () => import('./validation-rules').then(m => m.ruleTests),
+  ruleVersions: () => import('./validation-rules').then(m => m.ruleVersions),
 };
 
 /**

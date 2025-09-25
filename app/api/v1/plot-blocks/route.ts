@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DatabaseManager } from '@/lib/database';
 import { ResponseHandler, withErrorHandling } from '@/lib/api/responses';
 import { CommonMiddleware } from '@/lib/api/middleware';
-import { plotBlockSchema } from '@/lib/validation/schemas';
+import {
+  plotBlockSchema,
+  createPlotBlockSchema,
+} from '@/lib/validation/schemas';
 import { ErrorFactory } from '@/lib/errors';
 import { and, eq, ilike } from 'drizzle-orm';
 import { plotBlocks, fandoms } from '@/lib/database/schema';
+import crypto from 'crypto';
 
 /**
  * GET /api/v1/plot-blocks
@@ -82,10 +86,15 @@ export const GET = CommonMiddleware.public(
 export const POST = CommonMiddleware.admin(
   withErrorHandling(async (request: NextRequest, authContext: any) => {
     const body = await request.json();
-    const validatedData = plotBlockSchema.parse(body);
+    const validatedData = createPlotBlockSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
     const db = await dbManager.getConnection();
+
+    // Ensure fandom_id is provided
+    if (!validatedData.fandom_id) {
+      throw ErrorFactory.validation('fandom_id is required');
+    }
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({
@@ -115,9 +124,21 @@ export const POST = CommonMiddleware.admin(
     const [newPlotBlock] = await db
       .insert(plotBlocks)
       .values({
-        ...validatedData,
-        created_at: new Date(),
-        updated_at: new Date(),
+        id: crypto.randomUUID(),
+        name: validatedData.name,
+        description: validatedData.description || '',
+        fandom_id: validatedData.fandom_id,
+        parent_id: validatedData.parent_id,
+        category: validatedData.category || '',
+        is_active: validatedData.is_active ?? true,
+        requires: validatedData.requires,
+        enhances: validatedData.enhances,
+        soft_requires: validatedData.soft_requires,
+        enabled_by: validatedData.enabled_by,
+        conflicts_with: validatedData.conflicts_with,
+        excludes_categories: validatedData.excludes_categories,
+        max_instances: validatedData.max_instances,
+        children: validatedData.children,
       })
       .returning();
 

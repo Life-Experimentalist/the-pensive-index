@@ -9,13 +9,14 @@ import { z } from 'zod';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { fandom: string } }
+  { params }: { params: Promise<{ fandom: string }> }
 ) {
   try {
     const dbManager = DatabaseManager.getInstance();
     const db = await dbManager.getConnection();
 
-    const fandomSlug = params.fandom;
+    const { fandom } = await params;
+    const fandomSlug = fandom;
 
     // Get query parameters
     const { searchParams } = new URL(request.url);
@@ -28,18 +29,18 @@ export async function GET(
     const offset = (page - 1) * limit;
 
     // Find the fandom first
-    const fandom = await db.query.fandoms.findFirst({
+    const fandomRecord = await db.query.fandoms.findFirst({
       where: (fandoms, { eq }) => eq(fandoms.slug, fandomSlug),
     });
 
-    if (!fandom) {
+    if (!fandomRecord) {
       return NextResponse.json({ error: 'Fandom not found' }, { status: 404 });
     }
 
     // Get tags for this fandom with optional filtering
     const tags = await db.query.tags.findMany({
       where: (tags, { eq, and, like }) => {
-        const conditions = [eq(tags.fandom_id, fandom.id)];
+        const conditions = [eq(tags.fandom_id, fandomRecord.id)];
 
         if (search) {
           conditions.push(like(tags.name, `%${search}%`));
@@ -58,7 +59,7 @@ export async function GET(
 
     // Get total count for pagination
     const totalTags = await db.query.tags.findMany({
-      where: (tags, { eq }) => eq(tags.fandom_id, fandom.id),
+      where: (tags, { eq }) => eq(tags.fandom_id, fandomRecord.id),
     });
     const total = totalTags.length;
 

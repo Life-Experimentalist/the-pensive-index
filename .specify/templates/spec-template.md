@@ -1,8 +1,8 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`
-**Created**: [DATE]
-**Status**: Draft
+**Feature Branch**: `[###-feature-name]`  
+**Created**: [DATE]  
+**Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
 ## Execution Flow (main)
@@ -40,16 +40,15 @@
 ### For AI Generation
 When creating this spec from a user prompt:
 1. **Mark all ambiguities**: Use [NEEDS CLARIFICATION: specific question] for any assumption you'd need to make
-2. **Don't guess**: If the prompt doesn't specify something (e.g., "validation rules" without specific logic), mark it
+2. **Don't guess**: If the prompt doesn't specify something (e.g., "login system" without auth method), mark it
 3. **Think like a tester**: Every vague requirement should fail the "testable and unambiguous" checklist item
-4. **Common underspecified areas for The Pensieve Index**:
-   - Fandom-specific validation rules and tag hierarchies
-   - Plot Block conditional branching logic and dependencies
-   - Admin role permissions and fandom assignment policies
-   - Story search algorithms and ranking criteria
-   - Drag-and-drop UI behavior and responsive breakpoints
-   - Browser extension integration points and data flow
-   - Validation engine error messages and conflict resolution
+4. **Common underspecified areas**:
+   - User types and permissions
+   - Data retention/deletion policies  
+   - Performance targets and scale
+   - Error handling behaviors
+   - Integration requirements
+   - Security/compliance needs
 
 ---
 
@@ -70,7 +69,7 @@ When creating this spec from a user prompt:
 
 ### Functional Requirements
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
@@ -96,7 +95,7 @@ When creating this spec from a user prompt:
 
 ### Requirement Completeness
 - [ ] No [NEEDS CLARIFICATION] markers remain
-- [ ] Requirements are testable and unambiguous
+- [ ] Requirements are testable and unambiguous  
 - [ ] Success criteria are measurable
 - [ ] Scope is clearly bounded
 - [ ] Dependencies and assumptions identified

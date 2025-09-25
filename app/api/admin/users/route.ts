@@ -545,7 +545,7 @@ export async function DELETE(request: NextRequest) {
     const assignments = await adminModel.getUserAssignments(user_id);
     for (const assignment of assignments) {
       if (assignment.is_active) {
-        await roleService.revokeRole(assignment.id, currentUserId, reason);
+        await roleService.revokeRole(assignment.id, currentUserId);
       }
     }
 

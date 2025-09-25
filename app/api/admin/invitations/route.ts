@@ -191,12 +191,22 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get('action'); // 'list' | 'stats'
 
     const filters = {
-      status: searchParams.get('status') as 'pending' | 'accepted' | 'expired' | 'revoked' || undefined,
+      status:
+        (searchParams.get('status') as
+          | 'pending'
+          | 'accepted'
+          | 'expired'
+          | 'rejected'
+          | 'cancelled') || undefined,
       fandom_id: searchParams.get('fandom_id') || undefined,
       invited_by: searchParams.get('invited_by') || undefined,
-      role: searchParams.get('role') as AdminRole || undefined,
-      limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50,
-      offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
+      role: (searchParams.get('role') as AdminRole) || undefined,
+      limit: searchParams.get('limit')
+        ? parseInt(searchParams.get('limit')!)
+        : 50,
+      offset: searchParams.get('offset')
+        ? parseInt(searchParams.get('offset')!)
+        : 0,
     };
 
     if (action === 'stats') {

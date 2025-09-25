@@ -485,34 +485,41 @@ export default function AdminDashboard({
   const currentTab = tabs.find(tab => tab.id === activeTab) || tabs[0];
 
   return (
-    <div data-testid="admin-dashboard">
+    <div data-testid="admin-dashboard" className="w-full max-w-7xl mx-auto p-4">
       <nav
         data-testid="dashboard-nav"
         ref={navRef}
         role="navigation"
         aria-label="Admin dashboard navigation"
+        className="mb-6 overflow-x-auto"
       >
-        {tabs.map(tab => (
-          <Button
-            key={tab.id}
-            data-testid={tab.testId}
-            aria-selected={activeTab === tab.id}
-            aria-label={`Navigate to ${tab.label} section`}
-            onClick={() => handleTabChange(tab.id)}
-            variant={activeTab === tab.id ? 'default' : 'outline'}
-            className="mr-2"
-          >
-            {tab.label}
-          </Button>
-        ))}
+        <div className="flex flex-wrap gap-2 min-w-max">
+          {tabs.map(tab => (
+            <Button
+              key={tab.id}
+              data-testid={tab.testId}
+              aria-selected={activeTab === tab.id}
+              aria-label={`Navigate to ${tab.label} section`}
+              onClick={() => handleTabChange(tab.id)}
+              variant={activeTab === tab.id ? 'default' : 'outline'}
+              className="whitespace-nowrap text-sm px-3 py-2 sm:px-4 sm:py-2 sm:text-base"
+              size="sm"
+            >
+              {tab.label}
+            </Button>
+          ))}
+        </div>
       </nav>
 
       <main
         data-testid="dashboard-content"
         role="main"
         aria-labelledby={`nav-${activeTab}`}
+        className="w-full"
       >
-        {currentTab.content}
+        <div className="max-w-none overflow-x-auto">
+          {currentTab.content}
+        </div>
       </main>
     </div>
   );

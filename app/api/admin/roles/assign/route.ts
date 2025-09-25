@@ -243,11 +243,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Revoke the role
-    const success = await roleService.revokeRole(
-      assignmentId,
-      currentUserId,
-      reason
-    );
+    const success = await roleService.revokeRole(assignmentId, currentUserId);
 
     if (!success) {
       return NextResponse.json(

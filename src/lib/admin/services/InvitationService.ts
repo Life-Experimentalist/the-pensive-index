@@ -171,6 +171,11 @@ export class InvitationService {
         throw new Error('Invitation has expired');
       }
 
+      // Validate role_name exists
+      if (!invitation.role_name) {
+        throw new Error('Invalid invitation: missing role specification');
+      }
+
       // Create admin role assignment
       const assignment = await this.roleService.assignRole(
         userId,

@@ -13,11 +13,13 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const pathwayId = resolvedParams.id;
+
   try {
     const startTime = Date.now();
-    const pathwayId = params.id;
 
     // For MVP, we'll treat pathway ID as encoded pathway data
     // In production, this would retrieve from a pathways table
@@ -115,13 +117,13 @@ export async function GET(
       headers,
     });
   } catch (error) {
-    console.error(`Error fetching pathway ${params.id}:`, error);
+    console.error(`Error fetching pathway ${pathwayId}:`, error);
 
     return NextResponse.json(
       {
         error: 'Failed to fetch pathway',
         message: 'An error occurred while retrieving pathway data',
-        pathwayId: params.id,
+        pathwayId: pathwayId,
         timestamp: new Date().toISOString(),
       },
       {

@@ -176,9 +176,10 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagClassId = params.id;
+      const resolvedParams = await params;
+      const tagClassId = resolvedParams.id;
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();

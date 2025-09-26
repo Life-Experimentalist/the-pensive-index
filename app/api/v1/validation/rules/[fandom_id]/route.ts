@@ -14,9 +14,10 @@ export const GET = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: { fandom_id: string } }
+      { params }: { params: Promise<{ fandom_id: string }> }
     ) => {
-      const fandomId = params.fandom_id;
+      const resolvedParams = await params;
+      const fandomId = resolvedParams.fandom_id;
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();

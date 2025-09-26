@@ -57,6 +57,11 @@ export interface Fandom {
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
+
+  // Related content (populated when needed)
+  tags?: Tag[];
+  plot_blocks?: PlotBlock[];
+  tag_classes?: TagClass[];
 }
 
 export interface Tag {
@@ -203,6 +208,8 @@ export interface StoryPlotBlock {
 
 // Validation context types
 export interface ValidationContext {
+  fandomId;
+  // selectedTags: string[];
   plot_block?: PlotBlock;
   applied_tags: string[];
   all_tags: Tag[];
@@ -238,6 +245,8 @@ export interface ValidationResult {
   errors: ValidationError[];
   warnings: ValidationWarning[];
   suggestions?: ValidationSuggestion[];
+  missing_requirements?: Array<{ type: string; name: string }>;
+  conflicts?: Array<{ description: string }>;
 }
 
 export interface ValidationError {
@@ -683,11 +692,49 @@ export interface ContentVersion {
   version_number: number;
   parent_version_id?: string;
   content_snapshot: Record<string, any>;
+  content_data?: any; // Alternative property name used by some components
   changes_summary: string[];
+  changes?: ContentChange[]; // Detailed change objects
   change_reason?: string;
+  change_description?: string; // Alternative property name
   created_by: string;
   created_at: Date;
   is_active: boolean;
+  is_current?: boolean;
+}
+
+export interface ContentVersionHistory {
+  content_id: string;
+  content_type: string;
+  versions: ContentVersion[];
+  current_version: ContentVersion;
+  total_versions: number;
+  created_by_summary: Array<{
+    user_id: string;
+    user_name: string;
+    version_count: number;
+  }>;
+}
+
+export interface ContentChange {
+  field: string;
+  old_value: any;
+  new_value: any;
+  change_type: 'added' | 'removed' | 'modified';
+  timestamp: Date;
+  changed_by: string;
+}
+
+export interface ContentDiff {
+  version_a: ContentVersion;
+  version_b: ContentVersion;
+  changes: ContentChange[];
+  summary: {
+    additions: number;
+    modifications: number;
+    deletions: number;
+    impact_level: 'minor' | 'moderate' | 'major';
+  };
 }
 
 export interface ApprovalWorkflow {
@@ -697,12 +744,80 @@ export interface ApprovalWorkflow {
   content_types: string[];
   fandom_id?: string;
   approval_levels: ApprovalLevel[];
+  steps?: ApprovalStep[]; // Support both old and new structures
   auto_approval_rules?: AutoApprovalRule[];
   timeout_hours?: number;
   is_active: boolean;
   created_by: string;
   created_at: Date;
   updated_at: Date;
+}
+
+export type ApprovalStepType =
+  | 'manual'
+  | 'automatic'
+  | 'parallel'
+  | 'conditional';
+
+export interface ApprovalStep {
+  id?: string;
+  workflow_id?: string;
+  name: string;
+  description?: string;
+  step_type: ApprovalStepType;
+  step_order: number;
+  required_approvers: number;
+  assigned_users: string[];
+  assigned_roles: string[];
+  conditions?: ApprovalCondition[];
+  actions?: ApprovalAction[];
+  timeout_hours?: number;
+  is_parallel: boolean;
+  can_skip: boolean;
+}
+
+export interface ApprovalCondition {
+  id?: string;
+  condition_type:
+    | 'user_role'
+    | 'content_type'
+    | 'content_size'
+    | 'creator'
+    | 'custom';
+  condition_value: any;
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'greater_than'
+    | 'less_than'
+    | 'contains'
+    | 'in';
+  description?: string;
+}
+
+export interface ApprovalAction {
+  id?: string;
+  action_type: 'approve' | 'reject' | 'request_changes' | 'escalate' | 'notify';
+  action_value?: any;
+  message?: string;
+  target_users?: string[];
+  target_roles?: string[];
+}
+
+// Workflow operation types
+export interface WorkflowCreateRequest {
+  name: string;
+  description?: string;
+  content_types: string[];
+  fandom_id?: string;
+  steps: Omit<ApprovalStep, 'id' | 'workflow_id'>[];
+  auto_approval_rules?: Omit<AutoApprovalRule, 'id'>[];
+  timeout_hours?: number;
+  is_active: boolean;
+}
+
+export interface WorkflowUpdateRequest extends Partial<WorkflowCreateRequest> {
+  id: string;
 }
 
 export interface ApprovalLevel {
@@ -749,6 +864,37 @@ export interface BulkOperation {
   completed_at?: Date;
 }
 
+export type BulkOperationType =
+  | 'import'
+  | 'export'
+  | 'bulk_update'
+  | 'bulk_delete'
+  | 'validate';
+
+export interface BulkOperationRequest {
+  operation_type: BulkOperationType;
+  fandom_id: string;
+  target_ids?: string[];
+  operation_data?: any;
+  data?: any;
+  options?: Record<string, any>;
+}
+
+export interface BulkOperationResult {
+  operation_id?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  total_items: number;
+  processed_items: number;
+  failed_items: number;
+  error_log: string[];
+  errors?: string[];
+  results?: any[];
+  success?: boolean;
+  message?: string;
+  successful_operations?: any[];
+  failed_operations?: any[];
+}
+
 // Discovery interface types
 export interface PathwayItem {
   id: string;
@@ -770,3 +916,12 @@ export interface StoryPrompt {
   suggestions: string[];
   generatedAt: Date;
 }
+
+// Re-export specific types from other modules
+export type {
+  FandomCreationRequest,
+  FandomCreationResponse,
+  FandomUpdateRequest,
+  FandomContentCreationRequest,
+  FandomContentUpdateRequest,
+} from './fandom';

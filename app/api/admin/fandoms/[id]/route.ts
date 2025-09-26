@@ -10,14 +10,15 @@ const FandomParamsSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
     // Validate route parameters
-    const validatedParams = FandomParamsSchema.parse(params);
+    const resolvedParams = await params;
+    const validatedParams = FandomParamsSchema.parse(resolvedParams);
     const fandomId = parseInt(validatedParams.id);
 
     if (isNaN(fandomId)) {

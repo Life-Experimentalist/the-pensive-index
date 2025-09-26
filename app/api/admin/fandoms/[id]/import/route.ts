@@ -29,14 +29,15 @@ type ImportContentRequest = z.infer<typeof ImportContentSchema>;
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
     // Validate fandom ID
-    const fandomId = parseInt(params.id);
+    const resolvedParams = await params;
+    const fandomId = parseInt(resolvedParams.id);
     if (isNaN(fandomId)) {
       return NextResponse.json(
         {
@@ -142,14 +143,15 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
     // Validate fandom ID
-    const fandomId = parseInt(params.id);
+    const resolvedParams = await params;
+    const fandomId = parseInt(resolvedParams.id);
     if (isNaN(fandomId)) {
       return NextResponse.json(
         {

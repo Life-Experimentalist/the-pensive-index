@@ -172,11 +172,19 @@ export function BulkOperationsPanel({
         ...prev,
         status: 'failed',
         results: {
+          status: 'failed',
+          total_items: selectedItems.size,
+          processed_items: 0,
+          failed_items: selectedItems.size,
+          error_log: [error instanceof Error ? error.message : 'Unknown error'],
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
           success: false,
           message: error instanceof Error ? error.message : 'Operation failed',
           successful_operations: [],
-          failed_operations: [],
-          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          failed_operations: Array.from(selectedItems).map(id => ({
+            id,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })),
         },
       }));
     }
@@ -247,11 +255,19 @@ export function BulkOperationsPanel({
         ...prev,
         status: 'failed',
         results: {
+          status: 'failed',
+          total_items: previewData.length,
+          processed_items: 0,
+          failed_items: previewData.length,
+          error_log: [error instanceof Error ? error.message : 'Unknown error'],
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
           success: false,
           message: error instanceof Error ? error.message : 'Import failed',
           successful_operations: [],
-          failed_operations: [],
-          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          failed_operations: previewData.map((item: any, index: number) => ({
+            id: `item-${index}`,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })),
         },
       }));
     }
@@ -817,7 +833,7 @@ export function BulkOperationsPanel({
                 : executeBulkOperation
             }
             className={`px-6 py-2 rounded-md font-medium ${
-              operationForm.operation_type === 'delete'
+              operationForm.operation_type === 'bulk_delete'
                 ? 'bg-red-600 text-white hover:bg-red-700'
                 : 'bg-indigo-600 text-white hover:bg-indigo-700'
             } disabled:opacity-50 disabled:cursor-not-allowed`}

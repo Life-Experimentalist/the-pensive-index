@@ -13,11 +13,13 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const storyId = parseInt(resolvedParams.id);
+
   try {
     const startTime = Date.now();
-    const storyId = parseInt(params.id);
 
     if (isNaN(storyId)) {
       return NextResponse.json(
@@ -126,13 +128,13 @@ export async function GET(
       headers,
     });
   } catch (error) {
-    console.error(`Error fetching story ${params.id}:`, error);
+    console.error(`Error fetching story ${storyId}:`, error);
 
     return NextResponse.json(
       {
         error: 'Failed to fetch story',
         message: 'An error occurred while retrieving story data',
-        storyId: params.id,
+        storyId: storyId.toString(),
         timestamp: new Date().toISOString(),
       },
       {

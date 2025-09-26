@@ -14,9 +14,10 @@ export const GET = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: { fandomId: string } }
+      { params }: { params: Promise<{ fandomId: string }> }
     ) => {
-      const fandomId = params.fandomId;
+      const resolvedParams = await params;
+      const fandomId = resolvedParams.fandomId;
       const { searchParams } = new URL(request.url);
       const includeInactive = searchParams.get('include_inactive') === 'true';
 

@@ -72,28 +72,28 @@ export async function POST(
           content_id: approval.content_id,
           action: approval.action,
           notes: approval.notes,
-          approval_level: validatedData.approval_level || 1,
-          approved_by: userId,
         })),
+        approval_level: validatedData.approval_level || 1,
+        reviewer_id: userId,
       });
+
+      const successful_count = results.results.filter(
+        r => r.status !== 'error'
+      ).length;
+      const failed_count = results.results.filter(
+        r => r.status === 'error'
+      ).length;
 
       return NextResponse.json(
         {
           success: true,
           data: {
-            processed_count: results.processed,
-            successful_count: results.successful,
-            failed_count: results.failed,
-            results: results.approval_results.map((result: any) => ({
-              content_id: result.content_id,
-              action: result.action,
-              status: result.status,
-              approval_id: result.approval_id,
-              error: result.error,
-            })),
-            errors: results.errors,
+            processed_count: results.results.length,
+            successful_count,
+            failed_count,
+            results: results.results,
           },
-          message: `Bulk approval completed: ${results.successful} successful, ${results.failed} failed`,
+          message: `Bulk approval completed: ${successful_count} successful, ${failed_count} failed`,
         },
         { status: 200 }
       );
@@ -111,24 +111,24 @@ export async function POST(
       for (const contentId of validatedData.content_ids) {
         try {
           const result = await approvalService.processApproval({
-            content_id: contentId,
-            fandom_id: fandomId,
+            content_ids: [contentId],
             action: validatedData.action,
             approval_level: validatedData.approval_level || 1,
-            notes: validatedData.approval_notes,
+            approval_notes: validatedData.approval_notes,
             reviewer_comments: validatedData.reviewer_comments,
-            approved_by: userId,
+            reviewer_id: userId,
             delegate_to: validatedData.delegate_to,
           });
 
-          results.push({
-            content_id: contentId,
-            action: validatedData.action,
-            status: 'success',
-            approval_id: result.approval_id,
-            next_approval_level: result.next_approval_level,
-            requires_additional_approval: result.requires_additional_approval,
-          });
+          // processApproval returns results for all content_ids
+          results.push(
+            ...result.results.map(r => ({
+              content_id: r.content_id,
+              action: validatedData.action,
+              status: r.status === 'error' ? 'error' : 'success',
+              message: r.message,
+            }))
+          );
         } catch (error) {
           errors.push({
             content_id: contentId,
@@ -192,14 +192,15 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
     // Validate fandom ID
-    const fandomId = parseInt(params.id);
+    const resolvedParams = await params;
+    const fandomId = parseInt(resolvedParams.id);
     if (isNaN(fandomId)) {
       return NextResponse.json(
         {
@@ -231,31 +232,24 @@ export async function GET(
     // Get pending approvals for fandom
     const result = await approvalService.getPendingApprovals({
       fandom_id: fandomId,
-      status: status || undefined,
-      approval_level: approval_level || undefined,
-      content_type: content_type || undefined,
-      page,
+      status: status ? [status] : undefined,
+      content_type: content_type ? [content_type] : undefined,
       limit,
-      assigned_to: userId, // Filter to user's assigned approvals if not admin
+      offset: (page - 1) * limit,
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        pending_approvals: result.approvals.map((approval: any) => ({
+        pending_approvals: result.items.map((approval: any) => ({
           approval_id: approval.id,
-          content_id: approval.content_id,
-          content_name: approval.content_name,
+          content_id: approval.id,
+          content_name: approval.title,
           content_type: approval.content_type,
-          fandom_id: approval.fandom_id,
+          fandom_id: fandomId,
           current_status: approval.status,
-          approval_level: approval.approval_level,
-          required_approval_level: approval.required_approval_level,
           submitted_by: approval.submitted_by,
           submitted_at: approval.submitted_at,
-          assigned_to: approval.assigned_to,
-          reviewer_notes: approval.reviewer_notes,
-          deadline: approval.deadline,
           priority: approval.priority,
         })),
         pagination: {
@@ -265,10 +259,10 @@ export async function GET(
           total_pages: Math.ceil(result.total / limit),
         },
         summary: {
-          total_pending: result.summary?.total_pending || 0,
-          by_level: result.summary?.by_level || {},
-          by_type: result.summary?.by_type || {},
-          overdue: result.summary?.overdue || 0,
+          total_pending: result.total,
+          by_level: {},
+          by_type: {},
+          overdue: 0,
         },
       },
     });

@@ -28,7 +28,7 @@ async function seedDatabase() {
 
     // Seed fandoms
     console.log('📚 Creating sample fandoms...');
-    const currentTime = Math.floor(Date.now() / 1000); // Unix timestamp
+    const currentTime = new Date(); // Date object
 
     await db
       .insert(schema.fandoms)
@@ -89,8 +89,8 @@ async function seedDatabase() {
           description: 'Stories involving time travel',
           category: 'plot-device',
           is_active: true,
-          created_at: new Date(currentTime * 1000),
-          updated_at: new Date(currentTime * 1000),
+          created_at: currentTime,
+          updated_at: currentTime,
         },
         {
           id: 'tag-romance',
@@ -99,8 +99,8 @@ async function seedDatabase() {
           description: 'Romantic relationships',
           category: 'genre',
           is_active: true,
-          created_at: new Date(currentTime * 1000),
-          updated_at: new Date(currentTime * 1000),
+          created_at: currentTime,
+          updated_at: currentTime,
         },
         {
           id: 'tag-adventure',
@@ -109,8 +109,8 @@ async function seedDatabase() {
           description: 'Action and adventure stories',
           category: 'genre',
           is_active: true,
-          created_at: new Date(currentTime * 1000),
-          updated_at: new Date(currentTime * 1000),
+          created_at: currentTime,
+          updated_at: currentTime,
         },
       ])
       .onConflictDoNothing();
@@ -127,8 +127,8 @@ async function seedDatabase() {
           category: 'inheritance',
           description: 'Harry discovers his inheritance through Gringotts',
           is_active: true,
-          created_at: new Date(currentTime * 1000),
-          updated_at: new Date(currentTime * 1000),
+          created_at: currentTime,
+          updated_at: currentTime,
         },
         {
           id: 'pb-camp-arrival',
@@ -137,8 +137,8 @@ async function seedDatabase() {
           category: 'beginning',
           description: 'Character arrives at Camp Half-Blood',
           is_active: true,
-          created_at: new Date(currentTime * 1000),
-          updated_at: new Date(currentTime * 1000),
+          created_at: currentTime,
+          updated_at: currentTime,
         },
       ])
       .onConflictDoNothing();

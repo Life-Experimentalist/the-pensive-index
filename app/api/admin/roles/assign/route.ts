@@ -356,9 +356,9 @@ export async function PUT(request: NextRequest) {
         to_user_id: toUserId,
         transferred_by: currentUserId,
         fandom_context: fandomId,
-        transferred_assignments: result.transferred,
-        failed_transfers: result.failed
-      }
+        revoked_assignments: result.revoked,
+        created_assignments: result.created,
+      },
     });
 
   } catch (error) {

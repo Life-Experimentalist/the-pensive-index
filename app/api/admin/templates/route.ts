@@ -85,18 +85,13 @@ export async function GET(request: NextRequest) {
           updated_at: template.updated_at,
           version: template.version,
         })),
-        pagination: {
-          page,
-          limit,
-          total: result.total,
-          total_pages: Math.ceil(result.total / limit),
-        },
-        genres: result.available_genres || [],
+        pagination: result.pagination,
+        genres: [],
         statistics: {
-          total_templates: result.total,
-          public_templates: result.statistics?.public_count || 0,
-          private_templates: result.statistics?.private_count || 0,
-          by_genre: result.statistics?.by_genre || {},
+          total_templates: result.pagination.total,
+          public_templates: 0,
+          private_templates: 0,
+          by_genre: {},
         },
       },
     });
@@ -139,16 +134,15 @@ export async function POST(request: NextRequest) {
 
     // Create template
     const result = await templateService.createTemplate({
-      name: validatedData.name,
+      template_name: validatedData.name,
       description: validatedData.description,
       genre: validatedData.genre,
-      base_template_ids: validatedData.base_templates,
-      default_content: {
+      template_data: {
         tags: validatedData.default_tags,
         plot_blocks: validatedData.default_plot_blocks,
         validation_rules: validatedData.validation_rules,
+        base_template_ids: validatedData.base_templates,
       },
-      metadata: validatedData.metadata,
       is_public: validatedData.is_public,
       created_by: userId,
     });

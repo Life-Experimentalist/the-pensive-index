@@ -64,7 +64,7 @@ export function ApprovalWorkflowEditor({
       setFormData({
         name: workflow.name,
         description: workflow.description || '',
-        fandom_id: workflow.fandom_id,
+        fandom_id: workflow.fandom_id || '',
         steps: workflow.steps || [],
         is_active: workflow.is_active !== false,
       });
@@ -260,8 +260,8 @@ export function ApprovalWorkflowEditor({
         const workflowData =
           isEditing && workflow
             ? ({
-                workflow_id: workflow.id,
-                updates: formData,
+                id: workflow.id,
+                ...formData,
               } as WorkflowUpdateRequest)
             : (formData as WorkflowCreateRequest);
 

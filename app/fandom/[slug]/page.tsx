@@ -17,20 +17,21 @@ import { ResponsiveWrapper } from '@/components/discovery/responsive-wrapper';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 interface FandomPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     pathway?: string;
     view?: 'desktop' | 'mobile';
-  };
+  }>;
 }
 
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({
   params,
 }: FandomPageProps): Promise<Metadata> {
-  const fandom = await FandomModel.getBySlug(params.slug);
+  const resolvedParams = await params;
+  const fandom = await FandomModel.getBySlug(resolvedParams.slug);
 
   if (!fandom) {
     return {
@@ -130,7 +131,8 @@ export default async function FandomDiscoveryPage({
   params,
   searchParams,
 }: FandomPageProps) {
-  const data = await getFandomData(params.slug);
+  const resolvedParams = await params;
+  const data = await getFandomData(resolvedParams.slug);
 
   if (!data) {
     notFound();

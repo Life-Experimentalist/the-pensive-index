@@ -240,28 +240,28 @@ async function handleListUsers(
 
     return NextResponse.json({
       success: true,
-      users: users.map(user => ({
+      users: users.map((user: any) => ({
         id: user.id,
         email: user.email,
         name: user.name,
         is_active: user.is_active,
         last_login_at: user.last_login_at,
         created_at: user.created_at,
-        assignments: user.assignments?.map(assignment => ({
+        assignments: user.assignments?.map((assignment: any) => ({
           id: assignment.id,
           role: assignment.role,
           fandom_id: assignment.fandom_id,
           fandom_name: assignment.fandom_name,
-          is_active: assignment.is_active
-        }))
+          is_active: assignment.is_active,
+        })),
       })),
       pagination: {
         total: users.length, // Would be actual total from database
         limit: filters.limit,
         offset: filters.offset,
-        has_more: false // Would be calculated from actual total
+        has_more: false, // Would be calculated from actual total
       },
-      filters: filters
+      filters: filters,
     });
 
   } catch (error) {

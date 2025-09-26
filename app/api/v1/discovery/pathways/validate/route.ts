@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     if (pathwayAnalysis.completeness < 0.8 && pathwayItems.length < 10) {
       suggestions = await PathwayModel.getSuggestions(
         pathwayItems,
-        parseInt(fandomId),
+        fandomId,
         5
       );
     }

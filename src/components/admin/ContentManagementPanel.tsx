@@ -167,8 +167,10 @@ export function ContentManagementPanel({
     try {
       // Create update request based on edited item
       const updateRequest: FandomUpdateRequest = {
-        fandom_id: fandom.id,
-        updates: {
+        name: fandom.name,
+        description: fandom.description,
+        is_active: fandom.is_active,
+        metadata: {
           // This would need to be more specific based on what was edited
           tags: fandom.tags,
           plot_blocks: fandom.plot_blocks,

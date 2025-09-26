@@ -38,9 +38,10 @@ export const POST = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: { fandomId: string } }
+      { params }: { params: Promise<{ fandomId: string }> }
     ) => {
-      const fandomId = params.fandomId;
+      const resolvedParams = await params;
+      const fandomId = resolvedParams.fandomId;
       const body = await request.json();
       const validatedData = fandomValidationRequestSchema.parse(body);
 

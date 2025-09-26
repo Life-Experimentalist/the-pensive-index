@@ -14,11 +14,13 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const fandomSlug = resolvedParams.id;
+
   try {
     const startTime = Date.now();
-    const fandomSlug = params.id;
 
     // Convert slug to numeric ID if needed, or use slug directly
     // For now, treating id as fandom slug for SEO-friendly URLs
@@ -112,13 +114,13 @@ export async function GET(
       headers,
     });
   } catch (error) {
-    console.error(`Error fetching elements for fandom ${params.id}:`, error);
+    console.error(`Error fetching elements for fandom ${fandomSlug}:`, error);
 
     return NextResponse.json(
       {
         error: 'Failed to fetch fandom elements',
         message: 'An error occurred while retrieving tags and plot blocks',
-        fandom: params.id,
+        fandom: fandomSlug,
         timestamp: new Date().toISOString(),
       },
       {

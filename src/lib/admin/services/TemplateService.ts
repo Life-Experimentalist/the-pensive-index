@@ -9,7 +9,7 @@
 
 import { TemplateQueries } from '@/lib/database/template-queries';
 import { FandomQueries } from '@/lib/database/fandom-queries';
-import type { FandomTemplate, BulkOperation } from '@/types';
+import type { BulkOperation } from '@/types';
 
 export interface TemplateCreationOptions {
   template_name: string;
@@ -113,6 +113,89 @@ export class TemplateService {
       template,
       usage_stats: usageStats,
       hierarchy,
+    };
+  }
+
+  /**
+   * Get templates list with filtering and pagination
+   */
+  async getTemplates(
+    options: {
+      genre?: string;
+      search?: string;
+      include_inactive?: boolean;
+      page?: number;
+      limit?: number;
+      user_id?: string;
+    } = {}
+  ): Promise<{
+    templates: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      total_pages: number;
+    };
+  }> {
+    const {
+      genre,
+      search,
+      include_inactive = false,
+      page = 1,
+      limit = 20,
+    } = options;
+
+    // Mock implementation for now - in real app, this would query the database
+    const mockTemplates = [
+      {
+        id: 1,
+        name: 'Harry Potter Base Template',
+        description:
+          'Core Harry Potter fandom template with essential tags and plot blocks',
+        genre: 'fantasy',
+        base_templates: [],
+        usage_count: 145,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_active: true,
+      },
+      {
+        id: 2,
+        name: 'Percy Jackson Template',
+        description:
+          'Greek mythology-based template for Camp Half-Blood stories',
+        genre: 'fantasy',
+        base_templates: [],
+        usage_count: 67,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_active: true,
+      },
+    ];
+
+    // Apply filters
+    let filtered = mockTemplates.filter(template => {
+      if (!include_inactive && !template.is_active) return false;
+      if (genre && template.genre !== genre) return false;
+      if (search && !template.name.toLowerCase().includes(search.toLowerCase()))
+        return false;
+      return true;
+    });
+
+    // Apply pagination
+    const total = filtered.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const templates = filtered.slice(startIndex, endIndex);
+
+    return {
+      templates,
+      pagination: {
+        page,
+        limit,
+        total,
+        total_pages: Math.ceil(total / limit),
+      },
     };
   }
 

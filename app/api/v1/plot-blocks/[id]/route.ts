@@ -16,15 +16,11 @@ import { plotBlocks } from '@/lib/database/schema';
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
-    async (
-      request: NextRequest,
-      { params }: { params: Promise<{ id: string }> }
-    ) => {
-      const resolvedParams = await params;
-      const plotBlockId = resolvedParams.id;
+    async (request: NextRequest, { params }: { params: { id: string } }) => {
+      const plotBlockId = params.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       const plotBlock = await db.query.plotBlocks.findFirst({
         where: eq(plotBlocks.id, plotBlockId),
@@ -56,15 +52,14 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: Promise<{ id: string }> }
+      { params }: { params: { id: string } }
     ) => {
-      const resolvedParams = await params;
-      const plotBlockId = resolvedParams.id;
+      const plotBlockId = params.id;
       const body = await request.json();
       const validatedData = updatePlotBlockSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if plot block exists
       const existingPlotBlock = await db.query.plotBlocks.findFirst({
@@ -129,13 +124,12 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: Promise<{ id: string }> }
+      { params }: { params: { id: string } }
     ) => {
-      const resolvedParams = await params;
-      const plotBlockId = resolvedParams.id;
+      const plotBlockId = params.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if plot block exists
       const existingPlotBlock = await db.query.plotBlocks.findFirst({

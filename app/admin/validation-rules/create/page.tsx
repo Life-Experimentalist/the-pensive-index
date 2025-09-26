@@ -147,7 +147,7 @@ export default function CreateValidationRule() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async (isDraft = false) => {
+  const handleSave = (isDraft = false) => {
     if (!validateForm()) {
       return;
     }
@@ -197,7 +197,9 @@ export default function CreateValidationRule() {
   };
 
   const renderPreview = () => {
-    if (!showPreview) return null;
+    if (!showPreview) {
+      return null;
+    }
 
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

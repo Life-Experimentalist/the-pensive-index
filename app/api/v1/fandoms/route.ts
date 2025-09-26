@@ -23,7 +23,7 @@ export const GET = CommonMiddleware.public(
     }
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
     const queryBuilder = new QueryBuilder(db);
 
     if (search) {
@@ -58,7 +58,7 @@ export const POST = CommonMiddleware.admin(
     const validatedData = createFandomSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Generate slug if not provided
     const slug =
@@ -81,7 +81,7 @@ export const POST = CommonMiddleware.admin(
     }
 
     // Insert new fandom
-    const [newFandom] = await db
+    const newFandom = await db
       .insert(schema.fandoms)
       .values({
         id: crypto.randomUUID(),

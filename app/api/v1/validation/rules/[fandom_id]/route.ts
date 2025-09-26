@@ -14,13 +14,12 @@ export const GET = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: Promise<{ fandom_id: string }> }
+      { params }: { params: { fandom_id: string } }
     ) => {
-      const resolvedParams = await params;
-      const fandomId = resolvedParams.fandom_id;
+      const fandomId = params.fandom_id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Verify fandom exists
       const fandom = await db.query.fandoms.findFirst({

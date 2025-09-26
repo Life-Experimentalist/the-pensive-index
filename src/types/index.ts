@@ -208,7 +208,7 @@ export interface StoryPlotBlock {
 
 // Validation context types
 export interface ValidationContext {
-  fandomId;
+  fandomId: string;
   // selectedTags: string[];
   plot_block?: PlotBlock;
   applied_tags: string[];

@@ -219,8 +219,9 @@ export async function GET(
       | 'rejected'
       | 'changes_requested'
       | null;
-    const approval_level = searchParams.get('approval_level')
-      ? parseInt(searchParams.get('approval_level')!)
+    const approvalLevelStr = searchParams.get('approval_level');
+    const approval_level = approvalLevelStr
+      ? parseInt(approvalLevelStr)
       : null;
     const content_type = searchParams.get('content_type');
     const page = parseInt(searchParams.get('page') || '1');

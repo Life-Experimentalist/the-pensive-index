@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export function GET(request: NextRequest) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';

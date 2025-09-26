@@ -105,10 +105,14 @@ export function AdminNavigation() {
 
   const filteredItems = navigationItems.filter(item => {
     // Show item if no permission required
-    if (!item.permission) return true;
+    if (!item.permission) {
+      return true;
+    }
 
     // Hide ProjectAdmin-only items from FandomAdmins
-    if (item.projectAdminOnly && !isProjectAdmin) return false;
+    if (item.projectAdminOnly && !isProjectAdmin) {
+      return false;
+    }
 
     // Check specific permission
     return hasPermission(item.permission);

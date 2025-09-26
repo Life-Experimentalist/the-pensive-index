@@ -162,7 +162,9 @@ export function ContentManagementPanel({
 
   // Save edit changes
   const saveEdit = useCallback(async () => {
-    if (!isEditing) return;
+    if (!isEditing) {
+      return;
+    }
 
     try {
       // Create update request based on edited item
@@ -201,7 +203,9 @@ export function ContentManagementPanel({
   // Handle bulk operations
   const handleBulkOperation = useCallback(
     async (operationType: string) => {
-      if (selectedItems.size === 0) return;
+      if (selectedItems.size === 0) {
+        return;
+      }
 
       setBulkOperationStatus(`Performing ${operationType}...`);
 
@@ -226,7 +230,9 @@ export function ContentManagementPanel({
           );
         }
       } catch (error) {
-        setBulkOperationStatus(`${operationType} failed: ${error}`);
+        const errorMessage =
+          error instanceof Error ? error.message : 'An unknown error occurred';
+        setBulkOperationStatus(`${operationType} failed: ${errorMessage}`);
       }
     },
     [selectedItems, fandom.id, onBulkOperation, onRefresh]

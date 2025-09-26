@@ -13,12 +13,15 @@ import { tagClasses, tags } from '@/lib/database/schema';
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    async (
+      request: NextRequest,
+      { params }: { params: Promise<{ id: string }> }
+    ) => {
       const resolvedParams = await params;
       const tagClassId = resolvedParams.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       const tagClass = await db.query.tagClasses.findFirst({
         where: eq(tagClasses.id, tagClassId),
@@ -50,15 +53,14 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: Promise<{ id: string }> }
+      { params }: { params: { id: string } }
     ) => {
-      const resolvedParams = await params;
-      const tagClassId = resolvedParams.id;
+      const tagClassId = params.id;
       const body = await request.json();
       const validatedData = updateTagClassSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if tag class exists
       const existingTagClass = await db.query.tagClasses.findFirst({
@@ -89,12 +91,15 @@ export const PUT = CommonMiddleware.admin(
       // Transform validation rules if provided
       const updateData: any = {};
 
-      if (validatedData.name !== undefined)
+      if (validatedData.name !== undefined) {
         updateData.name = validatedData.name;
-      if (validatedData.description !== undefined)
+      }
+      if (validatedData.description !== undefined) {
         updateData.description = validatedData.description;
-      if (validatedData.is_active !== undefined)
+      }
+      if (validatedData.is_active !== undefined) {
         updateData.is_active = validatedData.is_active;
+      }
 
       if (validatedData.validation_rules !== undefined) {
         updateData.validation_rules = validatedData.validation_rules
@@ -176,13 +181,12 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: Promise<{ id: string }> }
+      { params }: { params: { id: string } }
     ) => {
-      const resolvedParams = await params;
-      const tagClassId = resolvedParams.id;
+      const tagClassId = params.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if tag class exists
       const existingTagClass = await db.query.tagClasses.findFirst({

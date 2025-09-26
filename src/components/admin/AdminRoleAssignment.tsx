@@ -10,7 +10,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import {
   DndContext,
@@ -21,13 +21,13 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  closestCorners
+  closestCorners,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -43,7 +43,7 @@ import {
   ChevronDown,
   Loader2,
   UserPlus,
-  UserMinus
+  UserMinus,
 } from 'lucide-react';
 
 // Types
@@ -91,36 +91,48 @@ const ADMIN_ROLES: AdminRole[] = [
     name: 'project_admin',
     display_name: 'Project Admin',
     description: 'Full access to all project areas and global settings',
-    permissions: ['validation:global', 'admin:assign', 'admin:revoke', 'admin:audit'],
-    is_global: true
+    permissions: [
+      'validation:global',
+      'admin:assign',
+      'admin:revoke',
+      'admin:audit',
+    ],
+    is_global: true,
   },
   {
     name: 'fandom_admin',
     display_name: 'Fandom Admin',
     description: 'Full access to specific fandom areas',
-    permissions: ['validation:fandom', 'admin:fandom_assign', 'fandom:moderate'],
-    is_global: false
+    permissions: [
+      'validation:fandom',
+      'admin:fandom_assign',
+      'fandom:moderate',
+    ],
+    is_global: false,
   },
   {
     name: 'fandom_moderator',
     display_name: 'Fandom Moderator',
     description: 'Content moderation within specific fandoms',
     permissions: ['validation:fandom', 'fandom:moderate'],
-    is_global: false
+    is_global: false,
   },
   {
     name: 'validator',
     display_name: 'Validator',
     description: 'Story and tag validation permissions',
     permissions: ['validation:fandom'],
-    is_global: false
-  }
+    is_global: false,
+  },
 ];
 
 /**
  * Main Role Assignment Component
  */
-export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleAssignmentComponentProps) {
+export default function AdminRoleAssignment({
+  fandom_id,
+  className = '',
+}: RoleAssignmentComponentProps) {
   const { user } = useUser();
 
   // State management
@@ -129,7 +141,9 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
   const [assignments, setAssignments] = useState<AdminAssignment[]>([]);
   const [selectedRole, setSelectedRole] = useState<AdminRole | null>(null);
   const [draggedUser, setDraggedUser] = useState<AdminUser | null>(null);
-  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -169,14 +183,24 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
     try {
       // Load users and assignments in parallel
       const [usersResponse, assignmentsResponse] = await Promise.all([
-        fetch(`/api/admin/users?action=list${fandom_id ? `&fandom_id=${fandom_id}` : ''}`),
-        fetch(`/api/admin/roles/assign?${fandom_id ? `fandom_id=${fandom_id}` : 'action=list'}`)
+        fetch(
+          `/api/admin/users?action=list${
+            fandom_id ? `&fandom_id=${fandom_id}` : ''
+          }`
+        ),
+        fetch(
+          `/api/admin/roles/assign?${
+            fandom_id ? `fandom_id=${fandom_id}` : 'action=list'
+          }`
+        ),
       ]);
 
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         setUsers(usersData.users || []);
-        setAvailableUsers(usersData.users?.filter((u: AdminUser) => u.is_active) || []);
+        setAvailableUsers(
+          usersData.users?.filter((u: AdminUser) => u.is_active) || []
+        );
       }
 
       if (assignmentsResponse.ok) {
@@ -194,13 +218,29 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
    * Check user permissions
    */
   const checkPermissions = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      return;
+    }
 
     try {
       const [assignResponse, revokeResponse, viewResponse] = await Promise.all([
-        fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:assign${fandom_id ? `&fandom_id=${fandom_id}` : ''}`),
-        fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:revoke${fandom_id ? `&fandom_id=${fandom_id}` : ''}`),
-        fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=validation:global`)
+        fetch(
+          `/api/admin/users?action=permissions&user_id=${
+            user.id
+          }&permission=admin:assign${
+            fandom_id ? `&fandom_id=${fandom_id}` : ''
+          }`
+        ),
+        fetch(
+          `/api/admin/users?action=permissions&user_id=${
+            user.id
+          }&permission=admin:revoke${
+            fandom_id ? `&fandom_id=${fandom_id}` : ''
+          }`
+        ),
+        fetch(
+          `/api/admin/users?action=permissions&user_id=${user.id}&permission=validation:global`
+        ),
       ]);
 
       const assignData = await assignResponse.json();
@@ -231,7 +271,9 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
     const { active, over } = event;
     setDraggedUser(null);
 
-    if (!over || !selectedRole) return;
+    if (!over || !selectedRole) {
+      return;
+    }
 
     const userId = active.id as string;
     const targetZone = over.id as string;
@@ -246,11 +288,13 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
    */
   const handleRoleAssignment = async (userId: string, role: AdminRole) => {
     if (!canAssign) {
-      setValidationErrors([{
-        field: 'permissions',
-        message: 'You do not have permission to assign roles',
-        suggestion: 'Contact a Project Admin for assistance'
-      }]);
+      setValidationErrors([
+        {
+          field: 'permissions',
+          message: 'You do not have permission to assign roles',
+          suggestion: 'Contact a Project Admin for assistance',
+        },
+      ]);
       return;
     }
 
@@ -262,15 +306,15 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
         user_id: userId,
         role: role.name,
         fandom_id: fandom_id || null,
-        expires_at: null // Could be configurable
+        expires_at: null, // Could be configurable
       };
 
       const response = await fetch('/api/admin/roles/assign', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(assignmentData)
+        body: JSON.stringify(assignmentData),
       });
 
       const result = await response.json();
@@ -283,18 +327,22 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
         // Could use toast or notification here
         console.log('Role assigned successfully:', result);
       } else {
-        setValidationErrors([{
-          field: 'assignment',
-          message: result.error || 'Failed to assign role',
-          suggestion: result.suggestion
-        }]);
+        setValidationErrors([
+          {
+            field: 'assignment',
+            message: result.error || 'Failed to assign role',
+            suggestion: result.suggestion,
+          },
+        ]);
       }
     } catch (error) {
       console.error('Error assigning role:', error);
-      setValidationErrors([{
-        field: 'network',
-        message: 'Network error occurred while assigning role'
-      }]);
+      setValidationErrors([
+        {
+          field: 'network',
+          message: 'Network error occurred while assigning role',
+        },
+      ]);
     } finally {
       setIsAssigning(false);
     }
@@ -303,12 +351,17 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
   /**
    * Handle role revocation
    */
-  const handleRoleRevocation = async (assignmentId: string, reason?: string) => {
+  const handleRoleRevocation = async (
+    assignmentId: string,
+    reason?: string
+  ) => {
     if (!canRevoke) {
-      setValidationErrors([{
-        field: 'permissions',
-        message: 'You do not have permission to revoke roles'
-      }]);
+      setValidationErrors([
+        {
+          field: 'permissions',
+          message: 'You do not have permission to revoke roles',
+        },
+      ]);
       return;
     }
 
@@ -316,12 +369,12 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
       const response = await fetch('/api/admin/roles/assign', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           assignment_id: assignmentId,
-          reason: reason || 'Role revoked by admin'
-        })
+          reason: reason || 'Role revoked by admin',
+        }),
       });
 
       const result = await response.json();
@@ -330,17 +383,21 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
         await loadInitialData();
         console.log('Role revoked successfully:', result);
       } else {
-        setValidationErrors([{
-          field: 'revocation',
-          message: result.error || 'Failed to revoke role'
-        }]);
+        setValidationErrors([
+          {
+            field: 'revocation',
+            message: result.error || 'Failed to revoke role',
+          },
+        ]);
       }
     } catch (error) {
       console.error('Error revoking role:', error);
-      setValidationErrors([{
-        field: 'network',
-        message: 'Network error occurred while revoking role'
-      }]);
+      setValidationErrors([
+        {
+          field: 'network',
+          message: 'Network error occurred while revoking role',
+        },
+      ]);
     }
   };
 
@@ -348,11 +405,13 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
    * Filter users based on search and filters
    */
   const filteredUsers = availableUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesFilter = filterRole === 'all' ||
-                         user.assignments?.some(a => a.role.name === filterRole && a.is_active);
+    const matchesFilter =
+      filterRole === 'all' ||
+      user.assignments?.some(a => a.role.name === filterRole && a.is_active);
 
     const matchesStatus = showInactive || user.is_active;
 
@@ -362,12 +421,23 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
   /**
    * Filter assignments based on current filters
    */
-  const filteredAssignments = assignments.filter(assignment => {
-    if (!showInactive && !assignment.is_active) return false;
-    if (filterRole !== 'all' && assignment.role.name !== filterRole) return false;
-    if (fandom_id && assignment.fandom_id !== fandom_id) return false;
-    return true;
-  });
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter(assignment => {
+      if (!showInactive && !assignment.is_active) {
+        return false;
+      }
+      if (
+        selectedRole &&
+        assignment.role.name.toLowerCase() !== selectedRole.name.toLowerCase()
+      ) {
+        return false;
+      }
+      if (fandom_id && assignment.fandom_id !== fandom_id) {
+        return false;
+      }
+      return true;
+    });
+  }, [assignments, showInactive, selectedRole, fandom_id]);
 
   if (isLoading) {
     return (
@@ -379,7 +449,9 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
   }
 
   return (
-    <div className={`admin-role-assignment bg-white rounded-lg shadow-sm border ${className}`}>
+    <div
+      className={`admin-role-assignment bg-white rounded-lg shadow-sm border ${className}`}
+    >
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -387,7 +459,11 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
             <h2 className="text-xl font-semibold text-gray-900 flex items-center">
               <Shield className="w-5 h-5 mr-2 text-blue-600" />
               Role Assignment
-              {fandom_id && <span className="ml-2 text-sm text-gray-500">• Fandom Specific</span>}
+              {fandom_id && (
+                <span className="ml-2 text-sm text-gray-500">
+                  • Fandom Specific
+                </span>
+              )}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               Assign and manage admin roles using drag-and-drop
@@ -421,7 +497,7 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -431,7 +507,7 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
           <div className="relative">
             <select
               value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
+              onChange={e => setFilterRole(e.target.value)}
               className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Roles</option>
@@ -449,11 +525,19 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
             <input
               type="checkbox"
               checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
+              onChange={e => setShowInactive(e.target.checked)}
               className="sr-only"
             />
-            <div className={`relative w-11 h-6 rounded-full transition-colors ${showInactive ? 'bg-blue-600' : 'bg-gray-200'}`}>
-              <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${showInactive ? 'translate-x-5' : 'translate-x-0'}`} />
+            <div
+              className={`relative w-11 h-6 rounded-full transition-colors ${
+                showInactive ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                  showInactive ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
             </div>
             <span className="ml-2 text-sm text-gray-700">Show Inactive</span>
           </label>
@@ -464,12 +548,17 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
       {validationErrors.length > 0 && (
         <div className="p-4 bg-red-50 border-b border-red-200">
           {validationErrors.map((error, index) => (
-            <div key={index} className="flex items-start space-x-2 text-red-800">
+            <div
+              key={index}
+              className="flex items-start space-x-2 text-red-800"
+            >
               <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="text-sm font-medium">{error.message}</p>
                 {error.suggestion && (
-                  <p className="text-xs text-red-600 mt-1">{error.suggestion}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    {error.suggestion}
+                  </p>
                 )}
               </div>
             </div>
@@ -489,7 +578,9 @@ export default function AdminRoleAssignment({ fandom_id, className = '' }: RoleA
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               <Users className="w-5 h-5 mr-2" />
               Available Users
-              <span className="ml-2 text-sm text-gray-500">({filteredUsers.length})</span>
+              <span className="ml-2 text-sm text-gray-500">
+                ({filteredUsers.length})
+              </span>
             </h3>
 
             <UserList users={filteredUsers} />
@@ -596,12 +687,13 @@ function DraggableUserItem({ user }: { user: AdminUser }) {
  */
 function UserList({ users }: { users: AdminUser[] }) {
   return (
-    <SortableContext items={users.map(u => u.id)} strategy={verticalListSortingStrategy}>
+    <SortableContext
+      items={users.map(u => u.id)}
+      strategy={verticalListSortingStrategy}
+    >
       <div className="space-y-2 max-h-96 overflow-y-auto">
         {users.length > 0 ? (
-          users.map(user => (
-            <DraggableUserItem key={user.id} user={user} />
-          ))
+          users.map(user => <DraggableUserItem key={user.id} user={user} />)
         ) : (
           <div className="text-center py-8 text-gray-500">
             <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -619,7 +711,7 @@ function UserList({ users }: { users: AdminUser[] }) {
 function RoleSelector({
   roles,
   selectedRole,
-  onRoleSelect
+  onRoleSelect,
 }: {
   roles: AdminRole[];
   selectedRole: AdminRole | null;
@@ -634,12 +726,15 @@ function RoleSelector({
         {roles.map(role => (
           <button
             key={role.name}
-            onClick={() => onRoleSelect(selectedRole?.name === role.name ? null : role)}
+            onClick={() =>
+              onRoleSelect(selectedRole?.name === role.name ? null : role)
+            }
             className={`
               p-3 text-left border rounded-lg transition-colors
-              ${selectedRole?.name === role.name
-                ? 'border-blue-500 bg-blue-50 text-blue-900'
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              ${
+                selectedRole?.name === role.name
+                  ? 'border-blue-500 bg-blue-50 text-blue-900'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }
             `}
           >
@@ -683,7 +778,7 @@ function AssignmentZone({
   selectedRole,
   isAssigning,
   canAssign,
-  draggedUser
+  draggedUser,
 }: {
   selectedRole: AdminRole | null;
   isAssigning: boolean;
@@ -695,13 +790,15 @@ function AssignmentZone({
       id="assignment-zone"
       className={`
         min-h-32 p-6 border-2 border-dashed rounded-lg text-center transition-colors
-        ${selectedRole && canAssign
-          ? 'border-blue-300 bg-blue-50'
-          : 'border-gray-300 bg-gray-50'
+        ${
+          selectedRole && canAssign
+            ? 'border-blue-300 bg-blue-50'
+            : 'border-gray-300 bg-gray-50'
         }
-        ${draggedUser && selectedRole && canAssign
-          ? 'border-blue-500 bg-blue-100'
-          : ''
+        ${
+          draggedUser && selectedRole && canAssign
+            ? 'border-blue-500 bg-blue-100'
+            : ''
         }
       `}
     >
@@ -745,7 +842,7 @@ function AssignmentZone({
 function CurrentAssignments({
   assignments,
   canRevoke,
-  onRevoke
+  onRevoke,
 }: {
   assignments: AdminAssignment[];
   canRevoke: boolean;
@@ -786,7 +883,8 @@ function CurrentAssignments({
                     </p>
                   )}
                   <p className="text-xs text-gray-500">
-                    Assigned {new Date(assignment.created_at).toLocaleDateString()}
+                    Assigned{' '}
+                    {new Date(assignment.created_at).toLocaleDateString()}
                   </p>
                 </div>
 

@@ -65,29 +65,29 @@ interface TabDefinition {
 
 // Mock API functions for demo purposes
 const mockApiCalls = {
-  fetchRules: async () => {
+  fetchRules: () => {
     console.log('Fetching rules...');
-    return [];
+    return Promise.resolve([]);
   },
-  createRule: async (rule: any) => {
+  createRule: (rule: any) => {
     console.log('Creating rule:', rule);
-    return { id: 'new-rule-id', ...rule };
+    return Promise.resolve({ id: 'new-rule-id', ...rule });
   },
-  updateRule: async (rule: any) => {
+  updateRule: (rule: any) => {
     console.log('Updating rule:', rule);
-    return rule;
+    return Promise.resolve(rule);
   },
-  deleteRule: async (ruleId: string) => {
+  deleteRule: (ruleId: string) => {
     console.log('Deleting rule:', ruleId);
-    return true;
+    return Promise.resolve(true);
   },
-  runValidation: async (config: any) => {
+  runValidation: (config: any) => {
     console.log('Running validation:', config);
-    return { passed: 0, failed: 0 };
+    return Promise.resolve({ passed: 0, failed: 0 });
   },
-  runScenario: async (scenario: any) => {
+  runScenario: (scenario: any) => {
     console.log('Running scenario:', scenario);
-    return { success: true, results: [] };
+    return Promise.resolve({ success: true, results: [] });
   },
 };
 
@@ -264,7 +264,7 @@ const TestingWorkflow: React.FC<TestingWorkflowProps> = ({
     onValidationRun?.(results);
   }, [onValidationRun]);
 
-  const handleSaveScenario = useCallback(async () => {
+  const handleSaveScenario = useCallback(() => {
     const scenario = {
       name: scenarioName,
       expectedValid,

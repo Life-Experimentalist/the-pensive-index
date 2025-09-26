@@ -10,7 +10,7 @@
 
 import { clerkClient } from '@clerk/nextjs/server';
 
-async function createTestAdmin() {
+function createTestAdmin() {
   try {
     // This is meant to be run manually to give admin role to existing users
     console.log('🔧 Admin User Setup Tool');

@@ -81,24 +81,23 @@ export async function GET(request: NextRequest) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
-    }
-
-    const user = authResult.user as any;
-
-    if (!AdminPermissions.isAdmin(user)) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
     const adminUser = authResult.user;
 
     // Only ProjectAdmin can access templates
-    if (adminUser.role !== 'ProjectAdmin') {
+    if (
+      !AdminPermissions.hasPermission(adminUser, AdminPermissions.PROJECT_ADMIN)
+    ) {
       return NextResponse.json(
         { success: false, error: 'ProjectAdmin access required for templates' },
         { status: 403 }
@@ -148,24 +147,23 @@ export async function POST(request: NextRequest) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
-    }
-
-    const user = authResult.user as any;
-
-    if (!AdminPermissions.isAdmin(user)) {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      );
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
     const adminUser = authResult.user;
 
     // Only ProjectAdmin can create templates
-    if (adminUser.role !== 'ProjectAdmin') {
+    if (
+      !AdminPermissions.hasPermission(adminUser, AdminPermissions.PROJECT_ADMIN)
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -203,7 +201,7 @@ export async function POST(request: NextRequest) {
     const adminQueries = new AdminQueries(db);
 
     const newTemplate = await adminQueries.ruleTemplates.create(
-      validationResult.data as any, // Type assertion for complex nested type
+      validationResult.data,
       adminUser.id
     );
 

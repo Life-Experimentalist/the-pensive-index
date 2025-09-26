@@ -14,15 +14,14 @@ export const GET = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: Promise<{ fandomId: string }> }
+      { params }: { params: { fandomId: string } }
     ) => {
-      const resolvedParams = await params;
-      const fandomId = resolvedParams.fandomId;
+      const fandomId = params.fandomId;
       const { searchParams } = new URL(request.url);
       const includeInactive = searchParams.get('include_inactive') === 'true';
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Verify fandom exists
       const fandom = await db.query.fandoms.findFirst({
@@ -77,7 +76,7 @@ export const GET = CommonMiddleware.public(
           if (!tagsByClass.has(tag.tag_class_id)) {
             tagsByClass.set(tag.tag_class_id, []);
           }
-          tagsByClass.get(tag.tag_class_id)!.push(tag);
+          tagsByClass.get(tag.tag_class_id)?.push(tag);
         } else {
           unclassifiedTags.push(tag);
         }
@@ -92,7 +91,7 @@ export const GET = CommonMiddleware.public(
         if (!plotBlocksByCategory.has(plotBlock.category)) {
           plotBlocksByCategory.set(plotBlock.category, []);
         }
-        plotBlocksByCategory.get(plotBlock.category)!.push(plotBlock);
+        plotBlocksByCategory.get(plotBlock.category)?.push(plotBlock);
       }
 
       // Build the complete tree structure
@@ -144,17 +143,14 @@ function buildPlotBlockTree(plotBlocks: any[]): any[] {
   const rootPlotBlocks: any[] = [];
 
   for (const plotBlock of plotBlocks) {
-    const plotBlockWithChildren = plotBlockMap.get(plotBlock.id)!;
+    const plotBlockWithChildren = plotBlockMap.get(plotBlock.id);
 
     if (plotBlock.parent_id) {
       const parent = plotBlockMap.get(plotBlock.parent_id);
-      if (parent) {
+      if (parent && plotBlockWithChildren) {
         parent.children.push(plotBlockWithChildren);
-      } else {
-        // Parent not found or not active, treat as root
-        rootPlotBlocks.push(plotBlockWithChildren);
       }
-    } else {
+    } else if (plotBlockWithChildren) {
       rootPlotBlocks.push(plotBlockWithChildren);
     }
   }

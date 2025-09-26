@@ -10,7 +10,7 @@ import { z } from 'zod';
 export async function GET(request: NextRequest) {
   try {
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Get query parameters for pagination and filtering
     const { searchParams } = new URL(request.url);
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
  * Create a new fandom (Admin only)
  * POST /api/fandoms
  */
-export async function POST(request: NextRequest) {
+export function POST(request: NextRequest) {
   try {
     // TODO: Add authentication middleware to check admin role
     // For now, return method not allowed

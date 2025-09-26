@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'The Pensieve Index',
+  metadataBase: new URL('http://localhost:3000'),
   description:
     'A library-first story discovery platform and intelligent prompt generator for fanfiction',
   icons: {
@@ -36,7 +37,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: { colorPrimary: '#6366f1' },
+        layout: {
+          socialButtonsVariant: 'iconButton',
+          logoImageUrl: '/icon.png',
+          logoPlacement: 'inside',
+        },
+      }}
+      signInFallbackRedirectUrl="/"
+    >
       <html lang="en">
         <body className={inter.className} suppressHydrationWarning={true}>
           {children}

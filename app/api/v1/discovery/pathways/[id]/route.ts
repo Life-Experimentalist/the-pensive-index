@@ -13,9 +13,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const resolvedParams = await params;
+  const resolvedParams = params;
   const pathwayId = resolvedParams.id;
 
   try {
@@ -139,7 +139,7 @@ export async function GET(
 /**
  * OPTIONS /api/v1/discovery/pathways/[id]
  */
-export async function OPTIONS() {
+export function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

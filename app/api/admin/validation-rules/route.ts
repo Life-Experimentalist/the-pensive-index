@@ -85,12 +85,15 @@ export async function GET(request: NextRequest) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      return (
+        authResult.response ??
+        NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      );
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -167,12 +170,15 @@ export async function POST(request: NextRequest) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      return (
+        authResult.response ??
+        NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      );
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(

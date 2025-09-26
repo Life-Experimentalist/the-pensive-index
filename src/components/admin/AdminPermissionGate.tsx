@@ -41,7 +41,9 @@ export function AdminPermissionGate({
   const isProjectAdmin = userRole === 'ProjectAdmin';
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      return;
+    }
 
     if (!user) {
       router.push(fallbackPath);

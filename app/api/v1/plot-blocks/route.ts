@@ -26,7 +26,7 @@ export const GET = CommonMiddleware.public(
     const offset = (page - 1) * limit;
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Build filter conditions
     const conditions = [];
@@ -89,7 +89,7 @@ export const POST = CommonMiddleware.admin(
     const validatedData = createPlotBlockSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Ensure fandom_id is provided
     if (!validatedData.fandom_id) {

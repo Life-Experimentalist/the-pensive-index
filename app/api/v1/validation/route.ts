@@ -36,7 +36,7 @@ export const POST = CommonMiddleware.public(
     const validatedData = validationRequestSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({

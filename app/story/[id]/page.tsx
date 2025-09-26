@@ -96,9 +96,7 @@ interface StoryDetailData {
 }
 
 // Mock data fetching function (will be replaced with actual service calls)
-async function fetchStoryDetail(
-  storyId: string
-): Promise<StoryDetailData | null> {
+function fetchStoryDetail(storyId: string): StoryDetailData | null {
   try {
     // TODO: Replace with actual StoryService and AnalyticsService calls
     // const storyService = new StoryService();
@@ -241,7 +239,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const storyData = await fetchStoryDetail(resolvedParams.id);
+  const storyData = fetchStoryDetail(resolvedParams.id);
 
   if (!storyData) {
     return {
@@ -429,16 +427,16 @@ function EngagementStats({ engagement }: { engagement: ReaderEngagement }) {
 }
 
 // Main page component
-export default async function StoryDetailPage({
+export default async function StoryPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const storyData = await fetchStoryDetail(resolvedParams.id);
+  const storyData = fetchStoryDetail(resolvedParams.id);
 
   if (!storyData) {
-    notFound();
+    return notFound();
   }
 
   const { story, relatedStories, engagement, similarPathways } = storyData;

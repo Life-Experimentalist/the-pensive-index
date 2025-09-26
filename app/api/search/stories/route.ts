@@ -13,7 +13,7 @@ import { z } from 'zod';
 export async function POST(request: NextRequest) {
   try {
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Parse and validate request body
     const body = await request.json();

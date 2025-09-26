@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable static site generation for GitHub Pages
-  output: 'export',
+  // output: 'export',
 
   // Configure for custom domain deployment
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
@@ -44,49 +44,8 @@ const nextConfig = {
 
   // Images handled above in static export config
 
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-        ],
-      },
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-        ],
-      },
-    ];
-  },
+  // Security headers are not supported with static export.
+  // They should be configured on the web server (e.g., Nginx, Vercel).
 
   // Performance optimizations
   poweredByHeader: false,
@@ -97,26 +56,11 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 
-  // Redirects for SEO
-  async redirects() {
-    return [
-      {
-        source: '/docs',
-        destination: '/docs/api',
-        permanent: true,
-      },
-    ];
-  },
+  // Redirects are not supported with static export.
+  // They should be configured on the web server.
 
-  // Rewrites for API versioning
-  async rewrites() {
-    return [
-      {
-        source: '/api/v1/:path*',
-        destination: '/api/:path*',
-      },
-    ];
-  },
+  // Rewrites are not supported with static export.
+  // They should be configured on the web server.
 };
 
 module.exports = nextConfig;

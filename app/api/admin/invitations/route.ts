@@ -202,10 +202,10 @@ export async function GET(request: NextRequest) {
       invited_by: searchParams.get('invited_by') || undefined,
       role: (searchParams.get('role') as AdminRole) || undefined,
       limit: searchParams.get('limit')
-        ? parseInt(searchParams.get('limit')!)
+        ? parseInt(searchParams.get('limit') ?? '50')
         : 50,
       offset: searchParams.get('offset')
-        ? parseInt(searchParams.get('offset')!)
+        ? parseInt(searchParams.get('offset') ?? '0')
         : 0,
     };
 

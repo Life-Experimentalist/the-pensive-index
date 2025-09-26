@@ -8,7 +8,7 @@ import { DatabaseManager, DatabaseHealthChecker } from '@/lib/database';
 export async function GET(request: NextRequest) {
   try {
     const dbManager = DatabaseManager.getInstance();
-    const connection = await dbManager.getConnection();
+    const connection = dbManager.getConnection();
     const healthChecker = new DatabaseHealthChecker(connection);
     const healthCheck = await healthChecker.checkHealth();
 

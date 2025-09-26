@@ -68,9 +68,7 @@ interface PathwayResultsData {
 }
 
 // Mock data fetching function (will be replaced with actual service calls)
-async function fetchPathwayResults(
-  pathwayId: string
-): Promise<PathwayResultsData | null> {
+function fetchPathwayResults(pathwayId: string): PathwayResultsData | null {
   try {
     // TODO: Replace with actual StorySearchService and PromptGenerationService calls
     // const storySearchService = new StorySearchService();
@@ -167,7 +165,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const resolvedParams = await params;
-  const pathwayData = await fetchPathwayResults(resolvedParams.id);
+  const pathwayData = fetchPathwayResults(resolvedParams.id);
 
   if (!pathwayData) {
     return {
@@ -380,16 +378,16 @@ function PromptCard({ prompt }: { prompt: PromptSuggestion }) {
 }
 
 // Main page component
-export default async function PathwayResultsPage({
+export default async function PathwayPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const pathwayData = await fetchPathwayResults(resolvedParams.id);
+  const pathwayData = fetchPathwayResults(resolvedParams.id);
 
   if (!pathwayData) {
-    notFound();
+    return notFound();
   }
 
   const { pathway, matchingStories, promptSuggestions, searchStats } =

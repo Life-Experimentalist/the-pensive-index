@@ -213,11 +213,14 @@ async function handleListUsers(
       is_active: validatedParams.is_active,
       search: validatedParams.search,
       limit: validatedParams.limit || 50,
-      offset: validatedParams.offset || 0
+      offset: validatedParams.offset || 0,
     };
 
     // If user is not Project Admin, restrict to their fandoms
-    const isProjectAdmin = await adminModel.hasPermission(currentUserId, 'validation:global');
+    const isProjectAdmin = await adminModel.hasPermission(
+      currentUserId,
+      'validation:global'
+    );
     if (!isProjectAdmin && validatedParams.fandom_id) {
       const hasAccess = await adminModel.hasPermission(
         currentUserId,
@@ -228,7 +231,7 @@ async function handleListUsers(
         return NextResponse.json(
           {
             error: 'No access to view users in this fandom',
-            fandom_id: validatedParams.fandom_id
+            fandom_id: validatedParams.fandom_id,
           },
           { status: 403 }
         );
@@ -236,7 +239,7 @@ async function handleListUsers(
     }
 
     // Get users (this would be implemented in AdminUserModel)
-    const users = await getFilteredUsers(filters);
+    const users = getFilteredUsers(filters);
 
     return NextResponse.json({
       success: true,
@@ -263,7 +266,6 @@ async function handleListUsers(
       },
       filters: filters,
     });
-
   } catch (error) {
     console.error('Error listing users:', error);
 
@@ -271,7 +273,7 @@ async function handleListUsers(
       return NextResponse.json(
         {
           error: 'Invalid query parameters',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -296,7 +298,9 @@ async function handleCheckPermissions(
 
     // Permission check - can check this user's permissions?
     if (user_id !== currentUserId) {
-      const canCheck = await permissionValidator.canViewAuditLogs(currentUserId);
+      const canCheck = await permissionValidator.canViewAuditLogs(
+        currentUserId
+      );
       if (!canCheck) {
         return NextResponse.json(
           { error: 'Insufficient permissions to check other user permissions' },
@@ -314,9 +318,8 @@ async function handleCheckPermissions(
 
     return NextResponse.json({
       success: true,
-      permission_check: permissionCheck
+      permission_check: permissionCheck,
     });
-
   } catch (error) {
     console.error('Error checking permissions:', error);
 
@@ -324,7 +327,7 @@ async function handleCheckPermissions(
       return NextResponse.json(
         {
           error: 'Invalid query parameters',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -371,10 +374,9 @@ async function handleGetAssignments(
         is_active: assignment.is_active,
         expires_at: assignment.expires_at,
         created_at: assignment.created_at,
-        updated_at: assignment.updated_at
-      }))
+        updated_at: assignment.updated_at,
+      })),
     });
-
   } catch (error) {
     console.error('Error getting user assignments:', error);
     throw error;
@@ -403,7 +405,9 @@ export async function PUT(request: NextRequest) {
 
     // Permission check - can update this user?
     if (user_id !== currentUserId) {
-      const canUpdate = await permissionValidator.canViewAuditLogs(currentUserId);
+      const canUpdate = await permissionValidator.canViewAuditLogs(
+        currentUserId
+      );
       if (!canUpdate) {
         return NextResponse.json(
           { error: 'Insufficient permissions to update other users' },
@@ -414,7 +418,10 @@ export async function PUT(request: NextRequest) {
 
     // Additional check for deactivating users
     if (is_active === false && user_id !== currentUserId) {
-      const canDeactivate = await adminModel.hasPermission(currentUserId, 'admin:revoke');
+      const canDeactivate = await adminModel.hasPermission(
+        currentUserId,
+        'admin:revoke'
+      );
       if (!canDeactivate) {
         return NextResponse.json(
           { error: 'Insufficient permissions to deactivate users' },
@@ -426,17 +433,14 @@ export async function PUT(request: NextRequest) {
     // Get current user
     const user = await adminModel.getAdminUser(user_id);
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Update user (this would be implemented in AdminUserModel)
     const updatedUser = await updateAdminUser(user_id, {
       name,
       is_active,
-      preferences
+      preferences,
     });
 
     // Log the update
@@ -449,8 +453,8 @@ export async function PUT(request: NextRequest) {
       details: {
         updated_fields: Object.keys(body),
         target_user_id: user_id,
-        is_self_update: user_id === currentUserId
-      }
+        is_self_update: user_id === currentUserId,
+      },
     });
 
     return NextResponse.json({
@@ -462,10 +466,9 @@ export async function PUT(request: NextRequest) {
         name: updatedUser.name,
         is_active: updatedUser.is_active,
         preferences: updatedUser.preferences,
-        updated_at: updatedUser.updated_at
-      }
+        updated_at: updatedUser.updated_at,
+      },
     });
-
   } catch (error) {
     console.error('Error updating user:', error);
 
@@ -473,7 +476,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -521,7 +524,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Permission check
-    const canDeactivate = await adminModel.hasPermission(currentUserId, 'admin:revoke');
+    const canDeactivate = await adminModel.hasPermission(
+      currentUserId,
+      'admin:revoke'
+    );
     if (!canDeactivate) {
       return NextResponse.json(
         { error: 'Insufficient permissions to deactivate users' },
@@ -532,10 +538,7 @@ export async function DELETE(request: NextRequest) {
     // Get user to verify existence
     const user = await adminModel.getAdminUser(user_id);
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Deactivate user and revoke all assignments
@@ -559,8 +562,8 @@ export async function DELETE(request: NextRequest) {
       details: {
         deactivated_user_id: user_id,
         reason: reason,
-        revoked_assignments: assignments.filter(a => a.is_active).length
-      }
+        revoked_assignments: assignments.filter(a => a.is_active).length,
+      },
     });
 
     return NextResponse.json({
@@ -569,9 +572,8 @@ export async function DELETE(request: NextRequest) {
       user_id: user_id,
       deactivated_by: currentUserId,
       reason: reason,
-      revoked_assignments: assignments.filter(a => a.is_active).length
+      revoked_assignments: assignments.filter(a => a.is_active).length,
     });
-
   } catch (error) {
     console.error('Error deactivating user:', error);
     return NextResponse.json(
@@ -586,7 +588,7 @@ export async function DELETE(request: NextRequest) {
 /**
  * Get filtered users (would be implemented in AdminUserModel)
  */
-async function getFilteredUsers(filters: any): Promise<any[]> {
+function getFilteredUsers(filters: any): any[] {
   // This would query the database with filters
   // For now, returning empty array
   return [];
@@ -595,7 +597,7 @@ async function getFilteredUsers(filters: any): Promise<any[]> {
 /**
  * Update admin user (would be implemented in AdminUserModel)
  */
-async function updateAdminUser(userId: string, updates: any): Promise<any> {
+function updateAdminUser(userId: string, updates: any): any {
   // This would update the user in the database
   // For now, returning mock updated user
   return {
@@ -604,6 +606,6 @@ async function updateAdminUser(userId: string, updates: any): Promise<any> {
     name: updates.name || 'Updated User',
     is_active: updates.is_active ?? true,
     preferences: updates.preferences || {},
-    updated_at: new Date()
+    updated_at: new Date(),
   };
 }

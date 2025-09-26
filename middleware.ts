@@ -33,19 +33,19 @@ export default clerkMiddleware(async (auth, req) => {
   // Check admin permissions based on route type
   if (isProjectAdminRoute(req)) {
     // Project Admin routes require ProjectAdmin role
-    const hasProjectAdminRole = await checkProjectAdminRole(userId);
+    const hasProjectAdminRole = checkProjectAdminRole(userId);
     if (!hasProjectAdminRole) {
       return NextResponse.redirect(new URL('/admin/unauthorized', req.url));
     }
   } else if (isFandomAdminRoute(req)) {
     // Fandom Admin routes require either ProjectAdmin or FandomAdmin role
-    const hasAdminRole = await checkAdminRole(userId);
+    const hasAdminRole = checkAdminRole(userId);
     if (!hasAdminRole) {
       return NextResponse.redirect(new URL('/admin/unauthorized', req.url));
     }
   } else if (isAdminRoute(req)) {
     // General admin routes require any admin role
-    const hasAdminRole = await checkAdminRole(userId);
+    const hasAdminRole = checkAdminRole(userId);
     if (!hasAdminRole) {
       return NextResponse.redirect(new URL('/admin/unauthorized', req.url));
     }
@@ -55,7 +55,7 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 // Helper functions for role checking
-async function checkProjectAdminRole(userId: string): Promise<boolean> {
+function checkProjectAdminRole(userId: string): boolean {
   try {
     // This would typically check against your database
     // For now, return true - will be implemented with actual DB queries
@@ -66,7 +66,7 @@ async function checkProjectAdminRole(userId: string): Promise<boolean> {
   }
 }
 
-async function checkAdminRole(userId: string): Promise<boolean> {
+function checkAdminRole(userId: string): boolean {
   try {
     // This would check for any admin role (Project or Fandom)
     // For now, return true - will be implemented with actual DB queries

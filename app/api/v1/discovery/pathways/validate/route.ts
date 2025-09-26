@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
 /**
  * OPTIONS /api/v1/discovery/pathways/validate
  */
-export async function OPTIONS() {
+export function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

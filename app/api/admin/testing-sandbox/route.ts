@@ -76,12 +76,15 @@ export async function POST(request: NextRequest) {
 async function handleValidatePathway(request: NextRequest) {
   // Get session and validate admin access
   const authResult = await checkAdminAuth();
-    
-    if (!authResult.success) {
-      return authResult.response!;
-    }
 
-  const user = authResult.user as any;
+  if (!authResult.success) {
+    return (
+      authResult.response ??
+      NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    );
+  }
+
+  const user = authResult.user;
 
   if (!AdminPermissions.isAdmin(user)) {
     return NextResponse.json(
@@ -210,12 +213,15 @@ async function handleValidatePathway(request: NextRequest) {
 async function handleTestRule(request: NextRequest) {
   // Get session and validate admin access
   const authResult = await checkAdminAuth();
-    
-    if (!authResult.success) {
-      return authResult.response!;
-    }
 
-  const user = authResult.user as any;
+  if (!authResult.success) {
+    return (
+      authResult.response ??
+      NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    );
+  }
+
+  const user = authResult.user;
 
   if (!AdminPermissions.isAdmin(user)) {
     return NextResponse.json(
@@ -310,10 +316,7 @@ async function handleTestRule(request: NextRequest) {
           tagClasses: {},
         };
 
-        const result = await RuleEngine.evaluateCondition(
-          condition,
-          conditionInput
-        );
+        const result = RuleEngine.evaluateCondition(condition, conditionInput);
         const endTime = performance.now();
 
         conditionResults.push({

@@ -75,12 +75,18 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -133,12 +139,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -201,7 +213,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Update the template
     const updatedTemplate = await adminQueries.ruleTemplates.update(
       templateId,
-      validationResult.data as any // Type assertion for complex nested type
+      validationResult.data
     );
 
     return NextResponse.json({
@@ -225,12 +237,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(

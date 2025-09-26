@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         {
           error: 'Insufficient permissions to assign fandom admins',
           required_permission: 'admin:assign',
-          fandom_id: fandomId
+          fandom_id: fandomId,
         },
         { status: 403 }
       );
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     // Validate target user exists
     const targetUser = await adminModel.getAdminUser(userId);
     if (!targetUser) {
-      const isNewAdmin = await checkIfUserExists(userId);
+      const isNewAdmin = checkIfUserExists(userId);
       if (!isNewAdmin) {
         return NextResponse.json(
           { error: 'Target user not found or not eligible for admin roles' },
@@ -93,12 +93,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already assigned to this fandom
-    const existingAssignment = await fandomService.getUserFandomAssignment(userId, fandomId);
+    const existingAssignment = await fandomService.getUserFandomAssignment(
+      userId,
+      fandomId
+    );
     if (existingAssignment) {
       return NextResponse.json(
         {
           error: 'User already assigned to this fandom',
-          existing_assignment_id: existingAssignment.id
+          existing_assignment_id: existingAssignment.id,
         },
         { status: 409 }
       );
@@ -111,20 +114,22 @@ export async function POST(request: NextRequest) {
       currentUserId
     );
 
-    return NextResponse.json({
-      success: true,
-      message: 'Fandom admin assigned successfully',
-      assignment: {
-        id: assignment.id,
-        user_id: assignment.user_id,
-        fandom_id: assignment.fandom_id,
-        role: assignment.role,
-        assigned_by: assignment.assigned_by,
-        is_active: assignment.is_active,
-        created_at: assignment.created_at
-      }
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Fandom admin assigned successfully',
+        assignment: {
+          id: assignment.id,
+          user_id: assignment.user_id,
+          fandom_id: assignment.fandom_id,
+          role: assignment.role,
+          assigned_by: assignment.assigned_by,
+          is_active: assignment.is_active,
+          created_at: assignment.created_at,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error assigning fandom admin:', error);
 
@@ -133,7 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -142,22 +147,13 @@ export async function POST(request: NextRequest) {
     // Handle known business logic errors
     if (error instanceof Error) {
       if (error.message.includes('permission')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: error.message }, { status: 403 });
       }
       if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: error.message }, { status: 404 });
       }
       if (error.message.includes('already assigned')) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 409 }
-        );
+        return NextResponse.json({ error: error.message }, { status: 409 });
       }
     }
 
@@ -199,7 +195,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Insufficient permissions to reassign fandoms',
-          fandom_id: fandomId
+          fandom_id: fandomId,
         },
         { status: 403 }
       );
@@ -208,7 +204,7 @@ export async function PUT(request: NextRequest) {
     // Validate new user exists
     const newUser = await adminModel.getAdminUser(newUserId);
     if (!newUser) {
-      const isNewAdmin = await checkIfUserExists(newUserId);
+      const isNewAdmin = checkIfUserExists(newUserId);
       if (!isNewAdmin) {
         return NextResponse.json(
           { error: 'Target user not found or not eligible for admin roles' },
@@ -235,11 +231,10 @@ export async function PUT(request: NextRequest) {
         role: newAssignment.role,
         assigned_by: newAssignment.assigned_by,
         is_active: newAssignment.is_active,
-        created_at: newAssignment.created_at
+        created_at: newAssignment.created_at,
       },
-      previous_assignment_id: previousAssignmentId
+      previous_assignment_id: previousAssignmentId,
     });
-
   } catch (error) {
     console.error('Error reassigning fandom:', error);
 
@@ -247,7 +242,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -292,14 +287,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Insufficient permissions to remove fandom admins',
-          fandom_id: fandomId
+          fandom_id: fandomId,
         },
         { status: 403 }
       );
     }
 
     // Check if user is assigned to this fandom
-    const assignment = await fandomService.getUserFandomAssignment(userId, fandomId);
+    const assignment = await fandomService.getUserFandomAssignment(
+      userId,
+      fandomId
+    );
     if (!assignment) {
       return NextResponse.json(
         { error: 'User is not assigned to this fandom' },
@@ -326,9 +324,8 @@ export async function DELETE(request: NextRequest) {
       message: 'Fandom admin removed successfully',
       removed_user_id: userId,
       fandom_id: fandomId,
-      removed_by: currentUserId
+      removed_by: currentUserId,
     });
-
   } catch (error) {
     console.error('Error removing fandom admin:', error);
 
@@ -336,7 +333,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -373,7 +370,9 @@ export async function GET(request: NextRequest) {
     // Permission check based on action
     if (action === 'stats' || (!fandomId && !userId)) {
       // Global stats require project admin
-      const canViewGlobal = await permissionValidator.canViewAuditLogs(currentUserId);
+      const canViewGlobal = await permissionValidator.canViewAuditLogs(
+        currentUserId
+      );
       if (!canViewGlobal) {
         return NextResponse.json(
           { error: 'Insufficient permissions to view global fandom data' },
@@ -382,12 +381,15 @@ export async function GET(request: NextRequest) {
       }
     } else if (fandomId) {
       // Fandom-specific data requires fandom access
-      const hasAccess = await fandomService.hasAccessToFandom(currentUserId, fandomId);
+      const hasAccess = await fandomService.hasAccessToFandom(
+        currentUserId,
+        fandomId
+      );
       if (!hasAccess) {
         return NextResponse.json(
           {
             error: 'No access to this fandom',
-            fandom_id: fandomId
+            fandom_id: fandomId,
           },
           { status: 403 }
         );
@@ -408,27 +410,29 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           user_id: userId,
-          fandoms: userFandoms
+          fandoms: userFandoms,
         });
 
       case 'orphaned':
         const orphanedFandoms = await fandomService.getOrphanedFandoms();
         return NextResponse.json({
           success: true,
-          orphaned_fandoms: orphanedFandoms
+          orphaned_fandoms: orphanedFandoms,
         });
 
       case 'stats':
         const stats = await fandomService.getFandomStats();
         return NextResponse.json({
           success: true,
-          statistics: stats
+          statistics: stats,
         });
 
       default:
         // Get assignments for specific fandom or user
         if (fandomId) {
-          const assignments = await fandomService.getFandomAssignments(fandomId);
+          const assignments = await fandomService.getFandomAssignments(
+            fandomId
+          );
           return NextResponse.json({
             success: true,
             fandom_id: fandomId,
@@ -439,15 +443,15 @@ export async function GET(request: NextRequest) {
               assigned_by: assignment.assigned_by,
               is_active: assignment.is_active,
               expires_at: assignment.expires_at,
-              created_at: assignment.created_at
-            }))
+              created_at: assignment.created_at,
+            })),
           });
         } else if (userId) {
           const userFandoms = await fandomService.getUserFandoms(userId);
           return NextResponse.json({
             success: true,
             user_id: userId,
-            fandoms: userFandoms
+            fandoms: userFandoms,
           });
         } else {
           return NextResponse.json(
@@ -456,7 +460,6 @@ export async function GET(request: NextRequest) {
           );
         }
     }
-
   } catch (error) {
     console.error('Error fetching fandom assignments:', error);
     return NextResponse.json(
@@ -497,7 +500,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Insufficient permissions to assign fandom admins',
-          fandom_id: fandomId
+          fandom_id: fandomId,
         },
         { status: 403 }
       );
@@ -521,12 +524,11 @@ export async function PATCH(request: NextRequest) {
         successful: result.successful.map(assignment => ({
           id: assignment.id,
           user_id: assignment.user_id,
-          role: assignment.role
+          role: assignment.role,
         })),
-        failed: result.failed
-      }
+        failed: result.failed,
+      },
     });
-
   } catch (error) {
     console.error('Error in bulk assignment:', error);
 
@@ -534,7 +536,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Invalid request data',
-          details: error.errors
+          details: error.errors,
         },
         { status: 400 }
       );
@@ -552,7 +554,7 @@ export async function PATCH(request: NextRequest) {
 /**
  * Check if user exists (in Clerk or system)
  */
-async function checkIfUserExists(userId: string): Promise<boolean> {
+function checkIfUserExists(userId: string): boolean {
   try {
     // This would check if user exists in Clerk
     // For now, assuming all users exist

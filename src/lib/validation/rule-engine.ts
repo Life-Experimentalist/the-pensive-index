@@ -658,10 +658,10 @@ export class RuleEngine {
   /**
    * Evaluate custom conditions (extensibility point)
    */
-  private async evaluateCustomCondition(
+  private evaluateCustomCondition(
     condition: RuleCondition,
     context: RuleContext
-  ): Promise<boolean> {
+  ): boolean {
     // This would be implemented to handle custom condition types
     // For now, return false as a safe default
     return false;

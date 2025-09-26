@@ -91,7 +91,9 @@ export function ContentVersionViewer({
   // Handle version comparison
   const handleCompare = useCallback(
     async (versionA: ContentVersion, versionB: ContentVersion) => {
-      if (!onCompare) return;
+      if (!onCompare) {
+        return;
+      }
 
       try {
         const diff = await onCompare(versionA.id, versionB.id);
@@ -107,7 +109,9 @@ export function ContentVersionViewer({
   // Handle version restore
   const handleRestore = useCallback(
     async (versionId: string) => {
-      if (!onRestore) return;
+      if (!onRestore) {
+        return;
+      }
 
       try {
         await onRestore(versionId);
@@ -248,13 +252,13 @@ export function ContentVersionViewer({
                         key={changeIndex}
                         className="flex items-center space-x-2 text-sm"
                       >
-                        <span
+                                                <span
                           className={`px-2 py-1 text-xs rounded ${
-                            change.change_type === 'create'
+                            change.change_type === 'added'
                               ? 'bg-green-100 text-green-800'
-                              : change.change_type === 'update'
+                              : change.change_type === 'modified'
                               ? 'bg-blue-100 text-blue-800'
-                              : change.change_type === 'delete'
+                              : change.change_type === 'removed'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-gray-100 text-gray-800'
                           }`}
@@ -262,7 +266,7 @@ export function ContentVersionViewer({
                           {change.change_type}
                         </span>
                         <span className="text-gray-700">
-                          {change.field_name}
+                          {change.field}
                         </span>
                         {change.old_value && (
                           <span className="text-gray-500">
@@ -318,7 +322,9 @@ export function ContentVersionViewer({
 
   // Render comparison view
   const renderComparisonView = () => {
-    if (!comparison) return null;
+    if (!comparison) {
+      return null;
+    }
 
     return (
       <div className="space-y-6">
@@ -385,14 +391,14 @@ export function ContentVersionViewer({
             </div>
             <div className="p-4">
               <div className="space-y-3">
-                {comparison.diff.field_changes?.map((change, index) => (
+                {comparison.diff.changes?.map((change, index) => (
                   <div
                     key={index}
                     className="border border-gray-200 rounded-lg p-3"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-gray-900">
-                        {change.field_name}
+                        {change.field}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs rounded ${
@@ -437,8 +443,8 @@ export function ContentVersionViewer({
                   </div>
                 ))}
 
-                {(!comparison.diff.field_changes ||
-                  comparison.diff.field_changes.length === 0) && (
+                {(!comparison.diff.changes ||
+                  comparison.diff.changes.length === 0) && (
                   <div className="text-center text-gray-500 py-8">
                     No differences found between these versions
                   </div>
@@ -453,7 +459,9 @@ export function ContentVersionViewer({
 
   // Render details view
   const renderDetailsView = () => {
-    if (!selectedVersion) return null;
+    if (!selectedVersion) {
+      return null;
+    }
 
     return (
       <div className="space-y-6">
@@ -551,16 +559,16 @@ export function ContentVersionViewer({
                     className="border border-gray-200 rounded-lg p-3"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">
-                        {change.field_name}
+                                            <span className="font-medium text-gray-900">
+                        {change.field}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs rounded ${
-                          change.change_type === 'create'
+                          change.change_type === 'added'
                             ? 'bg-green-100 text-green-800'
-                            : change.change_type === 'update'
+                            : change.change_type === 'modified'
                             ? 'bg-blue-100 text-blue-800'
-                            : change.change_type === 'delete'
+                            : change.change_type === 'removed'
                             ? 'bg-red-100 text-red-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}

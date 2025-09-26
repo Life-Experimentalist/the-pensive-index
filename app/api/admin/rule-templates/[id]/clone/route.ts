@@ -37,12 +37,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      if (!authResult.response) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication failed' },
+          { status: 401 }
+        );
+      }
+      return authResult.response;
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -136,4 +142,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * GET /api/admin/rule-templates/[id]/clone
+ * This endpoint does not support GET requests.
+ * @returns {NextResponse} A 405 Method Not Allowed response.
+ */
+export function GET() {
+  return NextResponse.json(
+    { success: false, error: 'Method not allowed' },
+    { status: 405 }
+  );
 }

@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
     const authResult = await checkAdminAuth();
 
     if (!authResult.success) {
-      return authResult.response!;
+      return (
+        authResult.response ??
+        NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      );
     }
 
     // For now, return a simplified permissions structure

@@ -38,15 +38,14 @@ export const POST = CommonMiddleware.public(
   withErrorHandling(
     async (
       request: NextRequest,
-      { params }: { params: Promise<{ fandomId: string }> }
+      { params }: { params: { fandomId: string } }
     ) => {
-      const resolvedParams = await params;
-      const fandomId = resolvedParams.fandomId;
+      const fandomId = params.fandomId;
       const body = await request.json();
       const validatedData = fandomValidationRequestSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Verify fandom exists
       const fandom = await db.query.fandoms.findFirst({

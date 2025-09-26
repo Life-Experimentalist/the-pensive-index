@@ -17,12 +17,11 @@ import { UpdateValidationRuleRequestSchema } from '@/types/validation-rules';
  */
 export const GET = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-      const resolvedParams = await params;
-      const ruleId = resolvedParams.id;
+    async (request: NextRequest, { params }: { params: { id: string } }) => {
+      const ruleId = params.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       const rule = await db.query.validationRules.findFirst({
         where: eq(validationRules.id, ruleId),
@@ -53,16 +52,15 @@ export const GET = CommonMiddleware.admin(
  */
 export const PUT = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-      const resolvedParams = await params;
-      const ruleId = resolvedParams.id;
+    async (request: NextRequest, { params }: { params: { id: string } }) => {
+      const ruleId = params.id;
       const body = await request.json();
 
       // Validate request body
       const validatedData = UpdateValidationRuleRequestSchema.parse(body);
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if rule exists
       const existingRule = await db.query.validationRules.findFirst({
@@ -97,12 +95,11 @@ export const PUT = CommonMiddleware.admin(
  */
 export const DELETE = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-      const resolvedParams = await params;
-      const ruleId = resolvedParams.id;
+    async (request: NextRequest, { params }: { params: { id: string } }) => {
+      const ruleId = params.id;
 
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       // Check if rule exists
       const existingRule = await db.query.validationRules.findFirst({

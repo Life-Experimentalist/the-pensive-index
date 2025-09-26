@@ -1,7 +1,17 @@
 /**
  * Admin Role Assignment API
  *
- * API endpoints for managing admin role assignments in the hierarchical system.
+ * API endpoints for managing admin role assignments in t    if (role    if (role === 'ProjectAdmin' && fandomId) {
+      return NextResponse.json(
+        { error: 'Project Admin roles should not be scoped to fandoms' },
+        { status: 400 }
+      );
+    }'FandomAdmin' && !fandomId) {
+      return NextResponse.json(
+        { error: 'Fandom ID required for Fandom Admin role assignment' },
+        { status: 400 }
+      );
+    }erarchical system.
  * Handles both Project Admin and Fandom Admin role assignments with proper RBAC.
  *
  * @package the-pensive-index
@@ -84,7 +94,7 @@ export async function POST(request: NextRequest) {
     const targetUser = await adminModel.getAdminUser(userId);
     if (!targetUser) {
       // Check if this is a new admin user (might be from Clerk but not in admin system)
-      const isNewAdmin = await checkIfNewAdminUser(userId);
+      const isNewAdmin = checkIfNewAdminUser(userId);
       if (!isNewAdmin) {
         return NextResponse.json(
           { error: 'Target user not found or not eligible for admin roles' },
@@ -111,8 +121,8 @@ export async function POST(request: NextRequest) {
     // Check if user already has this role assignment
     const existingAssignments = await adminModel.getUserAssignments(userId);
     const hasConflictingAssignment = existingAssignments.some(assignment => {
-      if (!assignment.is_active) return false;
-      if (assignment.role.name !== role) return false;
+      if (!assignment.is_active) { return false; }
+      if (assignment.role.name !== role) { return false; }
 
       // For Fandom Admin, check same fandom
       if (role === 'FandomAdmin') {
@@ -331,7 +341,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (!toUser) {
-      const isNewAdmin = await checkIfNewAdminUser(toUserId);
+      const isNewAdmin = checkIfNewAdminUser(toUserId);
       if (!isNewAdmin) {
         return NextResponse.json(
           { error: 'Target user not found or not eligible for admin roles' },
@@ -415,8 +425,8 @@ export async function GET(request: NextRequest) {
       active: searchParams.get('active') === 'true' ? true :
               searchParams.get('active') === 'false' ? false : undefined,
       assigned_by: searchParams.get('assigned_by') || undefined,
-      limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50,
-      offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
+      limit: searchParams.get('limit') ? parseInt(searchParams.get('limit') ?? '50') : 50,
+      offset: searchParams.get('offset') ? parseInt(searchParams.get('offset') ?? '0') : 0
     };
 
     // Get assignments
@@ -459,7 +469,7 @@ export async function GET(request: NextRequest) {
 /**
  * Check if user is eligible for admin roles (exists in Clerk)
  */
-async function checkIfNewAdminUser(userId: string): Promise<boolean> {
+function checkIfNewAdminUser(userId: string): boolean {
   try {
     // This would check if user exists in Clerk
     // For now, assuming all users are eligible

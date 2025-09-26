@@ -21,7 +21,7 @@ export const GET = CommonMiddleware.admin(
     const isActive = searchParams.get('is_active');
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     let query = db.query.validationRules.findMany({
       with: {
@@ -76,7 +76,7 @@ export const POST = CommonMiddleware.admin(
     const validatedData = CreateValidationRuleRequestSchema.parse(body);
 
     const dbManager = DatabaseManager.getInstance();
-    const db = await dbManager.getConnection();
+    const db = dbManager.getConnection();
 
     // Verify fandom exists and user has access
     const fandom = await db.query.fandoms.findFirst({

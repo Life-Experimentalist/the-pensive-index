@@ -213,7 +213,9 @@ export default function AuditLogViewer({
 
   // Auto-refresh effect
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!autoRefresh) {
+      return;
+    }
 
     const interval = setInterval(() => {
       loadAuditLogs(false); // Load without showing loading state
@@ -237,7 +239,9 @@ export default function AuditLogViewer({
    * Check user permissions
    */
   const checkPermissions = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      return;
+    }
 
     try {
       const [viewResponse, exportResponse] = await Promise.all([
@@ -269,27 +273,42 @@ export default function AuditLogViewer({
    * Load audit logs
    */
   const loadAuditLogs = async (showLoading = true) => {
-    if (!canViewLogs && showLoading) return;
+    if (!canViewLogs && showLoading) {
+      return;
+    }
 
-    if (showLoading) setIsLoading(true);
+    if (showLoading) {
+      setIsLoading(true);
+    }
 
     try {
       const params = new URLSearchParams();
 
       // Add filters
-      if (filters.user_id) params.append('user_id', filters.user_id);
-      if (filters.action) params.append('action', filters.action);
-      if (filters.resource_type)
+      if (filters.user_id) {
+        params.append('user_id', filters.user_id);
+      }
+      if (filters.action) {
+        params.append('action', filters.action);
+      }
+      if (filters.resource_type) {
         params.append('resource_type', filters.resource_type);
-      if (filters.resource_id)
+      }
+      if (filters.resource_id) {
         params.append('resource_id', filters.resource_id);
-      if (filters.fandom_id) params.append('fandom_id', filters.fandom_id);
-      if (filters.success !== undefined)
+      }
+      if (filters.fandom_id) {
+        params.append('fandom_id', filters.fandom_id);
+      }
+      if (filters.success !== undefined) {
         params.append('success', filters.success.toString());
-      if (filters.start_date)
+      }
+      if (filters.start_date) {
         params.append('start_date', filters.start_date.toISOString());
-      if (filters.end_date)
+      }
+      if (filters.end_date) {
         params.append('end_date', filters.end_date.toISOString());
+      }
 
       // Add search if present
       if (searchTerm) {
@@ -301,7 +320,9 @@ export default function AuditLogViewer({
       params.append('limit', pageSize.toString());
       params.append('offset', ((currentPage - 1) * pageSize).toString());
 
-      const response = await fetch(`/api/admin/audit-logs?${params}`);
+      const response = await fetch(
+        `/api/admin/audit-logs?${params.toString()}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -312,7 +333,9 @@ export default function AuditLogViewer({
     } catch (error) {
       console.error('Error loading audit logs:', error);
     } finally {
-      if (showLoading) setIsLoading(false);
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -324,13 +347,19 @@ export default function AuditLogViewer({
       const params = new URLSearchParams();
       params.append('action', 'stats');
 
-      if (fandom_id) params.append('fandom_id', fandom_id);
-      if (filters.start_date)
+      if (fandom_id) {
+        params.append('fandom_id', fandom_id);
+      }
+      if (filters.start_date) {
         params.append('start_date', filters.start_date.toISOString());
-      if (filters.end_date)
+      }
+      if (filters.end_date) {
         params.append('end_date', filters.end_date.toISOString());
+      }
 
-      const response = await fetch(`/api/admin/audit-logs?${params}`);
+      const response = await fetch(
+        `/api/admin/audit-logs?${params.toString()}`
+      );
       const data = await response.json();
 
       if (response.ok) {
@@ -345,7 +374,9 @@ export default function AuditLogViewer({
    * Handle export
    */
   const handleExport = async (format: 'json' | 'csv') => {
-    if (!canExportLogs) return;
+    if (!canExportLogs) {
+      return;
+    }
 
     setIsExporting(true);
     try {
@@ -368,7 +399,9 @@ export default function AuditLogViewer({
         params.append('search_term', searchTerm);
       }
 
-      const response = await fetch(`/api/admin/audit-logs?${params}`);
+      const response = await fetch(
+        `/api/admin/audit-logs?${params.toString()}`
+      );
 
       if (response.ok) {
         const blob = await response.blob();
@@ -1008,7 +1041,9 @@ function ActiveFiltersDisplay({
     ([, value]) => value !== undefined
   );
 
-  if (activeFilters.length === 0 && !searchTerm) return null;
+  if (activeFilters.length === 0 && !searchTerm) {
+    return null;
+  }
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">

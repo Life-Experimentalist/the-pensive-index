@@ -3,7 +3,11 @@
  *
  * Provides REST API for individual validation rule operations:
  * - GET /api/admin/validation-rules/[id] - Get specific rule
- * - PUT /api/admin/validation-rules/[id] - Update rule
+ * - PUT /api/admin/validati    const updatedRule = await adminQueries.validationRules.update(
+      ruleId,
+      validationResult.data,
+      adminUser.id
+    );les/[id] - Update rule
  * - DELETE /api/admin/validation-rules/[id] - Delete rule
  * - Role-based access control and fandom scoping
  *
@@ -69,12 +73,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      return authResult.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -137,12 +141,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      return authResult.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(
@@ -210,7 +214,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Update the rule
     const updatedRule = await adminQueries.validationRules.update(
       ruleId,
-      validationResult.data as any, // Type assertion for complex nested type
+      validationResult.data, // Type assertion for complex nested type
       adminUser.id
     );
 
@@ -235,12 +239,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     // Get session and validate admin access
     const authResult = await checkAdminAuth();
-    
+
     if (!authResult.success) {
-      return authResult.response!;
+      return authResult.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = authResult.user as any;
+    const user = authResult.user;
 
     if (!AdminPermissions.isAdmin(user)) {
       return NextResponse.json(

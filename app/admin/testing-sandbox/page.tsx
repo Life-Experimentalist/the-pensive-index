@@ -68,7 +68,7 @@ export default function TestingSandbox() {
     useState<ValidationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTestRule = async (ruleId?: string) => {
+  const handleTestRule = (ruleId?: string) => {
     setIsLoading(true);
 
     // Simulate API call

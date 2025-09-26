@@ -295,7 +295,9 @@ export default function UserManagement() {
   };
 
   const renderRoleModal = () => {
-    if (!showRoleModal || !selectedUser) return null;
+    if (!showRoleModal || !selectedUser) {
+      return null;
+    }
 
     return (
       <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">

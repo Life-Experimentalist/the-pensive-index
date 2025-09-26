@@ -78,7 +78,7 @@ export async function GET() {
  *
  * CORS preflight handler for public API access
  */
-export async function OPTIONS() {
+export function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

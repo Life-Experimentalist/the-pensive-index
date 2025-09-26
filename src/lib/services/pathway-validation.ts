@@ -286,7 +286,7 @@ export class PathwayValidationService {
     // Use existing validation engine for tag class validation
     const validationContext: ValidationContext = {
       fandomId: context.fandomId,
-      selectedTags: pathwayTags.map(tag => tag.id),
+      selectedTagIds: pathwayTags.map(tag => tag.id),
       selectedPlotBlocks: context.pathway
         .filter(item => item.type === 'plot_block')
         .map(item => item.id),

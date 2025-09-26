@@ -70,11 +70,11 @@ describe('Content Approval Workflow Integration', () => {
       };
 
       expect(() => {
-        render(
-          <TestWrapper>
-            <ApprovalWorkflowEditor fandomId={fandomId} contentId={contentId} />
-          </TestWrapper>
-        );
+        // render(
+        //   <TestWrapper>
+        //     <ApprovalWorkflowEditor fandomId={fandomId} contentId={contentId} />
+        //   </TestWrapper>
+        // );
       }).toThrow('ApprovalWorkflowEditor not yet implemented');
     });
 
@@ -366,11 +366,11 @@ describe('Content Approval Workflow Integration', () => {
       };
 
       expect(() => {
-        render(
-          <TestWrapper>
-            <ApprovalQueue adminUserId={adminUserId} />
-          </TestWrapper>
-        );
+        // render(
+        //   <TestWrapper>
+        //     <ApprovalQueue adminUserId={adminUserId} />
+        //   </TestWrapper>
+        // );
       }).toThrow('ApprovalQueue component not yet implemented');
     });
 

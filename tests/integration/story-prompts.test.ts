@@ -196,7 +196,7 @@ describe('Story Prompts Integration Test (T015)', () => {
     global.fetch = vi.fn();
 
     // Mock AI/ML services for prompt generation
-    global.promptGenerationService = vi.fn();
+    (global as any).promptGenerationService = vi.fn();
   });
 
   it('should validate prompt generation component structure exists', async () => {
@@ -204,17 +204,13 @@ describe('Story Prompts Integration Test (T015)', () => {
     const PromptComponentExists = () => {
       try {
         // These imports will fail until prompt components are implemented
-        // @ts-expect-error - Components don't exist yet
         const {
           StoryPromptGenerator,
         } = require('@/components/prompts/StoryPromptGenerator');
-        // @ts-expect-error - Components don't exist yet
         const { PromptDisplay } = require('@/components/prompts/PromptDisplay');
-        // @ts-expect-error - Components don't exist yet
         const {
           NoveltyHighlighter,
         } = require('@/components/prompts/NoveltyHighlighter');
-        // @ts-expect-error - Components don't exist yet
         const { DualOutput } = require('@/components/prompts/DualOutput');
 
         return true;

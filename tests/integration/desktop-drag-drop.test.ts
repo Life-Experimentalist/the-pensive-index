@@ -63,15 +63,12 @@ describe('Desktop Drag-Drop Integration Test (T012)', () => {
     const ComponentExists = () => {
       try {
         // These imports will fail until components are implemented
-        // @ts-expect-error - Components don't exist yet
         const {
           ElementsPanel,
         } = require('@/components/discovery/ElementsPanel');
-        // @ts-expect-error - Components don't exist yet
         const {
           PathwayBuilder,
         } = require('@/components/discovery/PathwayBuilder');
-        // @ts-expect-error - Components don't exist yet
         const {
           DraggableElement,
         } = require('@/components/drag-drop/DraggableElement');

@@ -13,8 +13,9 @@ import { tagClasses, tags } from '@/lib/database/schema';
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const tagClassId = params.id;
+    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+      const resolvedParams = await params;
+      const tagClassId = resolvedParams.id;
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();
@@ -49,9 +50,10 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagClassId = params.id;
+      const resolvedParams = await params;
+      const tagClassId = resolvedParams.id;
       const body = await request.json();
       const validatedData = updateTagClassSchema.parse(body);
 

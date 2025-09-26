@@ -1,75 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-// Mock imports - these will be replaced with actual implementations
-interface PlotBlock {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  soft_requires?: string[];
-  enhances?: string[];
-  enabled_by?: string[];
-}
-
-interface PlotBlockCondition {
-  id: string;
-  plot_block_id: string;
-  parent_id?: string;
-  name: string;
-  description: string;
-  order: number;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  enables?: string[];
-}
-
-interface Tag {
-  id: string;
-  name: string;
-  fandom_id: string;
-  category?: string;
-  created_at: Date;
-  updated_at: Date;
-  requires?: string[];
-  enhances?: string[];
-}
-
-interface DependencyContext {
-  plot_blocks: PlotBlock[];
-  conditions: PlotBlockCondition[];
-  tags: Tag[];
-  selected_plot_blocks?: string[];
-  selected_conditions?: string[];
-  selected_tags?: string[];
-}
-
-interface DependencyValidationResult {
-  is_valid: boolean;
-  missing_requirements: Array<{
-    type: 'plot_block' | 'condition' | 'tag';
-    source_id: string;
-    required_id: string;
-    requirement_type: 'hard' | 'soft' | 'enhancement';
-    message: string;
-    severity: 'error' | 'warning' | 'info';
-  }>;
-  dependency_chain?: Array<{
-    id: string;
-    type: 'plot_block' | 'condition' | 'tag';
-    dependencies: string[];
+// Types that aren't imported from the actual implementation
+interface DependencyChain {
+  chain: {
     level: number;
-  }>;
-  suggested_additions?: Array<{
-    id: string;
-    type: 'plot_block' | 'condition' | 'tag';
-    name: string;
-    reason: string;
-    impact: 'required' | 'recommended' | 'enhancement';
-  }>;
+    plot_block_id: string;
+    depends_on?: string[];
+    enables?: string[];
+  }[];
+  total_levels: number;
+  parallel_branches: string[][];
+  enhancements: {
+    plot_block_id: string;
+    enhanced_by: string[];
+  }[];
 }
 
 // Import the actual implementation
@@ -92,16 +36,20 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-1',
         name: 'Time Travel Setup',
+        fandom_id: 'test-fandom',
         category: 'temporal',
         description: 'Establishes time travel mechanics',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
       {
         id: 'pb-2',
         name: 'Marauders Era Travel',
+        fandom_id: 'test-fandom',
         category: 'temporal',
         description: 'Travel to Marauders era specifically',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-1'], // Requires Time Travel Setup
@@ -110,8 +58,10 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-3',
         name: 'Founders Era Travel',
+        fandom_id: 'test-fandom',
         category: 'temporal',
         description: 'Travel to Founders era',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-1'], // Also requires Time Travel Setup
@@ -120,8 +70,10 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-4',
         name: 'Character Interaction',
+        fandom_id: 'test-fandom',
         category: 'relationship',
         description: 'Deep character interactions',
+        is_active: true,
         created_at: now,
         updated_at: now,
         enabled_by: ['pb-2', 'pb-3'], // Can be enabled by either time travel
@@ -129,16 +81,20 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-5',
         name: 'Historical Knowledge',
+        fandom_id: 'test-fandom',
         category: 'knowledge',
         description: 'Character has historical knowledge',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
       {
         id: 'pb-6',
         name: 'Romance Arc',
+        fandom_id: 'test-fandom',
         category: 'relationship',
         description: 'Central romantic plot',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-4'], // Requires Character Interaction
@@ -147,16 +103,20 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-7',
         name: 'Emotional Development',
+        fandom_id: 'test-fandom',
         category: 'character',
         description: 'Character emotional growth',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
       {
         id: 'pb-8',
         name: 'Circular Dependency A',
+        fandom_id: 'test-fandom',
         category: 'test',
         description: 'Test circular dependency',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-9'], // Creates circular dependency
@@ -164,8 +124,10 @@ describe('DependencyValidator', () => {
       {
         id: 'pb-9',
         name: 'Circular Dependency B',
+        fandom_id: 'test-fandom',
         category: 'test',
         description: 'Test circular dependency',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-8'], // Completes circular dependency
@@ -179,6 +141,7 @@ describe('DependencyValidator', () => {
         name: 'Meet James Potter',
         description: 'Encounters James Potter',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
         enables: ['cond-2'], // Enables befriending James
@@ -189,6 +152,7 @@ describe('DependencyValidator', () => {
         name: 'Befriend James Potter',
         description: 'Becomes friends with James',
         order: 2,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['cond-1'], // Requires meeting first
@@ -199,6 +163,7 @@ describe('DependencyValidator', () => {
         name: 'Meet Godric Gryffindor',
         description: 'Encounters Godric Gryffindor',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['pb-5'], // Requires Historical Knowledge plot block
@@ -209,6 +174,7 @@ describe('DependencyValidator', () => {
         name: 'First Kiss',
         description: 'Romantic first kiss scene',
         order: 1,
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['cond-2'], // Requires friendship from other plot block
@@ -221,6 +187,7 @@ describe('DependencyValidator', () => {
         name: 'time-travel',
         fandom_id: 'fandom-1',
         category: 'plot',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -229,6 +196,7 @@ describe('DependencyValidator', () => {
         name: 'marauders-era',
         fandom_id: 'fandom-1',
         category: 'setting',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-1'], // Requires time-travel tag
@@ -238,6 +206,7 @@ describe('DependencyValidator', () => {
         name: 'founders-era',
         fandom_id: 'fandom-1',
         category: 'setting',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-1'], // Also requires time-travel tag
@@ -247,6 +216,7 @@ describe('DependencyValidator', () => {
         name: 'james-potter',
         fandom_id: 'fandom-1',
         category: 'character',
+        is_active: true,
         created_at: now,
         updated_at: now,
         enhances: ['tag-2'], // Enhances marauders-era
@@ -256,6 +226,7 @@ describe('DependencyValidator', () => {
         name: 'romance',
         fandom_id: 'fandom-1',
         category: 'genre',
+        is_active: true,
         created_at: now,
         updated_at: now,
         requires: ['tag-6'], // Requires relationship tag
@@ -265,6 +236,7 @@ describe('DependencyValidator', () => {
         name: 'relationship',
         fandom_id: 'fandom-1',
         category: 'genre',
+        is_active: true,
         created_at: now,
         updated_at: now,
       },
@@ -274,7 +246,7 @@ describe('DependencyValidator', () => {
   describe('Plot Block Dependencies', () => {
     it('should validate missing hard requirements', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[1]], // Marauders Era Travel (requires Time Travel Setup)
+        selected_plot_blocks: [samplePlotBlocks[1].id], // Marauders Era Travel (requires Time Travel Setup)
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -297,7 +269,7 @@ describe('DependencyValidator', () => {
 
     it('should validate satisfied dependencies', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel Setup + Marauders Era Travel
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel Setup + Marauders Era Travel
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -313,7 +285,7 @@ describe('DependencyValidator', () => {
 
     it('should handle soft requirements with warnings', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel Setup + Founders Era Travel (missing Historical Knowledge)
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[2].id], // Time Travel Setup + Founders Era Travel (missing Historical Knowledge)
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -337,9 +309,9 @@ describe('DependencyValidator', () => {
     it('should detect enabled_by relationships', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0],
-          samplePlotBlocks[1],
-          samplePlotBlocks[3],
+          samplePlotBlocks[0].id,
+          samplePlotBlocks[1].id,
+          samplePlotBlocks[3].id,
         ], // Includes Character Interaction
         selected_conditions: [],
         selected_tags: [],
@@ -358,8 +330,8 @@ describe('DependencyValidator', () => {
   describe('Condition Dependencies', () => {
     it('should validate condition requirements within same plot block', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
-        selected_conditions: [sampleConditions[1]], // Befriend James (requires Meet James)
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel + Marauders Era
+        selected_conditions: [sampleConditions[1].id], // Befriend James (requires Meet James)
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -378,8 +350,8 @@ describe('DependencyValidator', () => {
 
     it('should validate cross-plot-block condition requirements', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel + Founders Era (missing Historical Knowledge)
-        selected_conditions: [sampleConditions[2]], // Meet Godric (requires Historical Knowledge plot block)
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[2].id], // Time Travel + Founders Era (missing Historical Knowledge)
+        selected_conditions: [sampleConditions[2].id], // Meet Godric (requires Historical Knowledge plot block)
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -399,11 +371,11 @@ describe('DependencyValidator', () => {
     it('should validate complex cross-dependencies', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0], // Time Travel Setup
-          samplePlotBlocks[1], // Marauders Era Travel
-          samplePlotBlocks[5], // Romance Arc
+          samplePlotBlocks[0].id, // Time Travel Setup
+          samplePlotBlocks[1].id, // Marauders Era Travel
+          samplePlotBlocks[5].id, // Romance Arc
         ],
-        selected_conditions: [sampleConditions[3]], // First Kiss (requires Befriend James from different plot block)
+        selected_conditions: [sampleConditions[3].id], // First Kiss (requires Befriend James from different plot block)
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -422,8 +394,8 @@ describe('DependencyValidator', () => {
 
     it('should handle condition enables relationships', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
-        selected_conditions: [sampleConditions[0], sampleConditions[1]], // Meet James + Befriend James
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel + Marauders Era
+        selected_conditions: [sampleConditions[0].id, sampleConditions[1].id], // Meet James + Befriend James
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -495,10 +467,10 @@ describe('DependencyValidator', () => {
     it('should build complete dependency chain', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0], // Time Travel Setup (level 0)
-          samplePlotBlocks[1], // Marauders Era Travel (level 1, requires pb-1)
-          samplePlotBlocks[3], // Character Interaction (level 2, enabled by pb-2)
-          samplePlotBlocks[5], // Romance Arc (level 3, requires pb-4)
+          samplePlotBlocks[0].id, // Time Travel Setup (level 0)
+          samplePlotBlocks[1].id, // Marauders Era Travel (level 1, requires pb-1)
+          samplePlotBlocks[3].id, // Character Interaction (level 2, enabled by pb-2)
+          samplePlotBlocks[5].id, // Romance Arc (level 3, requires pb-4)
         ],
         selected_conditions: [],
         selected_tags: [],
@@ -522,11 +494,11 @@ describe('DependencyValidator', () => {
     it('should detect deep dependency chains', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0], // Level 0
-          samplePlotBlocks[1], // Level 1
-          samplePlotBlocks[3], // Level 2
-          samplePlotBlocks[5], // Level 3
-          samplePlotBlocks[6], // Level 4 (enhanced by Romance Arc)
+          samplePlotBlocks[0].id, // Level 0
+          samplePlotBlocks[1].id, // Level 1
+          samplePlotBlocks[3].id, // Level 2
+          samplePlotBlocks[5].id, // Level 3
+          samplePlotBlocks[6].id, // Level 4 (enhanced by Romance Arc)
         ],
         selected_conditions: [],
         selected_tags: [],
@@ -544,10 +516,10 @@ describe('DependencyValidator', () => {
     it('should handle parallel dependency branches', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0], // Time Travel Setup (level 0)
-          samplePlotBlocks[1], // Marauders Era Travel (level 1)
-          samplePlotBlocks[2], // Founders Era Travel (level 1, parallel branch)
-          samplePlotBlocks[4], // Historical Knowledge (level 0, independent)
+          samplePlotBlocks[0].id, // Time Travel Setup (level 0)
+          samplePlotBlocks[1].id, // Marauders Era Travel (level 1)
+          samplePlotBlocks[2].id, // Founders Era Travel (level 1, parallel branch)
+          samplePlotBlocks[4].id, // Historical Knowledge (level 0, independent)
         ],
         selected_conditions: [],
         selected_tags: [],
@@ -571,7 +543,7 @@ describe('DependencyValidator', () => {
   describe('Circular Dependency Detection', () => {
     it('should detect simple circular dependencies', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[7], samplePlotBlocks[8]], // Circular Dependency A + B
+        selected_plot_blocks: [samplePlotBlocks[7].id, samplePlotBlocks[8].id], // Circular Dependency A + B
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -610,7 +582,7 @@ describe('DependencyValidator', () => {
       ];
 
       const context: DependencyContext = {
-        selected_plot_blocks: complexCircularBlocks,
+        selected_plot_blocks: complexCircularBlocks.map(pb => pb.id),
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: [...samplePlotBlocks, ...complexCircularBlocks],
@@ -631,9 +603,9 @@ describe('DependencyValidator', () => {
     it('should not flag valid dependency chains as circular', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [
-          samplePlotBlocks[0], // Time Travel Setup
-          samplePlotBlocks[1], // Marauders Era Travel (requires Time Travel)
-          samplePlotBlocks[3], // Character Interaction (enabled by Marauders Era)
+          samplePlotBlocks[0].id, // Time Travel Setup
+          samplePlotBlocks[1].id, // Marauders Era Travel (requires Time Travel)
+          samplePlotBlocks[3].id, // Character Interaction (enabled by Marauders Era)
         ],
         selected_conditions: [],
         selected_tags: [],
@@ -656,7 +628,7 @@ describe('DependencyValidator', () => {
   describe('Enhancement Suggestions', () => {
     it('should suggest required additions', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[1]], // Marauders Era Travel (requires Time Travel Setup)
+        selected_plot_blocks: [samplePlotBlocks[1].id], // Marauders Era Travel (requires Time Travel Setup)
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -676,7 +648,7 @@ describe('DependencyValidator', () => {
 
     it('should suggest enhancement opportunities', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel + Marauders Era
         selected_conditions: [],
         selected_tags: ['tag-1', 'tag-2'], // time-travel + marauders-era
         plot_blocks: samplePlotBlocks,
@@ -696,7 +668,7 @@ describe('DependencyValidator', () => {
 
     it('should suggest soft requirement additions', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Time Travel + Founders Era (missing soft requirement)
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[2].id], // Time Travel + Founders Era (missing soft requirement)
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
@@ -730,7 +702,7 @@ describe('DependencyValidator', () => {
         }));
 
       const context: DependencyContext = {
-        selected_plot_blocks: manyPlotBlocks.slice(0, 50),
+        selected_plot_blocks: manyPlotBlocks.slice(0, 50).map(pb => pb.id),
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: manyPlotBlocks,
@@ -761,7 +733,7 @@ describe('DependencyValidator', () => {
         }));
 
       const context: DependencyContext = {
-        selected_plot_blocks: complexGraph.slice(0, 20),
+        selected_plot_blocks: complexGraph.slice(0, 20).map(pb => pb.id),
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: complexGraph,
@@ -801,7 +773,7 @@ describe('DependencyValidator', () => {
       };
 
       const context: DependencyContext = {
-        selected_plot_blocks: [malformedPlotBlock],
+        selected_plot_blocks: [malformedPlotBlock.id],
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: [malformedPlotBlock],
@@ -821,7 +793,7 @@ describe('DependencyValidator', () => {
       };
 
       const context: DependencyContext = {
-        selected_plot_blocks: [selfDependent],
+        selected_plot_blocks: [selfDependent.id],
         selected_conditions: [],
         selected_tags: [],
         plot_blocks: [selfDependent],
@@ -842,8 +814,8 @@ describe('DependencyValidator', () => {
 
     it('should handle mixed dependency types', () => {
       const context: DependencyContext = {
-        selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[1]], // Time Travel + Marauders Era
-        selected_conditions: [sampleConditions[0]], // Meet James
+        selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel + Marauders Era
+        selected_conditions: [sampleConditions[0].id], // Meet James
         selected_tags: ['tag-1', 'tag-2'], // time-travel + marauders-era
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -864,3 +836,5 @@ describe('DependencyValidator', () => {
     });
   });
 });
+
+

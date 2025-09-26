@@ -197,19 +197,15 @@ describe('Pathway Validation Integration Test (T016)', () => {
     const ValidationComponentExists = () => {
       try {
         // These imports will fail until validation components are implemented
-        // @ts-expect-error - Components don't exist yet
         const {
           PathwayValidator,
         } = require('@/components/validation/PathwayValidator');
-        // @ts-expect-error - Components don't exist yet
         const {
           ConflictModal,
         } = require('@/components/validation/ConflictModal');
-        // @ts-expect-error - Components don't exist yet
         const {
           ValidationEngine,
         } = require('@/lib/validation/ValidationEngine');
-        // @ts-expect-error - Components don't exist yet
         const {
           ConflictDetector,
         } = require('@/lib/validation/ConflictDetector');

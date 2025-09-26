@@ -111,7 +111,7 @@ export class PathwayModel {
    */
   static async getSuggestions(
     currentItems: PathwayItem[],
-    fandomId: number,
+    fandomId: string,
     limit: number = 10
   ): Promise<PathwayItem[]> {
     const db = getDatabase();
@@ -123,12 +123,7 @@ export class PathwayModel {
 
     // Suggest complementary tags
     const suggestedTags = await db
-      .select({
-        id: sql<string>`CAST(${tags.id} AS TEXT)`,
-        name: tags.name,
-        description: tags.description,
-        category: tagClasses.name,
-      })
+      .select()
       .from(tags)
       .leftJoin(tagClasses, eq(tags.tag_class_id, tagClasses.id))
       .where(eq(tags.fandom_id, fandomId))
@@ -137,14 +132,17 @@ export class PathwayModel {
     const suggestions: PathwayItem[] = [];
     let position = currentItems.length;
 
-    for (const tag of suggestedTags) {
-      if (!existingCategories.has(tag.category || '')) {
+    for (const row of suggestedTags) {
+      const tag = row.tags;
+      const tagClass = row.tag_classes;
+
+      if (!existingCategories.has(tagClass?.name || '')) {
         suggestions.push({
           id: tag.id,
           type: 'tag',
           name: tag.name,
           description: tag.description || undefined,
-          category: tag.category || undefined,
+          category: tagClass?.name || undefined,
           position: position++,
         });
       }

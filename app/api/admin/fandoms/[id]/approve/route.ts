@@ -31,14 +31,17 @@ type BulkApprovalRequest = z.infer<typeof BulkApprovalSchema>;
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
+    // Await params in Next.js 15
+    const resolvedParams = await params;
+
     // Validate fandom ID
-    const fandomId = parseInt(params.id);
+    const fandomId = parseInt(resolvedParams.id);
     if (isNaN(fandomId)) {
       return NextResponse.json(
         {

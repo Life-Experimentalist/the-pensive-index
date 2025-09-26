@@ -62,7 +62,7 @@ export class SearchResultModel {
 
     // Search for matching stories
     const stories = await StoryModel.search(
-      request.fandomId,
+      request.fandomId.toString(),
       searchFilters,
       request.limit || 20
     );
@@ -112,7 +112,7 @@ export class SearchResultModel {
     currentPathway: PathwayItem[],
     limit: number = 5
   ): Promise<PathwayItem[]> {
-    return await PathwayModel.getSuggestions(currentPathway, fandomId, limit);
+    return await PathwayModel.getSuggestions(currentPathway, fandomId.toString(), limit);
   }
 
   /**

@@ -135,14 +135,17 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
+    // Await params in Next.js 15
+    const resolvedParams = await params;
+
     // Validate content ID
-    const contentId = parseInt(params.id);
+    const contentId = parseInt(resolvedParams.id);
     if (isNaN(contentId)) {
       return NextResponse.json(
         {
@@ -225,14 +228,17 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
 
+    // Await params in Next.js 15
+    const resolvedParams = await params;
+
     // Validate content ID
-    const contentId = parseInt(params.id);
+    const contentId = parseInt(resolvedParams.id);
     if (isNaN(contentId)) {
       return NextResponse.json(
         {

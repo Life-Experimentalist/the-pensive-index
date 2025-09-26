@@ -31,7 +31,7 @@ export async function GET(
     }
 
     // Get full story metadata
-    const story = await StoryModel.getById(storyId);
+    const story = await StoryModel.getById(storyId.toString());
 
     if (!story) {
       return NextResponse.json(

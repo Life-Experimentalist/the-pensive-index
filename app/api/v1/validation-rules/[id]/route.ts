@@ -17,8 +17,9 @@ import { UpdateValidationRuleRequestSchema } from '@/types/validation-rules';
  */
 export const GET = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const ruleId = params.id;
+    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+      const resolvedParams = await params;
+      const ruleId = resolvedParams.id;
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();
@@ -52,8 +53,9 @@ export const GET = CommonMiddleware.admin(
  */
 export const PUT = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const ruleId = params.id;
+    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+      const resolvedParams = await params;
+      const ruleId = resolvedParams.id;
       const body = await request.json();
 
       // Validate request body
@@ -95,8 +97,9 @@ export const PUT = CommonMiddleware.admin(
  */
 export const DELETE = CommonMiddleware.admin(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const ruleId = params.id;
+    async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+      const resolvedParams = await params;
+      const ruleId = resolvedParams.id;
 
       const dbManager = DatabaseManager.getInstance();
       const db = await dbManager.getConnection();

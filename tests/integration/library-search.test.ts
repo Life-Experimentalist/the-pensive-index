@@ -141,13 +141,9 @@ describe('Library Search Integration Test (T014)', () => {
     const SearchComponentExists = () => {
       try {
         // These imports will fail until search components are implemented
-        // @ts-expect-error - Components don't exist yet
         const { LibrarySearch } = require('@/components/search/LibrarySearch');
-        // @ts-expect-error - Components don't exist yet
         const { SearchFilters } = require('@/components/search/SearchFilters');
-        // @ts-expect-error - Components don't exist yet
         const { SearchResults } = require('@/components/search/SearchResults');
-        // @ts-expect-error - Components don't exist yet
         const { StoryCard } = require('@/components/search/StoryCard');
 
         return true;

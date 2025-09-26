@@ -1,19 +1,18 @@
 import type {
   PathwayItem,
   Story,
-  SearchResult,
+  StorySearchResult,
   Tag,
   PlotBlock,
-  SearchFilters,
-  SortOption,
+  StorySearchFilters,
 } from '@/types';
-import { db } from '@/lib/database/connection';
+import { getDatabase } from '@/lib/database';
 
 export interface SearchQuery {
   fandomId: string;
   pathway: PathwayItem[];
-  filters?: SearchFilters;
-  sort?: SortOption;
+  filters?: StorySearchFilters;
+  sort?: string;
   limit?: number;
   offset?: number;
 }
@@ -89,7 +88,7 @@ export class StorySearchService {
     query: SearchQuery,
     context: SearchContext
   ): Promise<{
-    results: SearchResult[];
+    results: StorySearchResult[];
     stats: SearchStats;
   }> {
     const startTime = Date.now();
@@ -197,8 +196,8 @@ export class StorySearchService {
     stories: Story[],
     pathway: PathwayItem[],
     context: SearchContext
-  ): Promise<SearchResult[]> {
-    const searchResults: SearchResult[] = [];
+  ): Promise<StorySearchResult[]> {
+    const StorySearchResults: StorySearchResult[] = [];
 
     for (const story of stories) {
       // Get story's tags and plot blocks
@@ -217,7 +216,7 @@ export class StorySearchService {
       // Combine factors with weights to get final score
       const finalScore = this.combineRelevanceFactors(factors);
 
-      searchResults.push({
+      StorySearchResults.push({
         story,
         relevanceScore: finalScore,
         matchedTags: this.findMatchedTags(pathway, storyTags, context.tags),
@@ -231,7 +230,7 @@ export class StorySearchService {
       });
     }
 
-    return searchResults;
+    return StorySearchResults;
   }
 
   /**
@@ -486,9 +485,9 @@ export class StorySearchService {
    * Apply search filters to results
    */
   private applyFilters(
-    results: SearchResult[],
-    filters?: SearchFilters
-  ): SearchResult[] {
+    results: StorySearchResult[],
+    filters?: StorySearchFilters
+  ): StorySearchResult[] {
     if (!filters) return results;
 
     return results.filter(result => {
@@ -547,9 +546,9 @@ export class StorySearchService {
    * Sort results based on sort option
    */
   private sortResults(
-    results: SearchResult[],
-    sort?: SortOption
-  ): SearchResult[] {
+    results: StorySearchResult[],
+    sort?: string
+  ): StorySearchResult[] {
     const sortedResults = [...results];
 
     switch (sort?.field) {
@@ -603,10 +602,10 @@ export class StorySearchService {
    * Apply pagination to results
    */
   private applyPagination(
-    results: SearchResult[],
+    results: StorySearchResult[],
     limit: number,
     offset: number
-  ): SearchResult[] {
+  ): StorySearchResult[] {
     return results.slice(offset, offset + limit);
   }
 
@@ -615,8 +614,8 @@ export class StorySearchService {
    */
   private generateSearchStats(
     baseResults: Story[],
-    filteredResults: SearchResult[],
-    finalResults: SearchResult[],
+    filteredResults: StorySearchResult[],
+    finalResults: StorySearchResult[],
     query: SearchQuery,
     searchTime: number
   ): SearchStats {

@@ -261,15 +261,11 @@ describe('Advanced Filtering Integration Test (T017)', () => {
     const FilteringComponentExists = () => {
       try {
         // These imports will fail until filtering components are implemented
-        // @ts-expect-error - Components don't exist yet
         const {
           AdvancedFilters,
         } = require('@/components/filters/AdvancedFilters');
-        // @ts-expect-error - Components don't exist yet
         const { FilterBuilder } = require('@/components/filters/FilterBuilder');
-        // @ts-expect-error - Components don't exist yet
         const { SavedSearches } = require('@/components/filters/SavedSearches');
-        // @ts-expect-error - Components don't exist yet
         const { SearchHistory } = require('@/components/filters/SearchHistory');
 
         return true;

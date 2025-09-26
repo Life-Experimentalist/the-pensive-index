@@ -126,19 +126,15 @@ describe('Mobile Tap-Select Integration Test (T013)', () => {
     const MobileComponentExists = () => {
       try {
         // These imports will fail until mobile components are implemented
-        // @ts-expect-error - Components don't exist yet
         const {
           MobileFandomSelector,
         } = require('@/components/mobile/MobileFandomSelector');
-        // @ts-expect-error - Components don't exist yet
         const {
           MobileElementsPanel,
         } = require('@/components/mobile/MobileElementsPanel');
-        // @ts-expect-error - Components don't exist yet
         const {
           MobilePathwayBuilder,
         } = require('@/components/mobile/MobilePathwayBuilder');
-        // @ts-expect-error - Components don't exist yet
         const {
           TouchableElement,
         } = require('@/components/mobile/TouchableElement');

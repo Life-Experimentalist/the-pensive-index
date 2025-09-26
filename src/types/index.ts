@@ -748,3 +748,25 @@ export interface BulkOperation {
   started_at: Date;
   completed_at?: Date;
 }
+
+// Discovery interface types
+export interface PathwayItem {
+  id: string;
+  type: 'tag' | 'plot_block';
+  name: string;
+  category?: string;
+  description?: string;
+  dependencies?: string[];
+  conflicts?: string[];
+}
+
+export interface StoryPrompt {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  plotBlocks: string[];
+  noveltyScore: number;
+  suggestions: string[];
+  generatedAt: Date;
+}

@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import BootstrapAdmin from '@/components/admin/BootstrapAdmin';
 import {
   LayoutDashboard,
   Settings,
@@ -69,21 +70,98 @@ export default function AdminLayoutClient({
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-96">
           <CardHeader>
-            <CardTitle className="text-center">Unauthorized</CardTitle>
+            <CardTitle className="text-center">Access Denied</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Alert>
               <Shield className="h-4 w-4" />
               <AlertDescription>
-                You don't have permission to access the admin panel.
+                You need an admin role to access the admin dashboard.
+                <br />
+                <br />
+                <strong>Debug Info:</strong>
+                <br />
+                Current role: <code>{userRole || 'undefined'}</code>
+                <br />
+                Expected: <code>ProjectAdmin</code> or <code>FandomAdmin</code>
               </AlertDescription>
             </Alert>
+
+            <div className="text-sm text-gray-600 space-y-2">
+              <p>
+                <strong>To request admin access:</strong>
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-xs">
+                <li>Contact an existing ProjectAdmin or FandomAdmin</li>
+                <li>Or create a GitHub issue requesting access</li>
+                <li>
+                  Provide your email:{' '}
+                  <code className="bg-gray-100 px-1 rounded">
+                    {user.emailAddresses[0]?.emailAddress}
+                  </code>
+                </li>
+              </ol>
+            </div>
+
+            <div className="flex space-x-2">
+              <Button
+                onClick={() =>
+                  window.open(
+                    'https://github.com/Life-Experimentalist/the-pensive-index/issues/new?title=Admin%20Access%20Request&body=**User%20Email:**%20' +
+                      encodeURIComponent(
+                        user.emailAddresses[0]?.emailAddress || ''
+                      ) +
+                      '%0A**Requested%20Role:**%20[FandomAdmin/ProjectAdmin]%0A**Fandoms%20(if%20FandomAdmin):**%20[List%20fandoms]%0A**Reason:**%20[Explain%20why%20you%20need%20access]',
+                    '_blank'
+                  )
+                }
+                className="flex-1"
+                variant="outline"
+              >
+                Request Access via GitHub
+              </Button>
+            </div>
+
+            {/* First Admin Button - Only shown in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="text-xs text-gray-500 mb-2">
+                  Development Mode: If no admin exists, you can become the first
+                  admin
+                </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/admin/first-admin', {
+                        method: 'POST',
+                      });
+                      const data = await response.json();
+
+                      if (data.success) {
+                        alert('✅ Admin access granted! Refreshing page...');
+                        window.location.reload();
+                      } else {
+                        alert(
+                          '❌ ' + (data.error || 'Failed to grant admin access')
+                        );
+                      }
+                    } catch (error) {
+                      alert('❌ Network error: ' + String(error));
+                    }
+                  }}
+                  className="w-full"
+                  size="sm"
+                  variant="secondary"
+                >
+                  🔧 Become First Admin
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
     );
   }
-
   const navigationItems = [
     {
       label: 'Dashboard',
@@ -160,10 +238,10 @@ export default function AdminLayoutClient({
                 </div>
               </div>
               <SafeSignOutButton>
-                <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <div className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
-                </button>
+                </div>
               </SafeSignOutButton>
             </div>
           </div>

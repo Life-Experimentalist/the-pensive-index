@@ -37,8 +37,8 @@ import {
   gt,
   lt,
 } from 'drizzle-orm';
+import type { AdminUser } from '@/lib/database/schema';
 import type {
-  AdminUser,
   AdminRole,
   ValidationRule,
   RuleTemplate,
@@ -92,21 +92,11 @@ export class AdminQueries {
         .where(eq(adminUsers.id, id))
         .limit(1);
 
-      if (!user) return null;
+      if (!user) {
+        return null;
+      }
 
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        fandom_access: user.fandom_access || undefined,
-        permissions: user.permissions,
-        is_active: user.is_active,
-        last_login_at: user.last_login_at || undefined,
-        preferences: user.preferences || undefined,
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-      };
+      return user;
     },
 
     /**
@@ -119,21 +109,11 @@ export class AdminQueries {
         .where(eq(adminUsers.email, email))
         .limit(1);
 
-      if (!user) return null;
+      if (!user) {
+        return null;
+      }
 
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        fandom_access: user.fandom_access || undefined,
-        permissions: user.permissions,
-        is_active: user.is_active,
-        last_login_at: user.last_login_at || undefined,
-        preferences: user.preferences || undefined,
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-      };
+      return user;
     },
 
     /**
@@ -205,19 +185,7 @@ export class AdminQueries {
       const total = allUsers.length;
 
       // Map database results to AdminUser type
-      const mappedData: AdminUser[] = data.map(user => ({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        fandom_access: user.fandom_access || undefined,
-        permissions: user.permissions,
-        is_active: user.is_active,
-        last_login_at: user.last_login_at || undefined,
-        preferences: user.preferences || undefined,
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-      }));
+      const mappedData: AdminUser[] = data;
 
       return {
         data: mappedData,
@@ -261,11 +229,11 @@ export class AdminQueries {
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
-        fandom_access: newUser.fandom_access || undefined,
+        fandom_access: newUser.fandom_access || null,
         permissions: newUser.permissions,
         is_active: newUser.is_active,
-        last_login_at: newUser.last_login_at || undefined,
-        preferences: newUser.preferences || undefined,
+        last_login_at: newUser.last_login_at || null,
+        preferences: newUser.preferences || null,
         created_at: newUser.created_at,
         updated_at: newUser.updated_at,
       };
@@ -282,19 +250,30 @@ export class AdminQueries {
         updated_at: new Date(),
       };
 
-      if (updates.email !== undefined) updateData.email = updates.email;
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.role !== undefined) updateData.role = updates.role;
-      if (updates.fandom_access !== undefined)
+      if (updates.email !== undefined) {
+        updateData.email = updates.email;
+      }
+      if (updates.name !== undefined) {
+        updateData.name = updates.name;
+      }
+      if (updates.role !== undefined) {
+        updateData.role = updates.role;
+      }
+      if (updates.fandom_access !== undefined) {
         updateData.fandom_access = updates.fandom_access;
-      if (updates.permissions !== undefined)
+      }
+      if (updates.permissions !== undefined) {
         updateData.permissions = updates.permissions;
-      if (updates.is_active !== undefined)
+      }
+      if (updates.is_active !== undefined) {
         updateData.is_active = updates.is_active;
-      if (updates.last_login_at !== undefined)
+      }
+      if (updates.last_login_at !== undefined) {
         updateData.last_login_at = updates.last_login_at;
-      if (updates.preferences !== undefined)
+      }
+      if (updates.preferences !== undefined) {
         updateData.preferences = updates.preferences;
+      }
 
       const [updatedUser] = await this.db
         .update(adminUsers)
@@ -302,18 +281,20 @@ export class AdminQueries {
         .where(eq(adminUsers.id, id))
         .returning();
 
-      if (!updatedUser) return null;
+      if (!updatedUser) {
+        return null;
+      }
 
       return {
         id: updatedUser.id,
         email: updatedUser.email,
         name: updatedUser.name,
         role: updatedUser.role,
-        fandom_access: updatedUser.fandom_access || undefined,
+        fandom_access: updatedUser.fandom_access || null,
         permissions: updatedUser.permissions,
         is_active: updatedUser.is_active,
-        last_login_at: updatedUser.last_login_at || undefined,
-        preferences: updatedUser.preferences || undefined,
+        last_login_at: updatedUser.last_login_at || null,
+        preferences: updatedUser.preferences || null,
         created_at: updatedUser.created_at,
         updated_at: updatedUser.updated_at,
       };
@@ -362,7 +343,9 @@ export class AdminQueries {
         .where(eq(validationRules.id, id))
         .limit(1);
 
-      if (!rule) return null;
+      if (!rule) {
+        return null;
+      }
 
       // Get associated conditions and actions
       const [conditions, actions] = await Promise.all([
@@ -540,7 +523,9 @@ export class AdminQueries {
         .where(eq(validationRules.id, id))
         .returning();
 
-      if (!updatedRule) return null;
+      if (!updatedRule) {
+        return null;
+      }
 
       // If conditions are provided, replace them
       if (updates.conditions) {
@@ -683,9 +668,15 @@ export class AdminQueries {
           const bValue = b[sortBy as keyof typeof b];
 
           // Handle null values
-          if (aValue === null && bValue === null) return 0;
-          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
-          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+          if (aValue === null && bValue === null) {
+            return 0;
+          }
+          if (aValue === null) {
+            return sortOrder === 'desc' ? 1 : -1;
+          }
+          if (bValue === null) {
+            return sortOrder === 'desc' ? -1 : 1;
+          }
 
           if (sortOrder === 'desc') {
             return aValue > bValue ? -1 : 1;
@@ -744,9 +735,15 @@ export class AdminQueries {
           const bValue = b[sortBy as keyof typeof b];
 
           // Handle null values
-          if (aValue === null && bValue === null) return 0;
-          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
-          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+          if (aValue === null && bValue === null) {
+            return 0;
+          }
+          if (aValue === null) {
+            return sortOrder === 'desc' ? 1 : -1;
+          }
+          if (bValue === null) {
+            return sortOrder === 'desc' ? -1 : 1;
+          }
 
           if (sortOrder === 'desc') {
             return aValue > bValue ? -1 : 1;
@@ -836,9 +833,15 @@ export class AdminQueries {
           const bValue = b[sortBy as keyof typeof b];
 
           // Handle null values
-          if (aValue === null && bValue === null) return 0;
-          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
-          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+          if (aValue === null && bValue === null) {
+            return 0;
+          }
+          if (aValue === null) {
+            return sortOrder === 'desc' ? 1 : -1;
+          }
+          if (bValue === null) {
+            return sortOrder === 'desc' ? -1 : 1;
+          }
 
           if (sortOrder === 'desc') {
             return aValue > bValue ? -1 : 1;
@@ -1035,9 +1038,15 @@ export class AdminQueries {
           const bValue = b[sortBy as keyof typeof b];
 
           // Handle null values
-          if (aValue === null && bValue === null) return 0;
-          if (aValue === null) return sortOrder === 'desc' ? 1 : -1;
-          if (bValue === null) return sortOrder === 'desc' ? -1 : 1;
+          if (aValue === null && bValue === null) {
+            return 0;
+          }
+          if (aValue === null) {
+            return sortOrder === 'desc' ? 1 : -1;
+          }
+          if (bValue === null) {
+            return sortOrder === 'desc' ? -1 : 1;
+          }
 
           if (sortOrder === 'desc') {
             return aValue > bValue ? -1 : 1;

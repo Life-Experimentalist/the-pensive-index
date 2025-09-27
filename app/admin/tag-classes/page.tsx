@@ -27,7 +27,7 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import AdminLayout from '@/components/admin/AdminLayout';
+
 
 interface TagClass {
   id: string;
@@ -325,268 +325,264 @@ export default function TagClasses() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <TagIcon className="w-8 h-8 mr-3 text-indigo-600" />
+            Tag Classes
+          </h1>
+          <p className="mt-2 text-sm text-gray-700">
+            Manage tag classification systems and validation rules for your
+            fandoms.
+          </p>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Create Tag Class
+          </button>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <TagIcon className="w-8 h-8 mr-3 text-indigo-600" />
-              Tag Classes
-            </h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Manage tag classification systems and validation rules for your
-              fandoms.
-            </p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Search
+            </label>
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search tag classes..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
           </div>
-          <div className="flex space-x-3">
+          {userRole === 'ProjectAdmin' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fandom
+              </label>
+              <select
+                value={selectedFandom}
+                onChange={e => setSelectedFandom(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                {fandoms.map(fandom => (
+                  <option key={fandom.id} value={fandom.id}>
+                    {fandom.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Tag Classes List */}
+      <div className="space-y-4">
+        {filteredTagClasses.map(tagClass => {
+          const isExpanded = expandedClasses.has(tagClass.id);
+
+          return (
+            <div key={tagClass.id} className="bg-white shadow rounded-lg">
+              <div className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => toggleExpanded(tagClass.id)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        {isExpanded ? (
+                          <ChevronDownIcon className="w-5 h-5" />
+                        ) : (
+                          <ChevronRightIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {tagClass.name}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        {!tagClass.isActive && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Inactive
+                          </span>
+                        )}
+                        {tagClass.mutuallyExclusive && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Exclusive
+                          </span>
+                        )}
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {tagClass.category}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-600">
+                      {tagClass.description}
+                    </p>
+
+                    <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">
+                      <span>{tagClass.fandom}</span>
+                      <span>•</span>
+                      <span>{tagClass.tags.length} tags</span>
+                      <span>•</span>
+                      <span>{tagClass.usageCount} uses</span>
+                      <span>•</span>
+                      <span>Updated {tagClass.lastUpdated}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleToggleActive(tagClass)}
+                      className={`inline-flex items-center px-3 py-1 border text-sm font-medium rounded-md ${
+                        tagClass.isActive
+                          ? 'border-red-300 text-red-700 bg-white hover:bg-red-50'
+                          : 'border-green-300 text-green-700 bg-white hover:bg-green-50'
+                      }`}
+                    >
+                      {tagClass.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                      <PencilIcon className="w-4 h-4 mr-1" />
+                      Edit
+                    </button>
+                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                      <EyeIcon className="w-4 h-4 mr-1" />
+                      View
+                    </button>
+                    {userRole === 'ProjectAdmin' && (
+                      <button
+                        onClick={() => handleDeleteClass(tagClass)}
+                        className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+                      >
+                        <TrashIcon className="w-4 h-4 mr-1" />
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div className="mt-6 border-t border-gray-200 pt-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">
+                          Configuration
+                        </h4>
+                        <dl className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <dt className="text-gray-500">Max Selections:</dt>
+                            <dd className="text-gray-900">
+                              {tagClass.maxSelections || 'Unlimited'}
+                            </dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-gray-500">Min Selections:</dt>
+                            <dd className="text-gray-900">
+                              {tagClass.minSelections || 'None'}
+                            </dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-gray-500">
+                              Mutually Exclusive:
+                            </dt>
+                            <dd className="text-gray-900">
+                              {tagClass.mutuallyExclusive ? 'Yes' : 'No'}
+                            </dd>
+                          </div>
+                          <div className="flex justify-between">
+                            <dt className="text-gray-500">Validation Rules:</dt>
+                            <dd className="text-gray-900">
+                              {tagClass.validationRules.length}
+                            </dd>
+                          </div>
+                        </dl>
+
+                        <div className="mt-4">
+                          <h5 className="text-sm font-medium text-gray-900 mb-2">
+                            Tags ({tagClass.tags.length})
+                          </h5>
+                          <div className="flex flex-wrap gap-1">
+                            {tagClass.tags.slice(0, 10).map(tag => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {tagClass.tags.length > 10 && (
+                              <span className="text-xs text-gray-500">
+                                +{tagClass.tags.length - 10} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">
+                          Validation Rules
+                        </h4>
+                        {renderValidationRules(tagClass.validationRules)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {filteredTagClasses.length === 0 && (
+        <div className="text-center py-12">
+          <TagIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No tag classes found
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Try adjusting your search criteria or create a new tag class.
+          </p>
+          <div className="mt-6">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
             >
               <PlusIcon className="w-4 h-4 mr-2" />
               Create Tag Class
             </button>
           </div>
         </div>
-
-        {/* Search and Filters */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search
-              </label>
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search tag classes..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-            {userRole === 'ProjectAdmin' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fandom
-                </label>
-                <select
-                  value={selectedFandom}
-                  onChange={e => setSelectedFandom(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  {fandoms.map(fandom => (
-                    <option key={fandom.id} value={fandom.id}>
-                      {fandom.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Tag Classes List */}
-        <div className="space-y-4">
-          {filteredTagClasses.map(tagClass => {
-            const isExpanded = expandedClasses.has(tagClass.id);
-
-            return (
-              <div key={tagClass.id} className="bg-white shadow rounded-lg">
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() => toggleExpanded(tagClass.id)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          {isExpanded ? (
-                            <ChevronDownIcon className="w-5 h-5" />
-                          ) : (
-                            <ChevronRightIcon className="w-5 h-5" />
-                          )}
-                        </button>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {tagClass.name}
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          {!tagClass.isActive && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Inactive
-                            </span>
-                          )}
-                          {tagClass.mutuallyExclusive && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Exclusive
-                            </span>
-                          )}
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {tagClass.category}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {tagClass.description}
-                      </p>
-
-                      <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>{tagClass.fandom}</span>
-                        <span>•</span>
-                        <span>{tagClass.tags.length} tags</span>
-                        <span>•</span>
-                        <span>{tagClass.usageCount} uses</span>
-                        <span>•</span>
-                        <span>Updated {tagClass.lastUpdated}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleToggleActive(tagClass)}
-                        className={`inline-flex items-center px-3 py-1 border text-sm font-medium rounded-md ${
-                          tagClass.isActive
-                            ? 'border-red-300 text-red-700 bg-white hover:bg-red-50'
-                            : 'border-green-300 text-green-700 bg-white hover:bg-green-50'
-                        }`}
-                      >
-                        {tagClass.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <PencilIcon className="w-4 h-4 mr-1" />
-                        Edit
-                      </button>
-                      <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <EyeIcon className="w-4 h-4 mr-1" />
-                        View
-                      </button>
-                      {userRole === 'ProjectAdmin' && (
-                        <button
-                          onClick={() => handleDeleteClass(tagClass)}
-                          className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-                        >
-                          <TrashIcon className="w-4 h-4 mr-1" />
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="mt-6 border-t border-gray-200 pt-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Configuration
-                          </h4>
-                          <dl className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">Max Selections:</dt>
-                              <dd className="text-gray-900">
-                                {tagClass.maxSelections || 'Unlimited'}
-                              </dd>
-                            </div>
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">Min Selections:</dt>
-                              <dd className="text-gray-900">
-                                {tagClass.minSelections || 'None'}
-                              </dd>
-                            </div>
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">
-                                Mutually Exclusive:
-                              </dt>
-                              <dd className="text-gray-900">
-                                {tagClass.mutuallyExclusive ? 'Yes' : 'No'}
-                              </dd>
-                            </div>
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">
-                                Validation Rules:
-                              </dt>
-                              <dd className="text-gray-900">
-                                {tagClass.validationRules.length}
-                              </dd>
-                            </div>
-                          </dl>
-
-                          <div className="mt-4">
-                            <h5 className="text-sm font-medium text-gray-900 mb-2">
-                              Tags ({tagClass.tags.length})
-                            </h5>
-                            <div className="flex flex-wrap gap-1">
-                              {tagClass.tags.slice(0, 10).map(tag => (
-                                <span
-                                  key={tag}
-                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                              {tagClass.tags.length > 10 && (
-                                <span className="text-xs text-gray-500">
-                                  +{tagClass.tags.length - 10} more
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Validation Rules
-                          </h4>
-                          {renderValidationRules(tagClass.validationRules)}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {filteredTagClasses.length === 0 && (
-          <div className="text-center py-12">
-            <TagIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No tag classes found
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Try adjusting your search criteria or create a new tag class.
-            </p>
-            <div className="mt-6">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Create Tag Class
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </AdminLayout>
+      )}
+    </div>
   );
 }

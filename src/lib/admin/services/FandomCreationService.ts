@@ -1,22 +1,27 @@
 ﻿export interface FandomCreationOptions {
   name: string;
+  slug?: string;
   description?: string;
+  template_id?: number;
+  template_customizations?: any;
+  initial_content?: any;
+  created_by?: string;
 }
 
 export class FandomCreationService {
-  static async createFandom(options: any): Promise<any> {
-    return {};
+  static createFandom(options: any): Promise<any> {
+    return Promise.resolve({});
   }
-  static async deleteFandom(...args: any[]): Promise<any> {
-    return {};
+  static deleteFandom(...args: any[]): Promise<any> {
+    return Promise.resolve({});
   }
-  static async updateFandom(...args: any[]): Promise<any> {
-    return {};
+  static updateFandom(...args: any[]): Promise<any> {
+    return Promise.resolve({});
   }
-  static async getFandomDetails(...args: any[]): Promise<any> {
-    return {};
+  static getFandomDetails(...args: any[]): Promise<any> {
+    return Promise.resolve({});
   }
-  async getFandomCreationStatus(...args: any[]): Promise<any> {
-    return {};
+  getFandomCreationStatus(...args: any[]): Promise<any> {
+    return Promise.resolve({});
   }
 }

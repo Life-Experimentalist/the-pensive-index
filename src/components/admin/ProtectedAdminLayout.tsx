@@ -6,7 +6,6 @@ import {
   usePermissions,
   WithPermission,
 } from '@/lib/permissions';
-import AdminLayout from './AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, Loader, AlertTriangle } from 'lucide-react';
@@ -85,9 +84,14 @@ function ProtectedAdminContent({
   // Check if user has any admin role
   if (
     !userRole ||
-    !['super-admin', 'project-admin', 'fandom-admin', 'moderator'].includes(
-      userRole
-    )
+    ![
+      'super-admin',
+      'project-admin',
+      'fandom-admin',
+      'moderator',
+      'ProjectAdmin',
+      'FandomAdmin',
+    ].includes(userRole)
   ) {
     return (
       <AccessDeniedScreen
@@ -110,13 +114,29 @@ function ProtectedAdminContent({
           <AccessDeniedScreen message="You don't have permission to access this section." />
         }
       >
-        <AdminLayout title={title}>{children}</AdminLayout>
+        <div>
+          {title && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+            </div>
+          )}
+          {children}
+        </div>
       </WithPermission>
     );
   }
 
   // Default access for any admin
-  return <AdminLayout title={title}>{children}</AdminLayout>;
+  return (
+    <div>
+      {title && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+        </div>
+      )}
+      {children}
+    </div>
+  );
 }
 
 // Main protected admin layout component

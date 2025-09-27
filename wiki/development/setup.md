@@ -18,7 +18,7 @@ Before starting, ensure you have:
 
 ```powershell
 # Clone the repository
-git clone https://github.com/Life-Experimentalists/the-pensive-index.git
+git clone https://github.com/Life-Experimentalist/the-pensive-index.git
 cd the-pensive-index
 
 # Install dependencies

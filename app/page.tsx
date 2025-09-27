@@ -95,9 +95,9 @@ export default async function HomePage() {
   const fandoms = await getFandomsData();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm fixed w-full top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -119,76 +119,206 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          {/* Logo Banner */}
-          <div className="mb-8">
-            <Image
-              src="/logo-banner.png"
-              alt="The Pensieve Index - Logo Banner"
-              width={600}
-              height={200}
-              className="mx-auto max-w-full h-auto"
-              priority
-            />
+      {/* Hero Section */}
+      <main className="bg-gradient-to-br from-blue-600 to-purple-700 min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <div className="animate-fade-in-up">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+              Discover <span className="text-white">Fanfiction Stories</span>
+              <br />
+              <span className="text-cyan-300">Library First</span>
+            </h1>
           </div>
-
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-            Welcome to{' '}
-            <span className="text-indigo-600">The Pensieve Index</span>
-          </h1>
-          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            A library-first story discovery platform and intelligent prompt
-            generator for fanfiction.
+          <p className="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto leading-relaxed opacity-90">
+            The intelligent{' '}
+            <strong className="text-white">
+              fanfiction story discovery platform
+            </strong>{' '}
+            that prioritizes finding existing tagged stories before generating
+            new prompts. Built for readers who want{' '}
+            <em className="text-white">precision</em> and writers who want{' '}
+            <em className="text-white">inspiration</em> across
+            <strong className="text-white">
+              Harry Potter, Percy Jackson, and more fandoms
+            </strong>
+            .
           </p>
 
-          <UserContent />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <HydratedLink
+              href="/discover"
+              className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              🔍 Explore Stories
+            </HydratedLink>
+            <HydratedLink
+              href="/generate"
+              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105"
+            >
+              ⚡ Generate Prompts
+            </HydratedLink>
+          </div>
 
-          {/* Discovery Interface Entry Point */}
-          <div className="mt-8 mb-12">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Start Your Story Discovery Journey
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Choose a fandom to explore existing stories and generate new
-                prompts
+          {/* User Authentication */}
+          <div className="mb-12">
+            <UserContent />
+          </div>
+
+          {/* Interactive Demo Preview */}
+          <div className="bg-white bg-opacity-10 backdrop-blur-xl rounded-3xl p-8 max-w-4xl mx-auto border border-white border-opacity-30 shadow-2xl transform hover:scale-105 transition-all duration-700">
+            <div className="text-left">
+              <div className="flex items-center space-x-2 mb-6">
+                <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                <div
+                  className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"
+                  style={{ animationDelay: '0.5s' }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                  style={{ animationDelay: '1s' }}
+                ></div>
+                <span className="text-white text-opacity-90 text-sm ml-4 font-medium">
+                  ✨ Story Pathway Builder
+                </span>
+              </div>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-3">
+                  <span className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 bg-opacity-40 text-blue-100 rounded-full text-sm font-medium border border-blue-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
+                    🕰️ Time Travel
+                  </span>
+                  <span className="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 bg-opacity-40 text-purple-100 rounded-full text-sm font-medium border border-purple-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
+                    ⚡ Marauders Era
+                  </span>
+                  <span className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 bg-opacity-40 text-green-100 rounded-full text-sm font-medium border border-green-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
+                    💕 Harry/Hermione
+                  </span>
+                </div>
+                <div className="bg-black bg-opacity-20 backdrop-blur-md rounded-xl p-4 border border-white border-opacity-20">
+                  <div className="flex items-center justify-between text-white text-opacity-90 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span>Search Complete</span>
+                    </div>
+                    <span className="text-xs text-white text-opacity-60">
+                      342ms
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <div className="text-white text-opacity-90 text-sm">
+                      📚 Found{' '}
+                      <span className="text-cyan-300 font-bold text-lg">
+                        24 matching stories
+                      </span>
+                    </div>
+                    <div className="text-white text-opacity-90 text-sm">
+                      ✨{' '}
+                      <span className="text-yellow-300 font-semibold">
+                        Generate novel prompt
+                      </span>{' '}
+                      for unexplored combinations
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-xl opacity-20 animate-pulse"></div>
+          <div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-300 rounded-full mix-blend-overlay filter blur-xl opacity-15 animate-pulse"
+            style={{ animationDelay: '2s' }}
+          ></div>
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-purple-300 rounded-full mix-blend-overlay filter blur-xl opacity-10 animate-pulse"
+            style={{ animationDelay: '4s' }}
+          ></div>
+        </div>
+      </main>
+
+      {/* Features Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why Choose The Pensieve Index?
+            </h2>
+            <p className="text-xl text-gray-600">
+              Advanced story discovery with intelligent prompt generation
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                📚 Story Discovery
+              </h3>
+              <p className="text-gray-600">
+                Find existing tagged stories with advanced search and relevance
+                scoring. Library-first approach prioritizes existing content.
               </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                ✨ Prompt Generation
+              </h3>
+              <p className="text-gray-600">
+                Generate intelligent story prompts with novelty highlights for
+                unexplored combinations and creative opportunities.
+              </p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                🎯 Smart Filtering
+              </h3>
+              <p className="text-gray-600">
+                Advanced tag-based filtering with real-time validation and
+                conflict detection for optimal results.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              {fandoms.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {fandoms.map(fandom => (
-                    <HydratedLink
-                      key={fandom.id}
-                      href={`/fandom/${fandom.slug}`}
-                      className="group bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-4 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
-                    >
-                      <div className="text-center">
-                        <h3 className="font-semibold text-lg mb-1">
-                          {fandom.name}
-                        </h3>
-                        <p className="text-sm opacity-90">
-                          {fandom.description || 'Explore this fandom'}
-                        </p>
-                        <div className="mt-2 text-xs opacity-75">
-                          Click to explore →
-                        </div>
-                      </div>
-                    </HydratedLink>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-gray-50 rounded-lg p-6 mb-6">
-                  <p className="text-gray-600">
-                    No fandoms available yet. Check back soon!
-                  </p>
-                </div>
-              )}
+      {/* Fandoms Section */}
+      {fandoms.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Explore Popular Fandoms
+              </h2>
+              <p className="text-xl text-gray-600">
+                Start your story discovery journey
+              </p>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {fandoms.map(fandom => (
+                <HydratedLink
+                  key={fandom.id}
+                  href={`/fandom/${fandom.slug}`}
+                  className="group bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-6 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  <div className="text-center">
+                    <h3 className="font-semibold text-xl mb-2">
+                      {fandom.name}
+                    </h3>
+                    <p className="text-sm opacity-90 mb-3">
+                      {fandom.description || 'Explore this fandom'}
+                    </p>
+                    <div className="text-xs opacity-75">Click to explore →</div>
+                  </div>
+                </HydratedLink>
+              ))}
+            </div>
+
+            <div className="text-center mt-12">
               <HydratedLink
                 href="/discover"
-                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 shadow-lg"
               >
                 Browse All Fandoms
                 <svg
@@ -205,85 +335,8 @@ export default async function HomePage() {
               </HydratedLink>
             </div>
           </div>
-
-          {/* Hero Image */}
-          <div className="mt-12">
-            <Image
-              src="/hero.png"
-              alt="The Pensieve Index - Hero Image"
-              width={800}
-              height={400}
-              className="mx-auto max-w-full h-auto rounded-lg shadow-lg"
-            />
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="mt-20">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                📚 Story Discovery
-              </h3>
-              <p className="text-gray-600">
-                Find existing tagged stories with advanced search and relevance
-                scoring. Library-first approach prioritizes existing content.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                ✨ Prompt Generation
-              </h3>
-              <p className="text-gray-600">
-                Generate intelligent story prompts with novelty highlights for
-                unexplored combinations and creative opportunities.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                🎯 Smart Filtering
-              </h3>
-              <p className="text-gray-600">
-                Advanced tag-based filtering with real-time validation and
-                conflict detection for optimal results.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Performance Stats */}
-        <div className="mt-16 bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Why Choose The Pensieve Index?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">
-                {'<200ms'}
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                Validation Response Time
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">
-                {'<500ms'}
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                Story Search Speed
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">
-                Library-First
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                Existing Stories Priority
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        </section>
+      )}
 
       {/* Structured Data for SEO */}
       <script

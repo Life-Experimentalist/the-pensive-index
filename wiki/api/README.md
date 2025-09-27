@@ -224,7 +224,7 @@ Submit a new story for community review.
   "estimatedReviewTime": "3-5 days",
   "githubIssue": {
     "number": 456,
-    "url": "https://github.com/Life-Experimentalists/the-pensive-index/issues/456"
+    "url": "https://github.com/Life-Experimentalist/the-pensive-index/issues/456"
   }
 }
 ```

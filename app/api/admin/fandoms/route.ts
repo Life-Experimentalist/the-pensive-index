@@ -40,8 +40,6 @@ export async function POST(request: NextRequest) {
     const validatedData = CreateFandomSchema.parse(body);
 
     // Initialize services
-    const fandomCreationService = new FandomCreationService();
-
     // Create fandom creation options
     const options: FandomCreationOptions = {
       name: validatedData.name,
@@ -64,7 +62,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Create fandom using the service
-    const result = await fandomCreationService.createFandom(options);
+    const result = await FandomCreationService.createFandom(options);
 
     // Return success response
     return NextResponse.json(

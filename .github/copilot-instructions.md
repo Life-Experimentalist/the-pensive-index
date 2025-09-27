@@ -158,6 +158,8 @@ npm run lint            # ESLint checking
 npm run type-check      # TypeScript validation
 ```
 
+dont use timeout command since it is useless and not suitable for our work
+
 ## Code Style
 
 ### TypeScript

@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useUser } from '@clerk/nextjs';
+
 import Link from 'next/link';
 import {
   DocumentDuplicateIcon,
@@ -28,7 +28,6 @@ import {
   ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface RuleTemplate {
   id: string;
@@ -202,7 +201,6 @@ const complexityColors = {
 };
 
 export default function RuleTemplates() {
-  const { user, isLoaded } = useUser();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFandom, setSelectedFandom] = useState('all');
@@ -211,10 +209,6 @@ export default function RuleTemplates() {
     'usage'
   );
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const userRole = (user as any)?.role as
-    | 'ProjectAdmin'
-    | 'FandomAdmin';
 
   const filteredTemplates = useMemo(() => {
     let filtered = mockTemplates.filter(template => {
@@ -305,251 +299,247 @@ export default function RuleTemplates() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <ClipboardDocumentIcon className="w-8 h-8 mr-3 text-indigo-600" />
-              Rule Templates
-            </h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Browse, clone, and manage validation rule templates for your
-              fandoms.
-            </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <ClipboardDocumentIcon className="w-8 h-8 mr-3 text-indigo-600" />
+            Rule Templates
+          </h1>
+          <p className="mt-2 text-sm text-gray-700">
+            Browse, clone, and manage validation rule templates for your
+            fandoms.
+          </p>
+        </div>
+        <div className="flex space-x-3">
+          <Link
+            href="/admin/validation-rules/create"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Create New Rule
+          </Link>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
           </div>
-          <div className="flex space-x-3">
-            <Link
-              href="/admin/validation-rules/create"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Create New Rule
-            </Link>
-          </div>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <FunnelIcon className="w-4 h-4 mr-2" />
+            Filters
+          </button>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search templates..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
+        {showFilters && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name} ({category.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fandom
+                </label>
+                <select
+                  value={selectedFandom}
+                  onChange={e => setSelectedFandom(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {fandoms.map(fandom => (
+                    <option key={fandom.id} value={fandom.id}>
+                      {fandom.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sort By
+                </label>
+                <div className="flex space-x-2">
+                  <select
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value as any)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="usage">Usage Count</option>
+                    <option value="rating">Rating</option>
+                    <option value="name">Name</option>
+                    <option value="updated">Last Updated</option>
+                  </select>
+                  <button
+                    onClick={() =>
+                      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                    }
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    {sortOrder === 'asc' ? '↑' : '↓'}
+                  </button>
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <FunnelIcon className="w-4 h-4 mr-2" />
-              Filters
-            </button>
           </div>
+        )}
+      </div>
 
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={e => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name} ({category.count})
-                      </option>
+      {/* Templates Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {filteredTemplates.map(template => (
+          <div
+            key={template.id}
+            className="bg-white shadow rounded-lg overflow-hidden"
+          >
+            <div className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {template.name}
+                    </h3>
+                    {template.isOfficial && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Official
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {template.description}
+                  </p>
+
+                  <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                    <span>v{template.version}</span>
+                    <span>by {template.author}</span>
+                    <span>{template.usageCount} uses</span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 mb-3">
+                    <div className="flex items-center space-x-1">
+                      {renderStars(template.rating)}
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {template.rating.toFixed(1)} ({template.ratingCount}{' '}
+                      reviews)
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-4 text-sm mb-3">
+                    <span className="text-gray-600">
+                      {template.conditions} conditions, {template.actions}{' '}
+                      actions
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        complexityColors[template.complexity]
+                      }`}
+                    >
+                      {template.complexity}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {template.tags.slice(0, 3).map(tag => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                      >
+                        {tag}
+                      </span>
                     ))}
-                  </select>
+                    {template.tags.length > 3 && (
+                      <span className="text-xs text-gray-500">
+                        +{template.tags.length - 3} more
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fandom
-                  </label>
-                  <select
-                    value={selectedFandom}
-                    onChange={e => setSelectedFandom(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    {fandoms.map(fandom => (
-                      <option key={fandom.id} value={fandom.id}>
-                        {fandom.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sort By
-                  </label>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                <div className="flex items-center justify-between">
                   <div className="flex space-x-2">
-                    <select
-                      value={sortBy}
-                      onChange={e => setSortBy(e.target.value as any)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="usage">Usage Count</option>
-                      <option value="rating">Rating</option>
-                      <option value="name">Name</option>
-                      <option value="updated">Last Updated</option>
-                    </select>
                     <button
-                      onClick={() =>
-                        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                      }
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                      onClick={() => handleCloneTemplate(template)}
+                      className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                     >
-                      {sortOrder === 'asc' ? '↑' : '↓'}
+                      <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
+                      Clone
+                    </button>
+                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                      <EyeIcon className="w-4 h-4 mr-1" />
+                      Preview
+                    </button>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                      <PencilIcon className="w-4 h-4 mr-1" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTemplate(template)}
+                      className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+                    >
+                      <TrashIcon className="w-4 h-4 mr-1" />
+                      Delete
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Templates Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredTemplates.map(template => (
-            <div
-              key={template.id}
-              className="bg-white shadow rounded-lg overflow-hidden"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {template.name}
-                      </h3>
-                      {template.isOfficial && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          Official
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {template.description}
-                    </p>
-
-                    <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                      <span>v{template.version}</span>
-                      <span>by {template.author}</span>
-                      <span>{template.usageCount} uses</span>
-                    </div>
-
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="flex items-center space-x-1">
-                        {renderStars(template.rating)}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {template.rating.toFixed(1)} ({template.ratingCount}{' '}
-                        reviews)
-                      </span>
-                    </div>
-
-                    <div className="flex items-center space-x-4 text-sm mb-3">
-                      <span className="text-gray-600">
-                        {template.conditions} conditions, {template.actions}{' '}
-                        actions
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          complexityColors[template.complexity]
-                        }`}
-                      >
-                        {template.complexity}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {template.tags.slice(0, 3).map(tag => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {template.tags.length > 3 && (
-                        <span className="text-xs text-gray-500">
-                          +{template.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleCloneTemplate(template)}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
-                        Clone
-                      </button>
-                      <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <EyeIcon className="w-4 h-4 mr-1" />
-                        Preview
-                      </button>
-                    </div>
-
-                    {userRole === 'ProjectAdmin' && (
-                      <div className="flex space-x-2">
-                        <button className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                          <PencilIcon className="w-4 h-4 mr-1" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTemplate(template)}
-                          className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-                        >
-                          <TrashIcon className="w-4 h-4 mr-1" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredTemplates.length === 0 && (
-          <div className="text-center py-12">
-            <ClipboardDocumentIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No templates found
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Try adjusting your search criteria or create a new rule template.
-            </p>
-            <div className="mt-6">
-              <Link
-                href="/admin/validation-rules/create"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Create New Template
-              </Link>
-            </div>
           </div>
-        )}
+        ))}
       </div>
-    </AdminLayout>
+
+      {filteredTemplates.length === 0 && (
+        <div className="text-center py-12">
+          <ClipboardDocumentIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No templates found
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Try adjusting your search criteria or create a new rule template.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/admin/validation-rules/create"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Create New Template
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

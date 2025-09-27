@@ -10,6 +10,9 @@
 import { eq, and, desc, asc, like, sql, inArray } from 'drizzle-orm';
 import { getDatabase } from './config';
 import { fandoms, type Fandom, type NewFandom } from '@/lib/database/schema';
+import { fandomContentItems } from './schemas/fandom-content';
+import { fandomTemplates } from './schemas/fandom-template';
+// FandomTemplate type will be defined later
 
 export class FandomQueries {
   private db = getDatabase();
@@ -107,7 +110,7 @@ export class FandomQueries {
 
     // Get total count
     const countQuery = this.db
-      .select({ count: sql`count(*)` })
+      .select()
       .from(fandoms)
       .where(conditions.length > 0 ? and(...conditions) : undefined);
 
@@ -118,7 +121,7 @@ export class FandomQueries {
 
     return {
       fandoms: fandomsResult,
-      total: Number(countResult[0]?.count || 0),
+      total: countResult.length,
     };
   }
 
@@ -175,7 +178,7 @@ export class FandomQueries {
     }
 
     const result = await this.db
-      .select({ id: fandoms.id })
+      .select()
       .from(fandoms)
       .where(and(...conditions))
       .limit(1);
@@ -193,7 +196,7 @@ export class FandomQueries {
     }
 
     const result = await this.db
-      .select({ id: fandoms.id })
+      .select()
       .from(fandoms)
       .where(and(...conditions))
       .limit(1);
@@ -217,19 +220,17 @@ export class FandomQueries {
   } | null> {
     // Get fandom basic info
     const fandom = await this.getFandomById(id);
-    if (!fandom) return null;
+    if (!fandom) {
+      return null;
+    }
 
-    // Get content counts
-    const contentCounts = await this.db
-      .select({
-        content_type: fandomContentItems.content_type,
-        count: sql`count(*)`,
-      })
+    // Get content counts - simplified approach for now
+    const allContent = await this.db
+      .select()
       .from(fandomContentItems)
-      .where(eq(fandomContentItems.fandom_id, parseInt(id)))
-      .groupBy(fandomContentItems.content_type);
+      .where(eq(fandomContentItems.fandom_id, parseInt(id)));
 
-    // Process content counts
+    // Process content counts manually
     const counts = {
       tags: 0,
       plot_blocks: 0,
@@ -237,27 +238,26 @@ export class FandomQueries {
       total: 0,
     };
 
-    for (const item of contentCounts) {
-      const count = Number(item.count);
-      counts.total += count;
+    for (const item of allContent) {
+      counts.total += 1;
 
       switch (item.content_type) {
         case 'tag':
-          counts.tags = count;
+          counts.tags += 1;
           break;
         case 'plot_block':
-          counts.plot_blocks = count;
+          counts.plot_blocks += 1;
           break;
         case 'validation_rule':
-          counts.validation_rules = count;
+          counts.validation_rules += 1;
           break;
       }
     }
 
     return {
       content_count: counts,
-      created_at: fandom.created_at,
-      last_updated: fandom.updated_at,
+      created_at: fandom.created_at.toISOString(),
+      last_updated: fandom.updated_at.toISOString(),
       is_active: fandom.is_active,
     };
   }
@@ -279,14 +279,14 @@ export class FandomQueries {
     }
   ): Promise<{
     fandom: Fandom;
-    applied_template: FandomTemplate;
+    applied_template: any;
     content_created: {
       tags: number;
       plot_blocks: number;
       validation_rules: number;
     };
   }> {
-    return await this.db.transaction(async tx => {
+    return await (this.db as any).transaction(async (tx: any) => {
       // Create the fandom first
       const [newFandom] = await tx
         .insert(fandoms)
@@ -308,7 +308,7 @@ export class FandomQueries {
       }
 
       // Parse template configuration
-      const config = template.configuration as any;
+      const config = template.configuration;
       const contentCreated = {
         tags: 0,
         plot_blocks: 0,
@@ -419,10 +419,10 @@ export class FandomQueries {
   /**
    * Get fandoms created from a specific template
    */
-  async getFandomsByTemplate(templateId: number): Promise<Fandom[]> {
+  getFandomsByTemplate(templateId: number): Promise<Fandom[]> {
     // This would require storing template_id in fandoms table
     // For now, we'll return empty array as this is a future enhancement
-    return [];
+    return Promise.resolve([]);
   }
 
   /**
@@ -446,15 +446,13 @@ export class FandomQueries {
     );
 
     const result = await this.db
-      .select({
-        fandom: fandoms,
-      })
+      .select()
       .from(fandomContentItems)
       .innerJoin(fandoms, eq(fandomContentItems.fandom_id, fandoms.id))
       .where(and(...conditions))
       .groupBy(fandoms.id)
       .orderBy(fandoms.name);
 
-    return result.map(row => row.fandom);
+    return result.map(row => row.fandoms);
   }
 }

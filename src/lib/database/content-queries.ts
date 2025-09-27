@@ -22,16 +22,37 @@ export class ContentQueries {
   /**
    * Create new content item
    */
-  async createContentItem(
-    data: Omit<any, 'id' | 'created_at' | 'updated_at'>
-  ): Promise<any> {
+  async createContentItem(data: {
+    fandom_id: number;
+    content_type: string;
+    content_name: string;
+    content_slug: string;
+    content_data: any;
+    category?: string;
+    submitted_by?: string;
+    status?: string;
+    [key: string]: any;
+  }): Promise<any> {
+    const insertData: any = {
+      fandom_id: data.fandom_id,
+      content_type: data.content_type,
+      content_name: data.content_name,
+      content_slug: data.content_slug,
+      content_data: data.content_data,
+      status: data.status || 'draft',
+      submitted_by: data.submitted_by || 'system',
+      created_at: sql`datetime('now')`,
+      updated_at: sql`datetime('now')`,
+    };
+
+    // Only include optional fields if they have values
+    if (data.category !== undefined) {
+      insertData.category = data.category;
+    }
+
     const [newContent] = await this.db
       .insert(fandomContentItems)
-      .values({
-        ...data,
-        created_at: sql`datetime('now')`,
-        updated_at: sql`datetime('now')`,
-      })
+      .values(insertData)
       .returning();
 
     return newContent;
@@ -133,7 +154,7 @@ export class ContentQueries {
         .from(fandomContentItems)
         .where(eq(fandomContentItems.id, id));
 
-      if (!currentContent) return null;
+      if (!currentContent) {return null;}
 
       // Create version if requested
       if (createVersion) {
@@ -228,52 +249,58 @@ export class ContentQueries {
     versionId: number,
     revertedBy: string
   ): Promise<{ content: any; version: any } | null> {
-    return await this.db.transaction(async (tx: any) => {
-      // Get the target version
-      const [targetVersion] = await tx
-        .select()
-        .from(fandomContentVersions)
-        .where(eq(fandomContentVersions.id, versionId));
+    try {
+      const result = await (this.db as any).transaction(async (tx: any) => {
+        // Get the target version
+        const [targetVersion] = await tx
+          .select()
+          .from(fandomContentVersions)
+          .where(eq(fandomContentVersions.id, versionId));
 
-      if (!targetVersion || targetVersion.content_item_id !== contentId) {
-        return null;
-      }
+        if (!targetVersion || targetVersion.content_item_id !== contentId) {
+          return null;
+        }
 
-      // Create new version from target version snapshot
-      const [newVersion] = await tx
-        .insert(fandomContentVersions)
-        .values({
-          content_item_id: contentId,
-          version: `${Date.now()}`,
-          content_snapshot: targetVersion.content_snapshot,
-          changed_by: revertedBy,
-          change_type: 'revert',
-          change_summary: `Reverted to version ${targetVersion.version}`,
-          created_at: sql`datetime('now')`,
-        })
-        .returning();
+        // Create new version from target version snapshot
+        const [newVersion] = await tx
+          .insert(fandomContentVersions)
+          .values({
+            content_item_id: contentId,
+            version: `${Date.now()}`,
+            content_snapshot: targetVersion.content_snapshot,
+            changed_by: revertedBy,
+            change_type: 'revert',
+            change_summary: `Reverted to version ${targetVersion.version}`,
+            created_at: sql`datetime('now')`,
+          })
+          .returning();
 
-      // Update content item with snapshot data
-      const snapshotData = targetVersion.content_snapshot as any;
-      const [updatedContent] = await tx
-        .update(fandomContentItems)
-        .set({
-          content_name: snapshotData.content_name,
-          content_slug: snapshotData.content_slug,
-          content_data: snapshotData.content_data,
-          category: snapshotData.category,
-          subcategory: snapshotData.subcategory,
-          reviewed_by: revertedBy,
-          updated_at: sql`datetime('now')`,
-        })
-        .where(eq(fandomContentItems.id, contentId))
-        .returning();
+        // Update content item with snapshot data
+        const snapshotData = targetVersion.content_snapshot;
+        const [updatedContent] = await tx
+          .update(fandomContentItems)
+          .set({
+            content_name: snapshotData.content_name,
+            content_slug: snapshotData.content_slug,
+            content_data: snapshotData.content_data,
+            category: snapshotData.category,
+            subcategory: snapshotData.subcategory,
+            reviewed_by: revertedBy,
+            updated_at: sql`datetime('now')`,
+          })
+          .where(eq(fandomContentItems.id, contentId))
+          .returning();
 
-      return {
-        content: updatedContent,
-        version: newVersion,
-      };
-    });
+        return {
+          content: updatedContent,
+          version: newVersion,
+        };
+      });
+      return result;
+    } catch (error) {
+      console.error('Error reverting to version:', error);
+      return null;
+    }
   }
 
   /**

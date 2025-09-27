@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+
 import {
   PlayIcon,
   ClockIcon,
@@ -23,7 +23,6 @@ import {
   InformationCircleIcon,
   BeakerIcon,
 } from '@heroicons/react/24/outline';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface TestPathway {
   tags: string[];
@@ -56,7 +55,6 @@ const mockRules = [
 ];
 
 export default function TestingSandbox() {
-  const { user, isLoaded } = useUser();
   const [selectedFandom, setSelectedFandom] = useState('hp');
   const [selectedRules, setSelectedRules] = useState<string[]>([]);
   const [testPathway, setTestPathway] = useState<TestPathway>({
@@ -174,339 +172,334 @@ export default function TestingSandbox() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            <BeakerIcon className="w-8 h-8 mr-3 text-indigo-600" />
-            Testing Sandbox
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Test your validation rules with mock pathway data to ensure they
-            work as expected.
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+          <BeakerIcon className="w-8 h-8 mr-3 text-indigo-600" />
+          Testing Sandbox
+        </h1>
+        <p className="mt-2 text-sm text-gray-700">
+          Test your validation rules with mock pathway data to ensure they work
+          as expected.
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Test Configuration */}
-          <div className="space-y-6">
-            {/* Fandom Selection */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Test Configuration
-              </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Test Configuration */}
+        <div className="space-y-6">
+          {/* Fandom Selection */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+              Test Configuration
+            </h2>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fandom
-                  </label>
-                  <select
-                    value={selectedFandom}
-                    onChange={e => setSelectedFandom(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="hp">Harry Potter</option>
-                    <option value="pj">Percy Jackson</option>
-                    <option value="naruto">Naruto</option>
-                  </select>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fandom
+                </label>
+                <select
+                  value={selectedFandom}
+                  onChange={e => setSelectedFandom(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="hp">Harry Potter</option>
+                  <option value="pj">Percy Jackson</option>
+                  <option value="naruto">Naruto</option>
+                </select>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rules to Test
-                  </label>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {mockRules.map(rule => (
-                      <label key={rule.id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedRules.includes(rule.id)}
-                          onChange={e => {
-                            if (e.target.checked) {
-                              setSelectedRules(prev => [...prev, rule.id]);
-                            } else {
-                              setSelectedRules(prev =>
-                                prev.filter(id => id !== rule.id)
-                              );
-                            }
-                          }}
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">
-                          {rule.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="mt-2">
-                    <label className="flex items-center">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rules to Test
+                </label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {mockRules.map(rule => (
+                    <label key={rule.id} className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={selectedRules.length === mockRules.length}
+                        checked={selectedRules.includes(rule.id)}
                         onChange={e => {
                           if (e.target.checked) {
-                            setSelectedRules(mockRules.map(r => r.id));
+                            setSelectedRules(prev => [...prev, rule.id]);
                           } else {
-                            setSelectedRules([]);
+                            setSelectedRules(prev =>
+                              prev.filter(id => id !== rule.id)
+                            );
                           }
                         }}
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       />
-                      <span className="ml-2 text-sm font-medium text-gray-700">
-                        All Rules
+                      <span className="ml-2 text-sm text-gray-700">
+                        {rule.name}
                       </span>
                     </label>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            </div>
-
-            {/* Pathway Data */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Mock Pathway Data
-              </h3>
-
-              <div className="space-y-4">
-                {/* Tags */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tags
-                  </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {testPathway.tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                      >
-                        {tag}
-                        <button
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 text-indigo-600 hover:text-indigo-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex space-x-2">
+                <div className="mt-2">
+                  <label className="flex items-center">
                     <input
-                      type="text"
-                      placeholder="Add tag..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                      onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          addTag((e.target as HTMLInputElement).value);
-                          (e.target as HTMLInputElement).value = '';
+                      type="checkbox"
+                      checked={selectedRules.length === mockRules.length}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedRules(mockRules.map(r => r.id));
+                        } else {
+                          setSelectedRules([]);
                         }
                       }}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                     />
-                    <button
-                      onClick={() => {
-                        const commonTags = [
-                          'harry/hermione',
-                          'angst',
-                          'time-travel',
-                          'harry/ginny',
-                        ];
-                        const tag =
-                          commonTags[
-                            Math.floor(Math.random() * commonTags.length)
-                          ];
-                        addTag(tag);
-                      }}
-                      className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                      Random
-                    </button>
-                  </div>
-                </div>
-
-                {/* Plot Blocks */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Plot Blocks
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                      All Rules
+                    </span>
                   </label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {testPathway.plotBlocks.map(block => (
-                      <span
-                        key={block}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                      >
-                        {block}
-                        <button
-                          onClick={() => removePlotBlock(block)}
-                          className="ml-1 text-green-600 hover:text-green-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      placeholder="Add plot block..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
-                      onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                          addPlotBlock((e.target as HTMLInputElement).value);
-                          (e.target as HTMLInputElement).value = '';
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        const commonBlocks = [
-                          'Goblin Inheritance',
-                          'Time Turner',
-                          'Wrong Boy Who Lived',
-                        ];
-                        const block =
-                          commonBlocks[
-                            Math.floor(Math.random() * commonBlocks.length)
-                          ];
-                        addPlotBlock(block);
-                      }}
-                      className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                      Random
-                    </button>
-                  </div>
                 </div>
-              </div>
-
-              {/* Test Actions */}
-              <div className="mt-6 flex space-x-3">
-                <button
-                  onClick={() => handleTestRule()}
-                  disabled={isLoading || selectedRules.length === 0}
-                  className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <ClockIcon className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <PlayIcon className="w-4 h-4 mr-2" />
-                  )}
-                  {isLoading ? 'Testing...' : 'Test Selected Rules'}
-                </button>
               </div>
             </div>
           </div>
 
-          {/* Results */}
+          {/* Pathway Data */}
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Validation Results
+              Mock Pathway Data
             </h3>
 
-            {!validationResult ? (
-              <div className="text-center py-12">
-                <BeakerIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h4 className="mt-2 text-sm font-medium text-gray-900">
-                  No tests run yet
-                </h4>
-                <p className="mt-1 text-sm text-gray-500">
-                  Configure your test data and run validation to see results
-                  here.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Summary */}
-                <div
-                  className={`p-4 rounded-lg border ${
-                    validationResult.isValid
-                      ? 'bg-green-50 border-green-200'
-                      : 'bg-red-50 border-red-200'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    {validationResult.isValid ? (
-                      <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
-                    ) : (
-                      <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
-                    )}
+            <div className="space-y-4">
+              {/* Tags */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {testPathway.tags.map(tag => (
                     <span
-                      className={`font-medium ${
-                        validationResult.isValid
-                          ? 'text-green-800'
-                          : 'text-red-800'
-                      }`}
+                      key={tag}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                     >
-                      {validationResult.isValid
-                        ? 'Validation Passed'
-                        : 'Validation Failed'}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-600">
-                    Tested {validationResult.testedRules} rule
-                    {validationResult.testedRules === 1 ? '' : 's'}
-                    in {validationResult.executionTime}
-                  </div>
-                </div>
-
-                {/* Messages */}
-                <div className="space-y-2">
-                  {[
-                    ...validationResult.errors,
-                    ...validationResult.warnings,
-                    ...validationResult.info,
-                  ].map((message, index) => {
-                    const Icon = getMessageIcon(message.severity);
-                    const colorClass = getMessageColor(message.severity);
-
-                    return (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-lg border ${colorClass}`}
-                      >
-                        <div className="flex items-start">
-                          <Icon className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="text-sm font-medium">
-                              {message.ruleName}
-                            </div>
-                            <div className="text-sm mt-1">
-                              {message.message}
-                            </div>
-                            {message.data && (
-                              <div className="mt-2 text-xs font-mono bg-white bg-opacity-50 p-2 rounded">
-                                {JSON.stringify(message.data, null, 2)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Quick Test Actions */}
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">
-                    Quick Tests
-                  </h4>
-                  <div className="space-y-2">
-                    {mockRules.map(rule => (
+                      {tag}
                       <button
-                        key={rule.id}
-                        onClick={() => handleTestRule(rule.id)}
-                        disabled={isLoading}
-                        className="w-full text-left px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 text-indigo-600 hover:text-indigo-800"
                       >
-                        Test &quot;{rule.name}&quot;
+                        ×
                       </button>
-                    ))}
-                  </div>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Add tag..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    onKeyPress={e => {
+                      if (e.key === 'Enter') {
+                        addTag((e.target as HTMLInputElement).value);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const commonTags = [
+                        'harry/hermione',
+                        'angst',
+                        'time-travel',
+                        'harry/ginny',
+                      ];
+                      const tag =
+                        commonTags[
+                          Math.floor(Math.random() * commonTags.length)
+                        ];
+                      addTag(tag);
+                    }}
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Random
+                  </button>
                 </div>
               </div>
-            )}
+
+              {/* Plot Blocks */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Plot Blocks
+                </label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {testPathway.plotBlocks.map(block => (
+                    <span
+                      key={block}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                    >
+                      {block}
+                      <button
+                        onClick={() => removePlotBlock(block)}
+                        className="ml-1 text-green-600 hover:text-green-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Add plot block..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                    onKeyPress={e => {
+                      if (e.key === 'Enter') {
+                        addPlotBlock((e.target as HTMLInputElement).value);
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const commonBlocks = [
+                        'Goblin Inheritance',
+                        'Time Turner',
+                        'Wrong Boy Who Lived',
+                      ];
+                      const block =
+                        commonBlocks[
+                          Math.floor(Math.random() * commonBlocks.length)
+                        ];
+                      addPlotBlock(block);
+                    }}
+                    className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Random
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Test Actions */}
+            <div className="mt-6 flex space-x-3">
+              <button
+                onClick={() => handleTestRule()}
+                disabled={isLoading || selectedRules.length === 0}
+                className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <ClockIcon className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <PlayIcon className="w-4 h-4 mr-2" />
+                )}
+                {isLoading ? 'Testing...' : 'Test Selected Rules'}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Results */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Validation Results
+          </h3>
+
+          {!validationResult ? (
+            <div className="text-center py-12">
+              <BeakerIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <h4 className="mt-2 text-sm font-medium text-gray-900">
+                No tests run yet
+              </h4>
+              <p className="mt-1 text-sm text-gray-500">
+                Configure your test data and run validation to see results here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Summary */}
+              <div
+                className={`p-4 rounded-lg border ${
+                  validationResult.isValid
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
+                }`}
+              >
+                <div className="flex items-center">
+                  {validationResult.isValid ? (
+                    <CheckCircleIcon className="w-5 h-5 text-green-600 mr-2" />
+                  ) : (
+                    <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
+                  )}
+                  <span
+                    className={`font-medium ${
+                      validationResult.isValid
+                        ? 'text-green-800'
+                        : 'text-red-800'
+                    }`}
+                  >
+                    {validationResult.isValid
+                      ? 'Validation Passed'
+                      : 'Validation Failed'}
+                  </span>
+                </div>
+                <div className="mt-2 text-sm text-gray-600">
+                  Tested {validationResult.testedRules} rule
+                  {validationResult.testedRules === 1 ? '' : 's'}
+                  in {validationResult.executionTime}
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="space-y-2">
+                {[
+                  ...validationResult.errors,
+                  ...validationResult.warnings,
+                  ...validationResult.info,
+                ].map((message, index) => {
+                  const Icon = getMessageIcon(message.severity);
+                  const colorClass = getMessageColor(message.severity);
+
+                  return (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border ${colorClass}`}
+                    >
+                      <div className="flex items-start">
+                        <Icon className="w-4 h-4 mt-0.5 mr-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">
+                            {message.ruleName}
+                          </div>
+                          <div className="text-sm mt-1">{message.message}</div>
+                          {message.data && (
+                            <div className="mt-2 text-xs font-mono bg-white bg-opacity-50 p-2 rounded">
+                              {JSON.stringify(message.data, null, 2)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Quick Test Actions */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">
+                  Quick Tests
+                </h4>
+                <div className="space-y-2">
+                  {mockRules.map(rule => (
+                    <button
+                      key={rule.id}
+                      onClick={() => handleTestRule(rule.id)}
+                      disabled={isLoading}
+                      className="w-full text-left px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Test &quot;{rule.name}&quot;
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

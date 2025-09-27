@@ -1,3 +1,5 @@
+'use client';
+
 import ProtectedAdminLayout, {
   PermissionGate,
 } from '@/components/admin/ProtectedAdminLayout';

@@ -29,9 +29,13 @@ export class ApprovalQueries {
   /**
    * Create new approval request
    */
-  async createApprovalRequest(
-    data: Omit<any, 'id' | 'submitted_at' | 'reviewed_at' | 'completed_at'>
-  ): Promise<any> {
+  async createApprovalRequest(data: {
+    content_item_id: number;
+    approval_status?: string;
+    approval_level?: number;
+    priority?: string;
+    [key: string]: any;
+  }): Promise<any> {
     const [newApproval] = await this.db
       .insert(fandomContentApprovals)
       .values({
@@ -51,30 +55,7 @@ export class ApprovalQueries {
    */
   async getApprovalById(id: number): Promise<any | null> {
     const result = await this.db
-      .select({
-        // Approval fields
-        id: fandomContentApprovals.id,
-        content_item_id: fandomContentApprovals.content_item_id,
-        approval_status: fandomContentApprovals.approval_status,
-        reviewer_id: fandomContentApprovals.reviewer_id,
-        reviewer_notes: fandomContentApprovals.reviewer_notes,
-        approval_level: fandomContentApprovals.approval_level,
-        approved_changes: fandomContentApprovals.approved_changes,
-        rejection_reasons: fandomContentApprovals.rejection_reasons,
-        requested_changes: fandomContentApprovals.requested_changes,
-        priority: fandomContentApprovals.priority,
-        due_date: fandomContentApprovals.due_date,
-        escalated_to: fandomContentApprovals.escalated_to,
-        submitted_at: fandomContentApprovals.submitted_at,
-        reviewed_at: fandomContentApprovals.reviewed_at,
-        completed_at: fandomContentApprovals.completed_at,
-
-        // Content item fields
-        content_name: fandomContentItems.content_name,
-        content_type: fandomContentItems.content_type,
-        fandom_id: fandomContentItems.fandom_id,
-        status: fandomContentItems.status,
-      })
+      .select()
       .from(fandomContentApprovals)
       .leftJoin(
         fandomContentItems,
@@ -143,24 +124,7 @@ export class ApprovalQueries {
 
     // Get approvals with pagination
     const approvalsQuery = this.db
-      .select({
-        // Approval fields
-        id: fandomContentApprovals.id,
-        content_item_id: fandomContentApprovals.content_item_id,
-        approval_status: fandomContentApprovals.approval_status,
-        reviewer_id: fandomContentApprovals.reviewer_id,
-        approval_level: fandomContentApprovals.approval_level,
-        priority: fandomContentApprovals.priority,
-        due_date: fandomContentApprovals.due_date,
-        escalated_to: fandomContentApprovals.escalated_to,
-        submitted_at: fandomContentApprovals.submitted_at,
-        reviewed_at: fandomContentApprovals.reviewed_at,
-
-        // Content item fields
-        content_name: fandomContentItems.content_name,
-        content_type: fandomContentItems.content_type,
-        fandom_id: fandomContentItems.fandom_id,
-      })
+      .select()
       .from(fandomContentApprovals)
       .leftJoin(
         fandomContentItems,
@@ -371,15 +335,7 @@ export class ApprovalQueries {
   }> {
     // Get all approvals for statistics
     const allApprovals = await this.db
-      .select({
-        approval_status: fandomContentApprovals.approval_status,
-        priority: fandomContentApprovals.priority,
-        due_date: fandomContentApprovals.due_date,
-        escalated_to: fandomContentApprovals.escalated_to,
-        submitted_at: fandomContentApprovals.submitted_at,
-        reviewed_at: fandomContentApprovals.reviewed_at,
-        content_type: fandomContentItems.content_type,
-      })
+      .select()
       .from(fandomContentApprovals)
       .leftJoin(
         fandomContentItems,
@@ -400,7 +356,10 @@ export class ApprovalQueries {
     let totalApprovalTime = 0;
     let completedApprovalsCount = 0;
 
-    for (const approval of allApprovals) {
+    for (const row of allApprovals) {
+      const approval = row.fandom_content_approvals;
+      const contentItem = row.fandom_content_items;
+
       // Count by status
       const status = approval.approval_status || 'unknown';
       stats.by_status[status] = (stats.by_status[status] || 0) + 1;
@@ -425,7 +384,7 @@ export class ApprovalQueries {
       stats.by_priority[priority] = (stats.by_priority[priority] || 0) + 1;
 
       // Count by content type
-      const contentType = approval.content_type || 'unknown';
+      const contentType = contentItem?.content_type || 'unknown';
       stats.by_type[contentType] = (stats.by_type[contentType] || 0) + 1;
 
       // Calculate approval time for completed items
@@ -482,7 +441,9 @@ export class ApprovalQueries {
     const now = new Date();
 
     for (const approval of reviewerApprovals) {
-      if (!approval.reviewer_id) continue;
+      if (!approval.reviewer_id) {
+        continue;
+      }
 
       if (!reviewerStats.has(approval.reviewer_id)) {
         reviewerStats.set(approval.reviewer_id, {
@@ -492,7 +453,10 @@ export class ApprovalQueries {
         });
       }
 
-      const stats = reviewerStats.get(approval.reviewer_id)!;
+      const stats = reviewerStats.get(approval.reviewer_id);
+      if (!stats) {
+        continue;
+      }
 
       // Count pending items
       if (approval.approval_status === 'pending') {
@@ -536,17 +500,7 @@ export class ApprovalQueries {
     const now = new Date().toISOString();
 
     return await this.db
-      .select({
-        id: fandomContentApprovals.id,
-        content_item_id: fandomContentApprovals.content_item_id,
-        approval_status: fandomContentApprovals.approval_status,
-        reviewer_id: fandomContentApprovals.reviewer_id,
-        priority: fandomContentApprovals.priority,
-        due_date: fandomContentApprovals.due_date,
-        submitted_at: fandomContentApprovals.submitted_at,
-        content_name: fandomContentItems.content_name,
-        content_type: fandomContentItems.content_type,
-      })
+      .select()
       .from(fandomContentApprovals)
       .leftJoin(
         fandomContentItems,
@@ -577,7 +531,9 @@ export class ApprovalQueries {
         results.approved++;
       } catch (error) {
         results.failed++;
-        results.errors.push(`Failed to approve ${approvalId}: ${error}`);
+        results.errors.push(
+          `Failed to approve ${approvalId}: ${String(error)}`
+        );
       }
     }
 
@@ -606,7 +562,7 @@ export class ApprovalQueries {
         results.rejected++;
       } catch (error) {
         results.failed++;
-        results.errors.push(`Failed to reject ${approvalId}: ${error}`);
+        results.errors.push(`Failed to reject ${approvalId}: ${String(error)}`);
       }
     }
 

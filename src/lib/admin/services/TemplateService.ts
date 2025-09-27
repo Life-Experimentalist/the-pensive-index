@@ -4,10 +4,11 @@
  * Orchestrates template management including creation, validation,
  * usage tracking, and template application workflows.
  *
+ * NOTE: Template functionality currently disabled due to schema incompatibility
+ *
  * @package the-pensive-index
  */
 
-import { TemplateQueries } from '@/lib/database/template-queries';
 import { FandomQueries } from '@/lib/database/fandom-queries';
 import type { BulkOperation } from '@/types';
 

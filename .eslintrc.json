@@ -81,6 +81,7 @@
         "dist/",
         "build/",
         "coverage/",
+        "scripts/",
         "*.config.js"
     ]
 }

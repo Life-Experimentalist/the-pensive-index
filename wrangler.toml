@@ -1,0 +1,37 @@
+# Cloudflare Worker Configuration for The Pensive Index
+# Unified deployment handling both app and documentation
+
+name = "the-pensive-index"
+main = "worker.ts"
+compatibility_date = "2024-09-28"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Static assets
+[site]
+bucket = "public"
+
+# Database binding (if using D1)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "pensieve-index-db"
+# database_id = "your-database-id"
+
+# KV storage for caching
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"
+
+# Build configuration - using modern deployment
+# No custom build needed for simple worker
+
+# Routes
+[[routes]]
+pattern = "pensive.vkrishna04.me/*"
+zone_name = "vkrishna04.me"

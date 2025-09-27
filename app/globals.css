@@ -1,6 +1,22 @@
 @import "tailwindcss";
 
 @layer base {
+    /* Custom animations for landing page */
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+    
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
+        .animate-fade-in-up {
+            animation: fade-in-up 1s ease-out;
+        }
     :root {
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;

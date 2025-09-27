@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { auth } from '@clerk/nextjs/server';
 import { ErrorFactory } from '@/lib/errors';
 import { DatabaseManager } from '@/lib/database';
 import { eq } from 'drizzle-orm';
@@ -226,10 +226,10 @@ export class AuthMiddleware {
     request: NextRequest
   ): Promise<AuthContext> {
     try {
-      // Get session from NextAuth
-      const session = await getServerSession();
+      // Get session from Clerk
+      const { userId } = await auth();
 
-      if (!session?.user?.email) {
+      if (!userId) {
         return {
           user: {
             id: '',
@@ -242,20 +242,16 @@ export class AuthMiddleware {
         };
       }
 
-      // In a real implementation, you would fetch user roles and permissions from database
-      // For now, we'll use mock data based on email
-      const roles = AuthMiddleware.getUserRoles(session.user.email);
-      const permissions = AuthMiddleware.getPermissionsForRoles(roles);
-
+      // For now, return basic authenticated user without roles
+      // TODO: Implement role/permission fetching from Clerk or database
       return {
         user: {
-          id: session.user.email, // In real app, this would be user ID
-          email: session.user.email,
-          name: session.user.name || undefined,
-          roles,
-          permissions,
+          id: userId,
+          email: '', // TODO: Get from Clerk user
+          roles: [],
+          permissions: [],
         },
-        isAdmin: roles.includes(USER_ROLES.ADMIN),
+        isAdmin: false, // TODO: Check Clerk metadata
         isAuthenticated: true,
       };
     } catch (error) {
@@ -314,11 +310,11 @@ export class FandomAccessControl {
   /**
    * Check if user has access to a specific fandom
    */
-  static async verifyFandomAccess(
+  static verifyFandomAccess(
     authContext: AuthContext,
     fandomId: string,
     permission: string
-  ): Promise<boolean> {
+  ): boolean {
     // Admins have access to all fandoms
     if (authContext.isAdmin) {
       return true;
@@ -360,7 +356,7 @@ export class FandomAccessControl {
 
       // Verify fandom exists
       const dbManager = DatabaseManager.getInstance();
-      const db = await dbManager.getConnection();
+      const db = dbManager.getConnection();
 
       const fandom = await db.query.fandoms.findFirst({
         where: eq(fandoms.id, fandomId),
@@ -371,7 +367,7 @@ export class FandomAccessControl {
       }
 
       // Check fandom access
-      const hasAccess = await FandomAccessControl.verifyFandomAccess(
+      const hasAccess = FandomAccessControl.verifyFandomAccess(
         authContext,
         fandomId,
         permission

@@ -1,31 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-
-// This would typically come from your database
-interface UserRoleAssignment {
-  userId: string;
-  role: string;
-  fandoms: string[];
-}
-
-// Mock data - replace with actual database queries
-const userRoleAssignments: UserRoleAssignment[] = [
-  {
-    userId: 'user_1',
-    role: 'super_admin',
-    fandoms: []
-  },
-  {
-    userId: 'user_2',
-    role: 'fandom_admin',
-    fandoms: ['harry-potter', 'naruto']
-  },
-  {
-    userId: 'user_3',
-    role: 'content_moderator',
-    fandoms: ['harry-potter']
-  }
-];
+import { auth, clerkClient } from '@clerk/nextjs/server';
 
 /**
  * Get user role assignments and permissions
@@ -39,27 +13,31 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Find user's role assignment
-    const assignment = userRoleAssignments.find(a => a.userId === userId);
+    // Get user from Clerk to access metadata
+    const user = await clerkClient.users.getUser(userId);
+    const userRole = user.publicMetadata?.role as string;
 
-    if (!assignment) {
+    if (!userRole) {
       return NextResponse.json({
         role: 'none',
         permissions: [],
-        fandoms: []
+        fandoms: [],
       });
     }
 
+    // Convert role format for consistency
+    const normalizedRole = normalizeRole(userRole);
+
     // Define permissions based on role
-    const permissions = getPermissionsForRole(assignment.role);
+    const permissions = getPermissionsForRole(normalizedRole);
 
     return NextResponse.json({
-      role: assignment.role,
+      role: normalizedRole,
       permissions,
-      fandoms: assignment.fandoms
+      fandoms: user.publicMetadata?.fandoms || [],
     });
-
   } catch (error) {
+    console.error('Failed to get user permissions:', error);
     return NextResponse.json(
       { error: 'Failed to get user permissions' },
       { status: 500 }
@@ -79,31 +57,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only super_admin can modify permissions
-    const adminAssignment = userRoleAssignments.find(a => a.userId === userId);
-    if (!adminAssignment || adminAssignment.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    // Check if current user has admin privileges
+    const currentUser = await clerkClient.users.getUser(userId);
+    const currentUserRole = normalizeRole(
+      currentUser.publicMetadata?.role as string
+    );
+
+    if (
+      !['super-admin', 'project-admin', 'projectadmin'].includes(
+        currentUserRole
+      )
+    ) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions' },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
     const { targetUserId, role, fandoms } = body;
 
-    // Update or create assignment
-    const existingIndex = userRoleAssignments.findIndex(a => a.userId === targetUserId);
-    const newAssignment = { userId: targetUserId, role, fandoms };
-
-    if (existingIndex >= 0) {
-      userRoleAssignments[existingIndex] = newAssignment;
-    } else {
-      userRoleAssignments.push(newAssignment);
-    }
+    // Update user metadata via Clerk
+    await clerkClient.users.updateUserMetadata(targetUserId, {
+      publicMetadata: {
+        role: role,
+        fandoms: fandoms || [],
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      assignment: newAssignment
+      assignment: { userId: targetUserId, role, fandoms },
     });
-
   } catch (error) {
+    console.error('Failed to update user permissions:', error);
     return NextResponse.json(
       { error: 'Failed to update user permissions' },
       { status: 500 }
@@ -111,13 +98,53 @@ export async function POST(request: Request) {
   }
 }
 
+function normalizeRole(role: string): string {
+  if (!role) return 'none';
+
+  const roleMap: { [key: string]: string } = {
+    ProjectAdmin: 'project-admin',
+    projectadmin: 'project-admin',
+    FandomAdmin: 'fandom-admin',
+    fandomadmin: 'fandom-admin',
+    SuperAdmin: 'super-admin',
+    superadmin: 'super-admin',
+    Moderator: 'moderator',
+    moderator: 'moderator',
+  };
+
+  return roleMap[role] || role.toLowerCase();
+}
+
 function getPermissionsForRole(role: string): string[] {
   switch (role) {
-    case 'super_admin':
-      return ['admin:all', 'fandom:all', 'content:all'];
-    case 'fandom_admin':
-      return ['fandom:manage', 'content:moderate'];
-    case 'content_moderator':
+    case 'super-admin':
+      return [
+        'admin:all',
+        'fandom:all',
+        'content:all',
+        'canManageUsers',
+        'canManageRoles',
+        'canManageFandoms',
+        'canManageInvitations',
+      ];
+    case 'project-admin':
+      return [
+        'admin:manage',
+        'fandom:all',
+        'content:all',
+        'canManageUsers',
+        'canManageRoles',
+        'canManageFandoms',
+        'canManageInvitations',
+      ];
+    case 'fandom-admin':
+      return [
+        'fandom:manage',
+        'content:moderate',
+        'canManageFandoms',
+        'canManageInvitations',
+      ];
+    case 'moderator':
       return ['content:moderate'];
     default:
       return [];

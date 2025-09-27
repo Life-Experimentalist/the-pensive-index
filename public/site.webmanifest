@@ -1,0 +1,89 @@
+{
+    "name": "The Pensive Index - Fanfiction Story Discovery Platform",
+    "short_name": "Pensive Index",
+    "description": "Library-first fanfiction story discovery with intelligent tagging and prompt generation for creative writers and fandom enthusiasts",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3373dc",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en-US",
+    "dir": "ltr",
+    "categories": [
+        "entertainment",
+        "education",
+        "productivity",
+        "books"
+    ],
+    "screenshots": [
+        {
+            "src": "/social-banner.png",
+            "sizes": "1200x630",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "The Pensive Index main interface showing story search and discovery features"
+        }
+    ],
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Search Stories",
+            "short_name": "Search",
+            "description": "Find existing fanfiction stories with advanced filtering",
+            "url": "/search",
+            "icons": [
+                {
+                    "src": "/icon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Generate Prompts",
+            "short_name": "Generate",
+            "description": "Create intelligent story prompts for new content",
+            "url": "/generate",
+            "icons": [
+                {
+                    "src": "/icon.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "related_applications": [
+        {
+            "platform": "webapp",
+            "url": "https://pensive.vkrishna04.me/",
+            "id": "the-pensive-index"
+        }
+    ],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "protocol_handlers": [
+        {
+            "protocol": "web+pensiveindex",
+            "url": "/search?query=%s"
+        }
+    ]
+}

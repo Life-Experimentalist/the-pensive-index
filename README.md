@@ -175,7 +175,7 @@ This project uses [Spec-Kit](https://github.com/specify-dev) for structured deve
 ### Initial Setup
 1. **Clone the repository**
    ```powershell
-   git clone https://github.com/Life-Experimentalists/the-pensive-index.git
+   git clone https://github.com/Life-Experimentalist/the-pensive-index.git
    cd the-pensive-index
    ```
 
@@ -255,12 +255,12 @@ This project is licensed under the MIT License.
 ## 🔗 Links
 
 - **Documentation**: [PROJECT_DOCS.md](./PROJECT_DOCS.md)
-- **Issues**: [GitHub Issues](https://github.com/Life-Experimentalists/the-pensive-index/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Life-Experimentalists/the-pensive-index/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Life-Experimentalist/the-pensive-index/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Life-Experimentalist/the-pensive-index/discussions)
 
 ---
 
-> Built with ❤️ by the [Life Experimentalists](https://github.com/Life-Experimentalists) team
+> Built with ❤️ by the [Life Experimentalists](https://github.com/Life-Experimentalist) team
 
 
 ---
@@ -316,11 +316,11 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 4: Community Features (Spec 007)**
 
 ```
-/specify "Implement the community-driven story submission system with browser extension integration, GitHub Issues workflow, and moderation queue. Users can submit stories via browser extension from AO3/FFN, admins review submissions through GitHub Issues, and approved stories automatically integrate into the database. Include submission validation, duplicate detection, tag suggestion AI, automated quality scoring, and community feedback mechanisms."
+/specify "Implement the community-driven story submission system with browser extension integration, GitHub Issues workflow, and moderation queue. Users can submit stories via browser extension from AO3/FFN/Youtube(Audio books which are youtube long videos)/Wattpat and make it modular such that new websites support can be easily added with as simple as adding a single file, admins review submissions through GitHub Issues, and approved stories automatically integrate into the database. Include submission validation, duplicate detection, tag suggestion AI, automated quality scoring, and community feedback mechanisms."
 ```
 
 ```
-/plan "Develop browser extension using Manifest V3 with TypeScript targeting Chrome/Firefox. Create GitHub API integration using Octokit for automated issue creation. Build story submission API routes with validation using existing admin patterns. Implement moderation queue as admin interface extension. Add duplicate detection using fuzzy string matching and URL normalization. Create tag suggestion system using existing fandom taxonomies. Build automated quality scoring with configurable metrics. Use existing audit logging for submission tracking. Integrate email notifications using existing admin invitation email system. Add community feedback interfaces with simple voting mechanisms."
+/plan "Develop browser extension using Manifest V3 with TypeScript targeting Chrome/Edge/Brave/Firefox. Make the websites support modular so that new websites support is easily added as simple as adding a single new file. Create GitHub API integration using Octokit for automated issue creation. Build story submission API routes with validation using existing admin patterns. Implement moderation queue as admin interface extension. Add duplicate detection using fuzzy string matching and URL normalization. Create tag suggestion system using existing fandom taxonomies. Build automated quality scoring with configurable metrics. Use existing audit logging for submission tracking. Integrate email notifications using existing admin invitation email system. Add community feedback interfaces with simple voting mechanisms."
 ```
 
 ```
@@ -338,7 +338,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ```
 
 ```
-/plan "Implement Redis caching layer for Cloudflare deployment with edge caching strategies. Add database indexing optimization for SQLite with query performance monitoring. Create API rate limiting using Cloudflare Workers with Redis state. Build CDN integration for static assets with cache invalidation. Implement search result caching with TTL-based invalidation. Add validation rule caching with dependency-based cache busting. Create real-time performance monitoring using Cloudflare Analytics. Build error reporting system with structured logging. Add automated scaling configuration for Cloudflare Pages. Implement comprehensive monitoring dashboard using existing admin interface patterns."
+/plan "Implement Redis caching layer for Cloudflare deployment with edge caching strategies. Add database indexing optimization for SQLite with query performance monitoring. Create API rate limiting using Cloudflare Workers with Redis state. Build CDN integration for static assets with cache invalidation. Implement search result caching with TTL-based invalidation. Add validation rule caching with dependency-based cache busting. Create real-time performance monitoring using Cloudflare Analytics. Build error reporting system with structured logging. Add automated scaling configuration for Cloudflare Pages. Implement comprehensive monitoring dashboard using existing admin interface patterns. Most important make it such that it remains free even if it is a bit slower"
 ```
 
 ```

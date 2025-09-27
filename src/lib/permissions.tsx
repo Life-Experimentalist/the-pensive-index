@@ -65,6 +65,12 @@ interface Permissions {
   canImpersonateUsers: boolean;
   canAccessDangerZone: boolean;
   canManagePermissions: boolean;
+
+  // Computed/Combined Permissions for UI
+  canManageUsers: boolean;
+  canManageRoles: boolean;
+  canManageFandoms: boolean;
+  canManageInvitations: boolean;
 }
 
 // Role-based permission mappings
@@ -114,8 +120,15 @@ const ROLE_PERMISSIONS: Record<string, Partial<Permissions>> = {
     canImpersonateUsers: true,
     canAccessDangerZone: true,
     canManagePermissions: true,
+
+    // Computed/Combined Permissions for UI
+    canManageUsers: true,
+    canManageRoles: true,
+    canManageFandoms: true,
+    canManageInvitations: true,
   },
 
+  // Support both hyphenated and non-hyphenated versions for ProjectAdmin
   'project-admin': {
     // Project Admin: Broad access but no dangerous operations
     canViewUsers: true,
@@ -150,6 +163,55 @@ const ROLE_PERMISSIONS: Record<string, Partial<Permissions>> = {
     canEditValidationRules: true,
     canDeleteValidationRules: true,
     canTestValidationRules: true,
+
+    // Computed/Combined Permissions for UI
+    canManageUsers: true,
+    canManageRoles: true,
+    canManageFandoms: true,
+    canManageInvitations: true,
+  },
+
+  // Alternative naming for ProjectAdmin role (no hyphens)
+  projectadmin: {
+    // Same permissions as project-admin
+    canViewUsers: true,
+    canCreateUsers: true,
+    canEditUsers: true,
+    canDeactivateUsers: true,
+    canActivateUsers: true,
+    canExportUsers: true,
+    canViewRoles: true,
+    canAssignRoles: true,
+    canRevokeRoles: true,
+    canViewFandoms: true,
+    canAssignFandoms: true,
+    canRemoveFandoms: true,
+    canCreateFandoms: true,
+    canEditFandoms: true,
+    canViewInvitations: true,
+    canCreateInvitations: true,
+    canCancelInvitations: true,
+    canResendInvitations: true,
+    canApproveInvitations: true,
+    canRejectInvitations: true,
+    canViewAuditLogs: true,
+    canExportAuditLogs: true,
+    canViewAnalytics: true,
+    canExportAnalytics: true,
+    canViewAdvancedAnalytics: true,
+    canAccessSettings: true,
+    canViewSystemHealth: true,
+    canViewValidationRules: true,
+    canCreateValidationRules: true,
+    canEditValidationRules: true,
+    canDeleteValidationRules: true,
+    canTestValidationRules: true,
+
+    // Computed/Combined Permissions for UI
+    canManageUsers: true,
+    canManageRoles: true,
+    canManageFandoms: true,
+    canManageInvitations: true,
   },
 
   'fandom-admin': {
@@ -169,6 +231,38 @@ const ROLE_PERMISSIONS: Record<string, Partial<Permissions>> = {
     canCreateValidationRules: true, // Only for their fandoms
     canEditValidationRules: true, // Only for their fandoms
     canTestValidationRules: true,
+
+    // Computed/Combined Permissions for UI (limited scope)
+    canManageUsers: false,
+    canManageRoles: false,
+    canManageFandoms: true, // Only their assigned fandoms
+    canManageInvitations: true, // Only for their fandoms
+  },
+
+  // Alternative naming for FandomAdmin role (no hyphens)
+  fandomadmin: {
+    // Same permissions as fandom-admin
+    canViewUsers: true,
+    canViewRoles: true,
+    canViewFandoms: true,
+    canAssignFandoms: true, // Only for their fandoms
+    canRemoveFandoms: true, // Only for their fandoms
+    canViewInvitations: true,
+    canCreateInvitations: true, // Only for their fandoms
+    canCancelInvitations: true, // Only their invitations
+    canResendInvitations: true, // Only their invitations
+    canViewAuditLogs: true, // Only for their fandoms
+    canViewAnalytics: true, // Only for their fandoms
+    canViewValidationRules: true,
+    canCreateValidationRules: true, // Only for their fandoms
+    canEditValidationRules: true, // Only for their fandoms
+    canTestValidationRules: true,
+
+    // Computed/Combined Permissions for UI (limited scope)
+    canManageUsers: false,
+    canManageRoles: false,
+    canManageFandoms: true, // Only their assigned fandoms
+    canManageInvitations: true, // Only for their fandoms
   },
 
   moderator: {
@@ -181,6 +275,12 @@ const ROLE_PERMISSIONS: Record<string, Partial<Permissions>> = {
     canViewAnalytics: true, // Limited scope
     canViewValidationRules: true,
     canTestValidationRules: true,
+
+    // Computed/Combined Permissions for UI (minimal access)
+    canManageUsers: false,
+    canManageRoles: false,
+    canManageFandoms: false,
+    canManageInvitations: false,
   },
 };
 
@@ -229,6 +329,12 @@ const DEFAULT_PERMISSIONS: Permissions = {
   canImpersonateUsers: false,
   canAccessDangerZone: false,
   canManagePermissions: false,
+
+  // Computed/Combined Permissions for UI
+  canManageUsers: false,
+  canManageRoles: false,
+  canManageFandoms: false,
+  canManageInvitations: false,
 };
 
 interface PermissionContextType {

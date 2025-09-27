@@ -14,7 +14,6 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useUser } from '@clerk/nextjs';
 import {
   ChartBarIcon,
   UsersIcon,
@@ -27,7 +26,6 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import AdminLayout from '@/components/admin/AdminLayout';
 
 interface MetricCard {
   title: string;
@@ -123,13 +121,10 @@ const systemHealth = {
 };
 
 export default function Analytics() {
-  const { user, isLoaded } = useUser();
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
   const [selectedFandom, setSelectedFandom] = useState('all');
 
-  const userRole = (user as any)?.role as
-    | 'ProjectAdmin'
-    | 'FandomAdmin';
+  // User role will be handled by the layout's permission system
 
   const renderMetricCard = (metric: MetricCard) => {
     const Icon = metric.icon;
@@ -351,110 +346,106 @@ export default function Analytics() {
   );
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <ChartBarIcon className="w-8 h-8 mr-3 text-indigo-600" />
-              Analytics Dashboard
-            </h1>
-            <p className="mt-2 text-sm text-gray-700">
-              Monitor platform performance, user engagement, and system health.
-            </p>
-          </div>
-          <div className="flex space-x-3">
-            <select
-              value={selectedPeriod}
-              onChange={e => setSelectedPeriod(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="1y">Last year</option>
-            </select>
-            {userRole === 'ProjectAdmin' && (
-              <select
-                value={selectedFandom}
-                onChange={e => setSelectedFandom(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="all">All Fandoms</option>
-                <option value="harry-potter">Harry Potter</option>
-                <option value="percy-jackson">Percy Jackson</option>
-                <option value="naruto">Naruto</option>
-                <option value="marvel">Marvel</option>
-              </select>
-            )}
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            <ChartBarIcon className="w-8 h-8 mr-3 text-indigo-600" />
+            Analytics Dashboard
+          </h1>
+          <p className="mt-2 text-sm text-gray-700">
+            Monitor platform performance, user engagement, and system health.
+          </p>
         </div>
-
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {metricCards.map(renderMetricCard)}
+        <div className="flex space-x-3">
+          <select
+            value={selectedPeriod}
+            onChange={e => setSelectedPeriod(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="1y">Last year</option>
+          </select>
+          <select
+            value={selectedFandom}
+            onChange={e => setSelectedFandom(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          >
+            <option value="all">All Fandoms</option>
+            <option value="harry-potter">Harry Potter</option>
+            <option value="percy-jackson">Percy Jackson</option>
+            <option value="naruto">Naruto</option>
+            <option value="marvel">Marvel</option>
+          </select>
         </div>
+      </div>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderChart(userGrowthData, 'User Growth Over Time', 'line')}
-          {renderChart(fandomActivity, 'Fandom Activity')}
-        </div>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {metricCards.map(renderMetricCard)}
+      </div>
 
-        {/* Validation and System Health */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {renderValidationMetrics()}
-          {renderSystemHealth()}
-        </div>
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {renderChart(userGrowthData, 'User Growth Over Time', 'line')}
+        {renderChart(fandomActivity, 'Fandom Activity')}
+      </div>
 
-        {/* Additional Insights */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
-            Recent Activity Insights
-          </h3>
+      {/* Validation and System Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {renderValidationMetrics()}
+        {renderSystemHealth()}
+      </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <ArrowTrendingUpIcon className="w-5 h-5 text-green-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  User engagement increased 15% this week
-                </p>
-                <p className="text-sm text-gray-500">
-                  More users are creating complex story pathways with multiple
-                  validation rules
-                </p>
-              </div>
+      {/* Additional Insights */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Recent Activity Insights
+        </h3>
+
+        <div className="space-y-4">
+          <div className="flex items-start space-x-3">
+            <ArrowTrendingUpIcon className="w-5 h-5 text-green-500 mt-1" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                User engagement increased 15% this week
+              </p>
+              <p className="text-sm text-gray-500">
+                More users are creating complex story pathways with multiple
+                validation rules
+              </p>
             </div>
+          </div>
 
-            <div className="flex items-start space-x-3">
-              <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Shipping validation errors spike on weekends
-                </p>
-                <p className="text-sm text-gray-500">
-                  Consider implementing better UI hints for relationship tag
-                  selection
-                </p>
-              </div>
+          <div className="flex items-start space-x-3">
+            <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500 mt-1" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                Shipping validation errors spike on weekends
+              </p>
+              <p className="text-sm text-gray-500">
+                Consider implementing better UI hints for relationship tag
+                selection
+              </p>
             </div>
+          </div>
 
-            <div className="flex items-start space-x-3">
-              <CheckCircleIcon className="w-5 h-5 text-blue-500 mt-1" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  New Harry Potter validation rules performing well
-                </p>
-                <p className="text-sm text-gray-500">
-                  98.5% success rate since deployment last week
-                </p>
-              </div>
+          <div className="flex items-start space-x-3">
+            <CheckCircleIcon className="w-5 h-5 text-blue-500 mt-1" />
+            <div>
+              <p className="text-sm font-medium text-gray-900">
+                New Harry Potter validation rules performing well
+              </p>
+              <p className="text-sm text-gray-500">
+                98.5% success rate since deployment last week
+              </p>
             </div>
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

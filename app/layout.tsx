@@ -7,7 +7,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'The Pensieve Index',
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3003'
+  ),
   description:
     'A library-first story discovery platform and intelligent prompt generator for fanfiction',
   icons: {

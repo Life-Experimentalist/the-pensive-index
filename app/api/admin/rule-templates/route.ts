@@ -95,9 +95,7 @@ export async function GET(request: NextRequest) {
     const adminUser = authResult.user;
 
     // Only ProjectAdmin can access templates
-    if (
-      !AdminPermissions.hasPermission(adminUser, AdminPermissions.PROJECT_ADMIN)
-    ) {
+    if (!AdminPermissions.isProjectAdmin(adminUser)) {
       return NextResponse.json(
         { success: false, error: 'ProjectAdmin access required for templates' },
         { status: 403 }
@@ -161,9 +159,7 @@ export async function POST(request: NextRequest) {
     const adminUser = authResult.user;
 
     // Only ProjectAdmin can create templates
-    if (
-      !AdminPermissions.hasPermission(adminUser, AdminPermissions.PROJECT_ADMIN)
-    ) {
+    if (!AdminPermissions.isProjectAdmin(adminUser)) {
       return NextResponse.json(
         {
           success: false,
@@ -201,7 +197,7 @@ export async function POST(request: NextRequest) {
     const adminQueries = new AdminQueries(db);
 
     const newTemplate = await adminQueries.ruleTemplates.create(
-      validationResult.data,
+      validationResult.data as any,
       adminUser.id
     );
 

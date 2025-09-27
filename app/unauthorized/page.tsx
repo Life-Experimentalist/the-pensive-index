@@ -8,7 +8,7 @@
  */
 
 import Link from 'next/link';
-import { UserButton } from '@clerk/nextjs';
+import SafeUserButton from '@/components/ui/SafeUserButton';
 import { currentUser } from '@clerk/nextjs/server';
 
 export default async function UnauthorizedPage() {
@@ -27,7 +27,7 @@ export default async function UnauthorizedPage() {
             </div>
             <div className="flex items-center space-x-4">
               {user ? (
-                <UserButton afterSignOutUrl="/" />
+                <SafeUserButton afterSignOutUrl="/" />
               ) : (
                 <Link
                   href="/sign-in"

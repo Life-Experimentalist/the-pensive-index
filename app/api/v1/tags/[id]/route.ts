@@ -13,8 +13,11 @@ import { tags, fandoms } from '@/lib/database/schema';
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const tagId = params.id;
+    async (
+      request: NextRequest,
+      { params }: { params: Promise<{ id: string }> }
+    ) => {
+      const { id: tagId } = await params;
 
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
@@ -49,9 +52,9 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagId = params.id;
+      const { id: tagId } = await params;
       const body = await request.json();
       const validatedData = tagSchema.partial().parse(body);
 
@@ -121,9 +124,9 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagId = params.id;
+      const { id: tagId } = await params;
 
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();

@@ -53,9 +53,9 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagClassId = params.id;
+      const { id: tagClassId } = await params;
       const body = await request.json();
       const validatedData = updateTagClassSchema.parse(body);
 
@@ -181,9 +181,9 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const tagClassId = params.id;
+      const { id: tagClassId } = await params;
 
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();

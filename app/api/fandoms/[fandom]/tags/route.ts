@@ -9,13 +9,13 @@ import { z } from 'zod';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { fandom: string } }
+  { params }: { params: Promise<{ fandom: string }> }
 ) {
   try {
     const dbManager = DatabaseManager.getInstance();
     const db = dbManager.getConnection();
 
-    const { fandom } = params;
+    const { fandom } = await params;
     const fandomSlug = fandom;
 
     // Get query parameters

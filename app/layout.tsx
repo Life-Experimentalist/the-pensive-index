@@ -47,6 +47,7 @@ export default function RootLayout({
         },
       }}
       signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
     >
       <html lang="en">
         <body className={inter.className} suppressHydrationWarning={true}>

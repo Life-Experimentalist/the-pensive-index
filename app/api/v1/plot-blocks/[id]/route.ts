@@ -16,8 +16,11 @@ import { plotBlocks } from '@/lib/database/schema';
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
-    async (request: NextRequest, { params }: { params: { id: string } }) => {
-      const plotBlockId = params.id;
+    async (
+      request: NextRequest,
+      { params }: { params: Promise<{ id: string }> }
+    ) => {
+      const { id: plotBlockId } = await params;
 
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
@@ -52,9 +55,9 @@ export const PUT = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const plotBlockId = params.id;
+      const { id: plotBlockId } = await params;
       const body = await request.json();
       const validatedData = updatePlotBlockSchema.parse(body);
 
@@ -124,9 +127,9 @@ export const DELETE = CommonMiddleware.admin(
     async (
       request: NextRequest,
       authContext: any,
-      { params }: { params: { id: string } }
+      { params }: { params: Promise<{ id: string }> }
     ) => {
-      const plotBlockId = params.id;
+      const { id: plotBlockId } = await params;
 
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();

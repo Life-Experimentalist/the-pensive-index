@@ -10,6 +10,7 @@
 
 import UserNavigation from '@/components/HomePage/UserNavigation';
 import UserContent from '@/components/HomePage/UserContent';
+import HydratedLink from '@/components/ui/HydratedLink';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -18,7 +19,8 @@ import { FandomModel } from '@/lib/database/models';
 // SEO Metadata
 export const metadata: Metadata = {
   title: 'The Pensieve Index - Library-First Story Discovery Platform',
-  description: 'Discover existing fanfiction stories and generate intelligent prompts for new content. Library-first approach prioritizing existing tagged stories with advanced search and relevance scoring.',
+  description:
+    'Discover existing fanfiction stories and generate intelligent prompts for new content. Library-first approach prioritizing existing tagged stories with advanced search and relevance scoring.',
   keywords: [
     'fanfiction',
     'story discovery',
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
     'tag-based search',
     'story recommendations',
     'creative writing',
-    'fandom stories'
+    'fandom stories',
   ],
   authors: [{ name: 'The Pensieve Index' }],
   creator: 'The Pensieve Index',
@@ -48,7 +50,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://pensive-index.vercel.app',
     title: 'The Pensieve Index - Library-First Story Discovery',
-    description: 'Discover existing fanfiction stories and generate intelligent prompts for new content.',
+    description:
+      'Discover existing fanfiction stories and generate intelligent prompts for new content.',
     siteName: 'The Pensieve Index',
     images: [
       {
@@ -149,19 +152,22 @@ export default async function HomePage() {
                 Start Your Story Discovery Journey
               </h2>
               <p className="text-gray-600 mb-6">
-                Choose a fandom to explore existing stories and generate new prompts
+                Choose a fandom to explore existing stories and generate new
+                prompts
               </p>
 
               {fandoms.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                  {fandoms.map((fandom) => (
-                    <Link
+                  {fandoms.map(fandom => (
+                    <HydratedLink
                       key={fandom.id}
                       href={`/fandom/${fandom.slug}`}
                       className="group bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-4 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
                     >
                       <div className="text-center">
-                        <h3 className="font-semibold text-lg mb-1">{fandom.name}</h3>
+                        <h3 className="font-semibold text-lg mb-1">
+                          {fandom.name}
+                        </h3>
                         <p className="text-sm opacity-90">
                           {fandom.description || 'Explore this fandom'}
                         </p>
@@ -169,7 +175,7 @@ export default async function HomePage() {
                           Click to explore →
                         </div>
                       </div>
-                    </Link>
+                    </HydratedLink>
                   ))}
                 </div>
               ) : (
@@ -180,15 +186,23 @@ export default async function HomePage() {
                 </div>
               )}
 
-              <Link
+              <HydratedLink
                 href="/discover"
                 className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
               >
                 Browse All Fandoms
-                <svg className="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  className="ml-2 -mr-1 w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-              </Link>
+              </HydratedLink>
             </div>
           </div>
 
@@ -244,16 +258,28 @@ export default async function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">{'<200ms'}</div>
-              <div className="text-sm text-gray-600 mt-1">Validation Response Time</div>
+              <div className="text-3xl font-bold text-indigo-600">
+                {'<200ms'}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Validation Response Time
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">{'<500ms'}</div>
-              <div className="text-sm text-gray-600 mt-1">Story Search Speed</div>
+              <div className="text-3xl font-bold text-indigo-600">
+                {'<500ms'}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Story Search Speed
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">Library-First</div>
-              <div className="text-sm text-gray-600 mt-1">Existing Stories Priority</div>
+              <div className="text-3xl font-bold text-indigo-600">
+                Library-First
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Existing Stories Priority
+              </div>
             </div>
           </div>
         </div>
@@ -267,7 +293,8 @@ export default async function HomePage() {
             '@context': 'https://schema.org',
             '@type': 'WebApplication',
             name: 'The Pensieve Index',
-            description: 'Library-first story discovery platform and intelligent prompt generator for fanfiction',
+            description:
+              'Library-first story discovery platform and intelligent prompt generator for fanfiction',
             url: 'https://pensive-index.vercel.app',
             applicationCategory: 'Entertainment',
             operatingSystem: 'Web Browser',
@@ -286,7 +313,7 @@ export default async function HomePage() {
               'Real-time Validation',
               'Mobile and Desktop Support',
               'Tag-based Filtering',
-              'Library-first Approach'
+              'Library-first Approach',
             ],
           }),
         }}

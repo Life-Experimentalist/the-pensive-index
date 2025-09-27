@@ -7,7 +7,7 @@
  * @version 1.0.0
  */
 
-import { UserProfile } from '@clerk/nextjs';
+import SafeUserProfile from '@/components/ui/SafeUserProfile';
 
 export default function UserProfilePage() {
   return (
@@ -22,7 +22,7 @@ export default function UserProfilePage() {
           </p>
         </div>
         <div className="flex justify-center">
-          <UserProfile
+          <SafeUserProfile
             appearance={{
               elements: {
                 rootBox: 'mx-auto',

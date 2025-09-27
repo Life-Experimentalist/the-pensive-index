@@ -1,36 +1,20 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   ValidationResult,
-  ValidationConflict,
-  MissingRequirement,
-  CircularReferenceError,
   ValidationError,
+  ValidationWarning,
+  ValidationSuggestion,
 } from '../../types';
 
 interface ValidationErrorDisplayProps {
   validationResult: ValidationResult;
   onFixError?: (error: ValidationError, fix: any) => Promise<void>;
-  onDismissError?: (errorId: string) => void;
+  onDismissError?: (errorIndex: number) => void;
   showSuggestions?: boolean;
   compactMode?: boolean;
 }
-
-interface ErrorGroup {
-  category: string;
-  errors: ValidationError[];
-  severity: 'error' | 'warning' | 'info';
-  count: number;
-}
-
-type ErrorCategory =
-  | 'conflicts'
-  | 'missing'
-  | 'circular'
-  | 'dependencies'
-  | 'schema'
-  | 'other';
 
 export function ValidationErrorDisplay({
   validationResult,
@@ -39,534 +23,351 @@ export function ValidationErrorDisplay({
   showSuggestions = true,
   compactMode = false,
 }: ValidationErrorDisplayProps) {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(['conflicts'])
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(['errors'])
   );
   const [selectedError, setSelectedError] = useState<ValidationError | null>(
     null
   );
-  const [showFixModal, setShowFixModal] = useState(false);
 
-  // Group errors by category
-  const errorGroups = useMemo((): ErrorGroup[] => {
-    const groups: Record<ErrorCategory, ErrorGroup> = {
-      conflicts: {
-        category: 'Conflicts',
-        errors: [],
-        severity: 'error',
-        count: 0,
-      },
-      missing: {
-        category: 'Missing Requirements',
-        errors: [],
-        severity: 'warning',
-        count: 0,
-      },
-      circular: {
-        category: 'Circular References',
-        errors: [],
-        severity: 'error',
-        count: 0,
-      },
-      dependencies: {
-        category: 'Dependency Issues',
-        errors: [],
-        severity: 'warning',
-        count: 0,
-      },
-      schema: {
-        category: 'Schema Violations',
-        errors: [],
-        severity: 'error',
-        count: 0,
-      },
-      other: {
-        category: 'Other Issues',
-        errors: [],
-        severity: 'info',
-        count: 0,
-      },
-    };
+  const toggleSection = (section: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(section)) {
+      newExpanded.delete(section);
+    } else {
+      newExpanded.add(section);
+    }
+    setExpandedSections(newExpanded);
+  };
 
-    // Process conflicts
-    validationResult.conflicts?.forEach((conflict, index) => {
-      groups.conflicts.errors.push({
-        id: `conflict-${index}`,
-        type: 'conflict',
-        message: conflict.description,
-        field: conflict.conflicting_elements?.[0],
-        severity: 'error',
-        data: conflict,
-      });
-    });
-
-    // Process missing requirements
-    validationResult.missing_requirements?.forEach((missing, index) => {
-      groups.missing.errors.push({
-        id: `missing-${index}`,
-        type: 'missing_requirement',
-        message: `Missing ${missing.type}: ${missing.name}`,
-        field: missing.name,
-        severity: 'warning',
-        data: missing,
-      });
-    });
-
-    // Process circular references
-    validationResult.circular_references?.forEach((circular, index) => {
-      groups.circular.errors.push({
-        id: `circular-${index}`,
-        type: 'circular_reference',
-        message: `Circular reference detected: ${
-          circular.path?.join(' → ') || 'Unknown path'
-        }`,
-        field: circular.involved_elements?.[0],
-        severity: 'error',
-        data: circular,
-      });
-    });
-
-    // Process general errors
-    validationResult.errors?.forEach((error, index) => {
-      const category = error.includes('dependency')
-        ? 'dependencies'
-        : error.includes('schema')
-        ? 'schema'
-        : 'other';
-
-      groups[category].errors.push({
-        id: `error-${index}`,
-        type: 'general',
-        message: error,
-        severity: category === 'schema' ? 'error' : 'warning',
-      });
-    });
-
-    // Update counts and filter out empty groups
-    return Object.values(groups)
-      .map(group => ({ ...group, count: group.errors.length }))
-      .filter(group => group.count > 0);
-  }, [validationResult]);
-
-  // Get severity color classes
-  const getSeverityClasses = (severity: 'error' | 'warning' | 'info') => {
+  const getSeverityColor = (severity: 'error' | 'warning' | 'info') => {
     switch (severity) {
       case 'error':
-        return {
-          bg: 'bg-red-50',
-          border: 'border-red-200',
-          text: 'text-red-800',
-          icon: '🚨',
-          badge: 'bg-red-100 text-red-800',
-        };
+        return 'text-red-600 bg-red-50 border-red-200';
       case 'warning':
-        return {
-          bg: 'bg-yellow-50',
-          border: 'border-yellow-200',
-          text: 'text-yellow-800',
-          icon: '⚠️',
-          badge: 'bg-yellow-100 text-yellow-800',
-        };
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       case 'info':
-        return {
-          bg: 'bg-blue-50',
-          border: 'border-blue-200',
-          text: 'text-blue-800',
-          icon: 'ℹ️',
-          badge: 'bg-blue-100 text-blue-800',
-        };
+        return 'text-blue-600 bg-blue-50 border-blue-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
-  // Toggle category expansion
-  const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
-
-  // Generate suggested fixes
-  const getSuggestedFixes = (error: ValidationError) => {
-    const fixes: Array<{ label: string; action: any; description: string }> =
-      [];
-
-    if (error.type === 'conflict' && error.data) {
-      const conflict = error.data as ValidationConflict;
-
-      if (
-        conflict.conflicting_elements &&
-        conflict.conflicting_elements.length >= 2
-      ) {
-        fixes.push({
-          label: `Remove ${conflict.conflicting_elements[1]}`,
-          action: {
-            type: 'remove_element',
-            element: conflict.conflicting_elements[1],
-          },
-          description: `Remove the conflicting element to resolve the conflict`,
-        });
-
-        fixes.push({
-          label: `Keep ${conflict.conflicting_elements[1]} and remove ${conflict.conflicting_elements[0]}`,
-          action: {
-            type: 'remove_element',
-            element: conflict.conflicting_elements[0],
-          },
-          description: `Keep the second element and remove the first one`,
-        });
-      }
-
-      if (conflict.suggested_resolution) {
-        fixes.push({
-          label: 'Apply suggested resolution',
-          action: {
-            type: 'apply_suggestion',
-            resolution: conflict.suggested_resolution,
-          },
-          description: conflict.suggested_resolution,
-        });
-      }
-    }
-
-    if (error.type === 'missing_requirement' && error.data) {
-      const missing = error.data as MissingRequirement;
-
-      fixes.push({
-        label: `Add ${missing.name}`,
-        action: { type: 'add_requirement', requirement: missing },
-        description: `Add the missing ${missing.type} to satisfy the requirement`,
-      });
-
-      if (missing.alternatives && missing.alternatives.length > 0) {
-        missing.alternatives.forEach((alt, index) => {
-          fixes.push({
-            label: `Use ${alt} instead`,
-            action: {
-              type: 'use_alternative',
-              alternative: alt,
-              original: missing.name,
-            },
-            description: `Replace with the alternative option`,
-          });
-        });
-      }
-    }
-
-    if (error.type === 'circular_reference' && error.data) {
-      const circular = error.data as CircularReferenceError;
-
-      if (circular.involved_elements && circular.involved_elements.length > 0) {
-        // Suggest removing the weakest link
-        const weakestElement =
-          circular.involved_elements[circular.involved_elements.length - 1];
-        fixes.push({
-          label: `Remove dependency to ${weakestElement}`,
-          action: { type: 'break_cycle', element: weakestElement },
-          description: `Break the circular reference by removing this dependency`,
-        });
-      }
-    }
-
-    return fixes;
-  };
-
-  // Apply suggested fix
-  const applyFix = async (error: ValidationError, fix: any) => {
-    if (!onFixError) return;
-
-    try {
-      await onFixError(error, fix);
-      setSelectedError(null);
-      setShowFixModal(false);
-    } catch (err) {
-      console.error('Failed to apply fix:', err);
+  const getSeverityIcon = (severity: 'error' | 'warning' | 'info') => {
+    switch (severity) {
+      case 'error':
+        return '❌';
+      case 'warning':
+        return '⚠️';
+      case 'info':
+        return 'ℹ️';
+      default:
+        return '•';
     }
   };
 
-  // Render compact mode
   if (compactMode) {
-    const totalErrors = errorGroups.reduce(
-      (sum, group) => sum + group.count,
-      0
-    );
-    const hasErrors = errorGroups.some(
-      group => group.severity === 'error' && group.count > 0
-    );
-
-    if (!hasErrors && totalErrors === 0) {
-      return (
-        <div className="flex items-center space-x-2 text-sm text-green-600">
-          <span>✅</span>
-          <span>All validations passed</span>
-        </div>
-      );
-    }
+    const totalIssues =
+      validationResult.errors.length + validationResult.warnings.length;
 
     return (
-      <div className="flex items-center space-x-3">
-        {errorGroups.map(group => {
-          const classes = getSeverityClasses(group.severity);
-          return (
-            <div key={group.category} className="flex items-center space-x-1">
-              <span
-                className={`px-2 py-1 text-xs rounded-full ${classes.badge}`}
-              >
-                {group.count} {group.category}
-              </span>
-            </div>
-          );
-        })}
+      <div className="p-3 rounded-md border">
+        {validationResult.is_valid ? (
+          <div className="flex items-center text-green-600">
+            <span className="mr-2">✅</span>
+            <span className="text-sm font-medium">Validation passed</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-red-600">
+            <span className="mr-2">❌</span>
+            <span className="text-sm font-medium">
+              {totalIssues} issue{totalIssues !== 1 ? 's' : ''} found
+            </span>
+          </div>
+        )}
       </div>
     );
   }
 
-  // Render full display
   return (
-    <div className="bg-white rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Validation Results
+    <div className="space-y-4">
+      {/* Validation Status */}
+      <div
+        className={`p-4 rounded-lg border ${
+          validationResult.is_valid
+            ? 'bg-green-50 border-green-200 text-green-800'
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}
+      >
+        <div className="flex items-center">
+          <span className="mr-2">
+            {validationResult.is_valid ? '✅' : '❌'}
+          </span>
+          <h3 className="text-lg font-semibold">
+            {validationResult.is_valid
+              ? 'Validation Passed'
+              : 'Validation Failed'}
           </h3>
-          <div className="flex items-center space-x-2">
-            {validationResult.is_valid ? (
-              <span className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">
-                ✅ Valid
+        </div>
+      </div>
+
+      {/* Errors Section */}
+      {validationResult.errors && validationResult.errors.length > 0 && (
+        <div className="border border-red-200 rounded-lg">
+          <button
+            onClick={() => toggleSection('errors')}
+            className="w-full p-4 text-left bg-red-50 hover:bg-red-100 transition-colors rounded-t-lg"
+          >
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-red-800">
+                Errors ({validationResult.errors.length})
+              </h4>
+              <span className="text-red-600">
+                {expandedSections.has('errors') ? '▼' : '▶'}
               </span>
-            ) : (
-              <span className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full">
-                ❌ Invalid
-              </span>
-            )}
-          </div>
-        </div>
-
-        {validationResult.message && (
-          <p className="text-sm text-gray-600 mt-2">
-            {validationResult.message}
-          </p>
-        )}
-      </div>
-
-      {/* Summary Statistics */}
-      <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          {errorGroups.map(group => {
-            const classes = getSeverityClasses(group.severity);
-            return (
-              <div key={group.category} className="flex items-center space-x-2">
-                <span>{classes.icon}</span>
-                <span className="text-gray-600">{group.category}:</span>
-                <span className={`font-medium ${classes.text}`}>
-                  {group.count}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Error Groups */}
-      <div className="divide-y divide-gray-200">
-        {errorGroups.map(group => {
-          const isExpanded = expandedCategories.has(group.category);
-          const classes = getSeverityClasses(group.severity);
-
-          return (
-            <div key={group.category}>
-              {/* Group Header */}
-              <button
-                onClick={() => toggleCategory(group.category)}
-                className="w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-lg">{classes.icon}</span>
-                    <span className="font-medium text-gray-900">
-                      {group.category}
-                    </span>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${classes.badge}`}
-                    >
-                      {group.count}
-                    </span>
-                  </div>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform ${
-                      isExpanded ? 'rotate-90' : ''
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </button>
-
-              {/* Group Content */}
-              {isExpanded && (
-                <div className="px-6 pb-4">
-                  <div className="space-y-3">
-                    {group.errors.map(error => (
-                      <div
-                        key={error.id}
-                        className={`border rounded-lg p-4 ${classes.bg} ${classes.border}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p
-                              className={`text-sm font-medium ${classes.text}`}
-                            >
-                              {error.message}
-                            </p>
-
-                            {error.field && (
-                              <p className="text-xs text-gray-600 mt-1">
-                                Field: {error.field}
-                              </p>
-                            )}
-
-                            {error.details && (
-                              <p className="text-xs text-gray-600 mt-1">
-                                {error.details}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="flex items-center space-x-2 ml-4">
-                            {showSuggestions && onFixError && (
-                              <button
-                                onClick={() => {
-                                  setSelectedError(error);
-                                  setShowFixModal(true);
-                                }}
-                                className="px-3 py-1 text-xs text-indigo-600 hover:text-indigo-800"
-                              >
-                                Fix
-                              </button>
-                            )}
-
-                            {onDismissError && (
-                              <button
-                                onClick={() => onDismissError(error.id)}
-                                className="px-3 py-1 text-xs text-gray-600 hover:text-gray-800"
-                              >
-                                Dismiss
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Additional Error Data */}
-                        {error.type === 'conflict' && error.data && (
-                          <div className="mt-3 text-xs">
-                            <strong>Conflicting elements:</strong>{' '}
-                            {(
-                              error.data as ValidationConflict
-                            ).conflicting_elements?.join(', ')}
-                          </div>
-                        )}
-
-                        {error.type === 'circular_reference' && error.data && (
-                          <div className="mt-3 text-xs">
-                            <strong>Reference path:</strong>{' '}
-                            {(error.data as CircularReferenceError).path?.join(
-                              ' → '
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-          );
-        })}
-      </div>
+          </button>
 
-      {/* No Errors State */}
-      {errorGroups.length === 0 && (
-        <div className="px-6 py-12 text-center">
-          <div className="text-6xl mb-4">✅</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No validation errors found
-          </h3>
-          <p className="text-gray-600">
-            All validation checks passed successfully.
-          </p>
-        </div>
-      )}
-
-      {/* Fix Modal */}
-      {showFixModal && selectedError && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Suggested Fixes
-            </h3>
-
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-medium text-gray-900 mb-1">Error:</p>
-              <p className="text-sm text-gray-700">{selectedError.message}</p>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              {getSuggestedFixes(selectedError).map((fix, index) => (
+          {expandedSections.has('errors') && (
+            <div className="p-4 space-y-3">
+              {validationResult.errors.map((error, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 rounded-lg p-4"
+                  className={`p-3 rounded border ${getSeverityColor(
+                    error.severity
+                  )}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">
-                        {fix.label}
-                      </h4>
-                      <p className="text-xs text-gray-600">{fix.description}</p>
+                      <div className="flex items-center mb-1">
+                        <span className="mr-2">
+                          {getSeverityIcon(error.severity)}
+                        </span>
+                        <span className="font-medium text-sm uppercase tracking-wide">
+                          {error.type}
+                        </span>
+                      </div>
+                      <p className="text-sm mb-1">{error.message}</p>
+                      {error.field && (
+                        <p className="text-xs text-gray-600">
+                          Field: {error.field}
+                        </p>
+                      )}
+                      {error.value && (
+                        <p className="text-xs text-gray-600">
+                          Value: {JSON.stringify(error.value)}
+                        </p>
+                      )}
                     </div>
-
-                    <button
-                      onClick={() => applyFix(selectedError, fix.action)}
-                      className="ml-3 px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                    >
-                      Apply
-                    </button>
+                    {onDismissError && (
+                      <button
+                        onClick={() => onDismissError(index)}
+                        className="ml-2 text-gray-400 hover:text-gray-600 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
-
-              {getSuggestedFixes(selectedError).length === 0 && (
-                <div className="text-center text-gray-500 py-4">
-                  No automatic fixes available for this error.
-                </div>
-              )}
             </div>
-
-            <div className="flex items-center justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setSelectedError(null);
-                  setShowFixModal(false);
-                }}
-                className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       )}
+
+      {/* Warnings Section */}
+      {validationResult.warnings && validationResult.warnings.length > 0 && (
+        <div className="border border-yellow-200 rounded-lg">
+          <button
+            onClick={() => toggleSection('warnings')}
+            className="w-full p-4 text-left bg-yellow-50 hover:bg-yellow-100 transition-colors rounded-t-lg"
+          >
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-yellow-800">
+                Warnings ({validationResult.warnings.length})
+              </h4>
+              <span className="text-yellow-600">
+                {expandedSections.has('warnings') ? '▼' : '▶'}
+              </span>
+            </div>
+          </button>
+
+          {expandedSections.has('warnings') && (
+            <div className="p-4 space-y-3">
+              {validationResult.warnings.map((warning, index) => (
+                <div
+                  key={index}
+                  className="p-3 rounded border border-yellow-200 bg-yellow-50 text-yellow-800"
+                >
+                  <div className="flex items-start">
+                    <span className="mr-2 mt-0.5">⚠️</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm uppercase tracking-wide mb-1">
+                        {warning.type}
+                      </div>
+                      <p className="text-sm mb-1">{warning.message}</p>
+                      {warning.field && (
+                        <p className="text-xs text-yellow-700">
+                          Field: {warning.field}
+                        </p>
+                      )}
+                      {warning.suggestion && (
+                        <p className="text-xs text-yellow-700">
+                          Suggestion: {warning.suggestion}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Conflicts Section */}
+      {validationResult.conflicts && validationResult.conflicts.length > 0 && (
+        <div className="border border-purple-200 rounded-lg">
+          <button
+            onClick={() => toggleSection('conflicts')}
+            className="w-full p-4 text-left bg-purple-50 hover:bg-purple-100 transition-colors rounded-t-lg"
+          >
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-purple-800">
+                Conflicts ({validationResult.conflicts.length})
+              </h4>
+              <span className="text-purple-600">
+                {expandedSections.has('conflicts') ? '▼' : '▶'}
+              </span>
+            </div>
+          </button>
+
+          {expandedSections.has('conflicts') && (
+            <div className="p-4 space-y-3">
+              {validationResult.conflicts.map((conflict, index) => (
+                <div
+                  key={index}
+                  className="p-3 rounded border border-purple-200 bg-purple-50 text-purple-800"
+                >
+                  <div className="flex items-start">
+                    <span className="mr-2 mt-0.5">⚔️</span>
+                    <p className="text-sm">{conflict.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Missing Requirements Section */}
+      {validationResult.missing_requirements &&
+        validationResult.missing_requirements.length > 0 && (
+          <div className="border border-orange-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('missing')}
+              className="w-full p-4 text-left bg-orange-50 hover:bg-orange-100 transition-colors rounded-t-lg"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold text-orange-800">
+                  Missing Requirements (
+                  {validationResult.missing_requirements.length})
+                </h4>
+                <span className="text-orange-600">
+                  {expandedSections.has('missing') ? '▼' : '▶'}
+                </span>
+              </div>
+            </button>
+
+            {expandedSections.has('missing') && (
+              <div className="p-4 space-y-3">
+                {validationResult.missing_requirements.map((missing, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded border border-orange-200 bg-orange-50 text-orange-800"
+                  >
+                    <div className="flex items-start">
+                      <span className="mr-2 mt-0.5">📋</span>
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-medium">{missing.type}:</span>{' '}
+                          {missing.name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+      {/* Suggestions Section */}
+      {showSuggestions &&
+        validationResult.suggestions &&
+        validationResult.suggestions.length > 0 && (
+          <div className="border border-blue-200 rounded-lg">
+            <button
+              onClick={() => toggleSection('suggestions')}
+              className="w-full p-4 text-left bg-blue-50 hover:bg-blue-100 transition-colors rounded-t-lg"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold text-blue-800">
+                  Suggestions ({validationResult.suggestions.length})
+                </h4>
+                <span className="text-blue-600">
+                  {expandedSections.has('suggestions') ? '▼' : '▶'}
+                </span>
+              </div>
+            </button>
+
+            {expandedSections.has('suggestions') && (
+              <div className="p-4 space-y-3">
+                {validationResult.suggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded border border-blue-200 bg-blue-50 text-blue-800"
+                  >
+                    <div className="flex items-start">
+                      <span className="mr-2 mt-0.5">💡</span>
+                      <div className="flex-1">
+                        <div className="font-medium text-sm uppercase tracking-wide mb-1">
+                          {suggestion.type} - {suggestion.action}
+                        </div>
+                        <p className="text-sm mb-1">{suggestion.message}</p>
+                        {suggestion.target_id && (
+                          <p className="text-xs text-blue-700">
+                            Target: {suggestion.target_id}
+                          </p>
+                        )}
+                        {suggestion.alternative_ids &&
+                          suggestion.alternative_ids.length > 0 && (
+                            <p className="text-xs text-blue-700">
+                              Alternatives:{' '}
+                              {suggestion.alternative_ids.join(', ')}
+                            </p>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+      {/* No Issues */}
+      {validationResult.is_valid &&
+        (!validationResult.errors || validationResult.errors.length === 0) &&
+        (!validationResult.warnings ||
+          validationResult.warnings.length === 0) && (
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-lg">🎉 All validation checks passed!</p>
+            <p className="text-sm mt-2">
+              No issues found with the current configuration.
+            </p>
+          </div>
+        )}
     </div>
   );
 }

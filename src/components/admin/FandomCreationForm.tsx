@@ -2,8 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  FandomCreateRequest,
-  FandomTemplate,
+  FandomCreationRequest,
   ValidationResult,
   PlotBlock,
   Tag,
@@ -11,10 +10,10 @@ import {
 } from '../../types';
 
 interface FandomCreationFormProps {
-  templates: FandomTemplate[];
-  onSubmit: (fandom: FandomCreateRequest) => Promise<ValidationResult>;
+  templates: any[];
+  onSubmit: (fandom: FandomCreationRequest) => Promise<ValidationResult>;
   onCancel: () => void;
-  initialData?: Partial<FandomCreateRequest>;
+  initialData?: Partial<FandomCreationRequest>;
   isLoading?: boolean;
 }
 
@@ -32,7 +31,7 @@ export function FandomCreationForm({
   initialData,
   isLoading = false,
 }: FandomCreationFormProps) {
-  const [formData, setFormData] = useState<FandomCreateRequest>({
+  const [formData, setFormData] = useState<any>({
     name: '',
     description: '',
     category: '',
@@ -54,7 +53,7 @@ export function FandomCreationForm({
       setSelectedTemplate(templateId);
       const template = templates.find(t => t.id === templateId);
       if (template) {
-        setFormData(prev => ({
+        setFormData((prev: any) => ({
           ...prev,
           name: template.base_fandom.name || prev.name,
           description: template.base_fandom.description || prev.description,
@@ -136,8 +135,8 @@ export function FandomCreationForm({
 
   // Handle input changes
   const handleInputChange = useCallback(
-    (field: keyof FandomCreateRequest, value: any) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
+    (field: string, value: any) => {
+      setFormData((prev: any) => ({ ...prev, [field]: value }));
       // Clear related errors when user starts typing
       if (errors[field as keyof FormErrors]) {
         setErrors(prev => ({ ...prev, [field]: undefined }));
@@ -149,7 +148,7 @@ export function FandomCreationForm({
   // Handle array field changes (tags, plot_blocks, tag_classes)
   const handleArrayFieldChange = useCallback(
     (field: 'tags' | 'plot_blocks' | 'tag_classes', items: any[]) => {
-      setFormData(prev => ({ ...prev, [field]: items }));
+      setFormData((prev: any) => ({ ...prev, [field]: items }));
     },
     []
   );
@@ -287,7 +286,7 @@ export function FandomCreationForm({
                   <p className="text-gray-500 text-sm">No tags added yet</p>
                 ) : (
                   <div className="space-y-1">
-                    {formData.tags.map((tag, index) => (
+                    {formData.tags.map((tag: any, index: number) => (
                       <div
                         key={index}
                         className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded"
@@ -326,7 +325,7 @@ export function FandomCreationForm({
                   </p>
                 ) : (
                   <div className="space-y-1">
-                    {formData.plot_blocks.map((block, index) => (
+                    {formData.plot_blocks.map((block: any, index: number) => (
                       <div
                         key={index}
                         className="flex items-center justify-between bg-blue-100 px-2 py-1 rounded"
@@ -367,30 +366,32 @@ export function FandomCreationForm({
                   </p>
                 ) : (
                   <div className="space-y-1">
-                    {formData.tag_classes.map((tagClass, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between bg-green-100 px-2 py-1 rounded"
-                      >
-                        <span className="text-sm">
-                          {typeof tagClass === 'string'
-                            ? tagClass
-                            : tagClass.name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newClasses = [...formData.tag_classes];
-                            newClasses.splice(index, 1);
-                            handleArrayFieldChange('tag_classes', newClasses);
-                          }}
-                          className="text-red-500 hover:text-red-700 text-xs"
-                          disabled={isLoading || isSubmitting}
+                    {formData.tag_classes.map(
+                      (tagClass: any, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-green-100 px-2 py-1 rounded"
                         >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                          <span className="text-sm">
+                            {typeof tagClass === 'string'
+                              ? tagClass
+                              : tagClass.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newClasses = [...formData.tag_classes];
+                              newClasses.splice(index, 1);
+                              handleArrayFieldChange('tag_classes', newClasses);
+                            }}
+                            className="text-red-500 hover:text-red-700 text-xs"
+                            disabled={isLoading || isSubmitting}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -409,13 +410,14 @@ export function FandomCreationForm({
                 {validationResults.missing_requirements?.map((req, index) => (
                   <li key={index}>
                     Missing {req.type}: {req.name}
-                    {req.description && ` - ${req.description}`}
+                    {(req as any).description &&
+                      ` - ${(req as any).description}`}
                   </li>
                 ))}
                 {validationResults.conflicts?.map((conflict, index) => (
                   <li key={index}>
                     Conflict: {conflict.description} (Severity:{' '}
-                    {conflict.severity})
+                    {(conflict as any).severity})
                   </li>
                 ))}
               </ul>

@@ -13,9 +13,9 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const resolvedParams = params;
+  const resolvedParams = await params;
   const pathwayId = resolvedParams.id;
 
   try {

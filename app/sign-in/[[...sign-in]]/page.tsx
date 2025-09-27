@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import { SignIn } from '@clerk/nextjs';
+import SafeSignIn from '@/components/ui/SafeSignIn';
 
 export default function Page() {
   return (
@@ -23,7 +23,7 @@ export default function Page() {
           </p>
         </div>
         <div className="flex justify-center">
-          <SignIn
+          <SafeSignIn
             appearance={{
               elements: {
                 rootBox: 'mx-auto',

@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserButton } from '@clerk/nextjs';
+import SafeUserButton from '@/components/ui/SafeUserButton';
 import { currentUser } from '@clerk/nextjs/server';
 
 export default async function NotFoundPage() {
@@ -42,7 +42,7 @@ export default async function NotFoundPage() {
                   >
                     Admin Dashboard
                   </Link>
-                  <UserButton afterSignOutUrl="/" />
+                  <SafeUserButton afterSignOutUrl="/" />
                 </>
               ) : (
                 <Link

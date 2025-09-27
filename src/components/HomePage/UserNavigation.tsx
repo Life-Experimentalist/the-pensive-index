@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { isAdmin } from '@/lib/auth/roles';
+import SafeUserButton from '@/components/ui/SafeUserButton';
 
 export default function UserNavigation() {
   const { user, isLoaded } = useUser();
@@ -25,7 +26,7 @@ export default function UserNavigation() {
               Admin Dashboard
             </Link>
           )}
-          <UserButton />
+          <SafeUserButton />
         </>
       ) : (
         <Link

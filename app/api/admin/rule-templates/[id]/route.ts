@@ -16,6 +16,7 @@ import { checkAdminAuth } from '@/lib/api/clerk-auth';
 import { AdminPermissions } from '@/lib/admin/permissions';
 import { AdminQueries } from '@/lib/database/admin-queries';
 import { getDatabase } from '@/lib/database';
+import { RuleCategory } from '@/types/admin';
 
 import { z } from 'zod';
 
@@ -23,7 +24,9 @@ import { z } from 'zod';
 const updateTemplateSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   description: z.string().optional(),
-  category: z.string().min(1, 'Category is required').optional(),
+  category: z
+    .enum(['conditional', 'exclusivity', 'prerequisite', 'hierarchy', 'custom'])
+    .optional(),
   isActive: z.boolean().optional(),
   appliesTo: z.array(z.string()).optional(),
   version: z.string().optional(),

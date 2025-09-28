@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: 'The Pensieve Index',
     description:
       'A library-first story discovery platform and intelligent prompt generator for fanfiction',
-    images: ['/social banner.png'],
+    images: ['/social-banner.png'],
     type: 'website',
   },
   twitter: {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title: 'The Pensieve Index',
     description:
       'A library-first story discovery platform and intelligent prompt generator for fanfiction',
-    images: ['/social banner.png'],
+    images: ['/social-banner.png'],
   },
 };
 

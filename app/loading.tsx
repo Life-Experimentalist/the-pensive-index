@@ -16,7 +16,7 @@ export default function LoadingPage() {
         {/* Animated Logo */}
         <div className="mb-8">
           <Image
-            src="/logos.png"
+            src="/logo-banner.png"
             alt="The Pensieve Index - Loading"
             width={200}
             height={100}

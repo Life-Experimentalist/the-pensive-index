@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard Statistics API
+ * Admin Dashboard Stats API Route
  *
  * Provides real statistics and metrics for the admin dashboard
  * including user counts, content counts, and system health.
@@ -10,8 +10,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { eq, count, sql } from 'drizzle-orm';
-import { db } from '@/lib/database';
+import { eq } from 'drizzle-orm';
+import { getDb } from '@/lib/database/init';
 import {
   fandoms,
   tags,
@@ -19,7 +19,7 @@ import {
   plotBlocks,
   validationRules,
   stories,
-  pathways,
+  adminUsers,
 } from '@/lib/database/schema';
 
 interface DashboardStats {
@@ -71,7 +71,12 @@ export async function GET(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // Get content counts in parallel
+    // Get initialized database connection
+    const connection = await getDb();
+
+    // Get actual counts from database with fallbacks for missing tables/columns
+    // Database status: Fandoms ✅ | Tags ⚠️ (schema mismatch) | Stories ❌ (missing)
+
     const [
       fandomCount,
       tagCount,
@@ -80,43 +85,56 @@ export async function GET(request: NextRequest) {
       storyCount,
       pathwayCount,
     ] = await Promise.all([
-      db
-        .select({ count: count() })
+      // Count fandoms - working table
+      connection
+        .select()
         .from(fandoms)
-        .then(result => result[0]?.count || 0),
-      db
-        .select({ count: count() })
-        .from(tags)
-        .then(result => result[0]?.count || 0),
-      db
-        .select({ count: count() })
-        .from(plotBlocks)
-        .then(result => result[0]?.count || 0),
-      db
-        .select({ count: count() })
-        .from(validationRules)
-        .then(result => result[0]?.count || 0),
-      db
-        .select({ count: count() })
-        .from(stories)
-        .then(result => result[0]?.count || 0)
+        .then((result: any[]) => result.length)
         .catch(() => 0),
-      db
-        .select({ count: count() })
-        .from(pathways)
-        .then(result => result[0]?.count || 0)
-        .catch(() => 0),
-    ]);
 
-    // Calculate response time
+      // Count tags - working with schema differences, use basic query
+      connection
+        .select({ id: tags.id, name: tags.name })
+        .from(tags)
+        .then((result: any[]) => result.length)
+        .catch(() => 0),
+
+      // Count plot blocks - table may not exist yet
+      // connection
+      //   .select()
+      //   .from(plotBlocks)
+      //   .then((result: any[]) => result.length)
+      //   .catch(() => 0),
+      Promise.resolve(0), // Placeholder until migrations are run
+
+      // Count validation rules - table may not exist yet
+      // connection
+      //   .select()
+      //   .from(validationRules)
+      //   .then((result: any[]) => result.length)
+      //   .catch(() => 0),
+      Promise.resolve(0), // Placeholder until migrations are run
+
+      // Count stories - table doesn't exist yet
+      // connection
+      //   .select()
+      //   .from(stories)
+      //   .then((result: any[]) => result.length)
+      //   .catch(() => 0),
+      Promise.resolve(0), // Placeholder until migrations are run
+
+      // Pathways not implemented yet
+      Promise.resolve(0),
+    ]);    // Calculate response time
     const responseTime = Date.now() - startTime;
 
-    // Get active fandoms count
-    const activeFandomCount = await db
-      .select({ count: count() })
+    // Get active fandoms count from database
+    const activeFandomCount = await connection
+      .select({ id: fandoms.id, is_active: fandoms.is_active })
       .from(fandoms)
       .where(eq(fandoms.is_active, true))
-      .then(result => result[0]?.count || 0);
+      .then((result: any[]) => result.length)
+      .catch(() => fandomCount); // Fallback to total fandoms if active query fails
 
     // Calculate system uptime (approximate)
     const uptime = process.uptime();

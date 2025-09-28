@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     }
 
     // Get user from Clerk to access metadata
-    const user = await clerkClient.users.getUser(userId);
+    const clerk = await clerkClient();
+    const user = await clerk.users.getUser(userId);
     const userRole = user.publicMetadata?.role as string;
 
     if (!userRole) {
@@ -58,7 +59,8 @@ export async function POST(request: Request) {
     }
 
     // Check if current user has admin privileges
-    const currentUser = await clerkClient.users.getUser(userId);
+    const clerk2 = await clerkClient();
+    const currentUser = await clerk2.users.getUser(userId);
     const currentUserRole = normalizeRole(
       currentUser.publicMetadata?.role as string
     );
@@ -78,7 +80,8 @@ export async function POST(request: Request) {
     const { targetUserId, role, fandoms } = body;
 
     // Update user metadata via Clerk
-    await clerkClient.users.updateUserMetadata(targetUserId, {
+    const clerk3 = await clerkClient();
+    await clerk3.users.updateUserMetadata(targetUserId, {
       publicMetadata: {
         role: role,
         fandoms: fandoms || [],
@@ -99,7 +102,9 @@ export async function POST(request: Request) {
 }
 
 function normalizeRole(role: string): string {
-  if (!role) return 'none';
+  if (!role) {
+    return 'none';
+  }
 
   const roleMap: { [key: string]: string } = {
     ProjectAdmin: 'project-admin',

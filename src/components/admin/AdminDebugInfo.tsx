@@ -58,7 +58,7 @@ export default function AdminDebugInfo() {
         <div className="mt-4">
           <strong>Private Metadata:</strong>
           <pre className="bg-white p-2 rounded text-xs overflow-auto">
-            {JSON.stringify(user.privateMetadata, null, 2)}
+            {JSON.stringify((user as any).privateMetadata || {}, null, 2)}
           </pre>
         </div>
 

@@ -295,7 +295,7 @@ You're absolutely right! Let's get the core functionality working first before a
 /implement
 ```
 
-### **Phase 3: Public User Interface (Spec 006)**
+### **Phase 3: Public User Interface (Spec 001)**
 
 ```
 /specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement the library-first approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
@@ -313,7 +313,7 @@ You're absolutely right! Let's get the core functionality working first before a
 /implement
 ```
 
-### **Phase 4: Community Features (Spec 007)**
+### **Phase 4: Community Features (Spec 002)**
 
 ```
 /specify "Implement the community-driven story submission system with browser extension integration, GitHub Issues workflow, and moderation queue. Users can submit stories via browser extension from AO3/FFN/Youtube(Audio books which are youtube long videos)/Wattpat and make it modular such that new websites support can be easily added with as simple as adding a single file, admins review submissions through GitHub Issues, and approved stories automatically integrate into the database. Include submission validation, duplicate detection, tag suggestion AI, automated quality scoring, and community feedback mechanisms."
@@ -331,7 +331,7 @@ You're absolutely right! Let's get the core functionality working first before a
 /implement
 ```
 
-### **Phase 5: Performance & Polish (Spec 008)**
+### **Phase 5: Performance & Polish (Spec 003)**
 
 ```
 /specify "Optimize the platform for production scale with caching strategies, database indexing, API rate limiting, and CDN integration. Implement search result caching, validation rule caching, story metadata caching, and real-time invalidation. Add performance monitoring, analytics tracking, error reporting, and automated scaling for high-traffic scenarios."
@@ -349,7 +349,7 @@ You're absolutely right! Let's get the core functionality working first before a
 /implement
 ```
 
-### **Phase 6: Crossover Support (Spec 009 - Future)**
+### **Phase 6: Crossover Support (Spec 004 - Future)**
 
 ```
 /specify "Extend the platform with crossover fanfiction support, allowing stories that combine multiple fandoms. Add crossover relationship management, cross-fandom validation rules, shared concept mappings, and crossover-specific pathway building. Include crossover templates, conflict resolution systems, and enhanced search for crossover content."

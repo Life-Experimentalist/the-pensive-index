@@ -17,6 +17,8 @@ matching stories and writers to discover gaps for new content.
 4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
 
 ## Active Technologies
+- TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM, @octokit/rest, browser extension APIs (002-implement-the-community)
+- SQLite via Drizzle ORM (existing), GitHub Issues API for submission workflow (002-implement-the-community)
 
 - TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+,
   dnd-kit 6.1+ (005-create-a-modular)
@@ -205,10 +207,10 @@ dont use timeout command since it is useless and not suitable for our work
 - Keyboard navigation support
 
 ## Recent Changes
+- 002-implement-the-community: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM, @octokit/rest, browser extension APIs
 - 005-create-a-modular: Added TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+, dnd-kit 6.1+
 
 - 2025-09-17: Initial project setup with constitution and templates
-- Next.js app directory structure established
 
 <!-- MANUAL ADDITIONS START -->
 <!-- Add project-specific guidelines, coding standards, or team preferences here -->

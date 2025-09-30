@@ -1,0 +1,81 @@
+{
+    "manifest_version": 3,
+    "name": "Pensieve Index - Story Submission",
+    "version": "1.0.0",
+    "description": "Submit fanfiction stories to the Pensieve Index for community curation and discovery",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "scripting",
+        "background"
+    ],
+    "host_permissions": [
+        "https://archiveofourown.org/*",
+        "https://www.fanfiction.net/*",
+        "https://www.wattpad.com/*",
+        "https://www.youtube.com/*",
+        "https://localhost:3000/*",
+        "https://*.pensieve-index.com/*"
+    ],
+    "background": {
+        "service_worker": "src/background/service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://archiveofourown.org/works/*",
+                "https://www.fanfiction.net/s/*",
+                "https://www.wattpad.com/story/*",
+                "https://www.youtube.com/watch?v=*"
+            ],
+            "js": [
+                "src/content/content-script.js"
+            ],
+            "css": [
+                "src/content/styles.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "src/popup/popup.html",
+        "default_title": "Submit Story to Pensieve Index",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "src/content/ui-injector.js",
+                "src/content/styles.css",
+                "icons/*"
+            ],
+            "matches": [
+                "https://archiveofourown.org/*",
+                "https://www.fanfiction.net/*",
+                "https://www.wattpad.com/*",
+                "https://www.youtube.com/*"
+            ]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'"
+    },
+    "externally_connectable": {
+        "matches": [
+            "https://localhost:3000/*",
+            "https://*.pensieve-index.com/*"
+        ]
+    }
+}

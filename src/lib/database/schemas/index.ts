@@ -43,6 +43,28 @@ export {
   type NewFandomImportExportSession,
 } from './fandom-content';
 
+// Community submission system schemas
+export {
+  storySubmissions,
+  submissionQueue,
+  browserExtensionState,
+  websiteExtractors,
+  moderationActions,
+  duplicateDetectionResults,
+  type StorySubmission,
+  type NewStorySubmission,
+  type SubmissionQueue,
+  type NewSubmissionQueue,
+  type BrowserExtensionState,
+  type NewBrowserExtensionState,
+  type WebsiteExtractor,
+  type NewWebsiteExtractor,
+  type ModerationAction,
+  type NewModerationAction,
+  type DuplicateDetectionResult,
+  type NewDuplicateDetectionResult,
+} from './submissions';
+
 // Schema registry for Drizzle ORM
 export const schema = {
   fandoms: () => import('./fandom').then(m => m.fandoms),

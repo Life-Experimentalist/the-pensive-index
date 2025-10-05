@@ -10,6 +10,7 @@
 import Link from 'next/link';
 import SafeUserButton from '@/components/ui/SafeUserButton';
 import { currentUser } from '@clerk/nextjs/server';
+import RefreshButton from './RefreshButton';
 
 export default async function UnauthorizedPage() {
   const user = await currentUser();
@@ -121,14 +122,7 @@ export default async function UnauthorizedPage() {
             >
               ← Back to Home
             </Link>
-            {user && (
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium"
-              >
-                🔄 Refresh Page
-              </button>
-            )}
+            {user && <RefreshButton />}
           </div>
 
           {/* Help Section */}

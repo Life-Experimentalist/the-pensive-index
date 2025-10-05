@@ -54,10 +54,26 @@ describe('Admin Security and Permission Validation', () => {
     it('should prevent role elevation attacks', async () => {
       // Setup hierarchy
       await mockSystem.createTestHierarchy({
-        superAdmin: { email: 'super@example.com', role: 'super-admin' },
-        projectAdmin: { email: 'project@example.com', role: 'project-admin' },
-        fandomAdmin: { email: 'fandom@example.com', role: 'fandom-admin' },
-        moderator: { email: 'mod@example.com', role: 'moderator' },
+        superAdmin: {
+          name: 'Super Admin',
+          email: 'super@example.com',
+          role: 'super-admin',
+        },
+        projectAdmin: {
+          name: 'Project Admin',
+          email: 'project@example.com',
+          role: 'project-admin',
+        },
+        fandomAdmin: {
+          name: 'Fandom Admin',
+          email: 'fandom@example.com',
+          role: 'fandom-admin',
+        },
+        moderator: {
+          name: 'Moderator',
+          email: 'mod@example.com',
+          role: 'moderator',
+        },
       });
 
       // Attempt 1: Moderator trying to assign super-admin role

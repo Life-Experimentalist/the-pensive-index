@@ -15,6 +15,8 @@ import { Suspense } from 'react';
 import { FandomModel, TagModel, PlotBlockModel } from '@/lib/database/models';
 import { ResponsiveWrapper } from '@/components/discovery/responsive-wrapper';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import FandomShareButton from './FandomShareButton';
+import FandomErrorFallback from './FandomErrorFallback';
 
 interface FandomPageProps {
   params: Promise<{
@@ -141,26 +143,7 @@ export default async function FandomDiscoveryPage({
   const { fandom, tags, plotBlocks } = data;
 
   return (
-    <ErrorBoundary
-      fallback={
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Something went wrong
-            </h2>
-            <p className="text-gray-600 mb-6">
-              We encountered an error while loading the discovery interface.
-            </p>
-            <Link
-              href="/"
-              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
-            >
-              Return Home
-            </Link>
-          </div>
-        </div>
-      }
-    >
+    <ErrorBoundary fallback={<FandomErrorFallback />}>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Header with breadcrumb navigation */}
         <header className="bg-white shadow-sm">
@@ -187,30 +170,7 @@ export default async function FandomDiscoveryPage({
 
               {/* Social Sharing */}
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: `${fandom.name} Story Discovery`,
-                        text: `Discover ${fandom.name} fanfiction stories`,
-                        url: window.location.href,
-                      });
-                    } else {
-                      // Fallback to clipboard
-                      navigator.clipboard.writeText(window.location.href);
-                    }
-                  }}
-                  className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
-                  title="Share this page"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                  </svg>
-                </button>
+                <FandomShareButton fandomName={fandom.name} />
               </div>
             </div>
           </div>

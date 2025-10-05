@@ -131,6 +131,11 @@ function getPermissionsForRole(role: string): string[] {
         'canManageRoles',
         'canManageFandoms',
         'canManageInvitations',
+        'canViewAuditLogs',
+        'canExportAuditLogs',
+        'canViewAnalytics',
+        'canAccessSettings',
+        'canModifySettings',
       ];
     case 'project-admin':
       return [
@@ -141,6 +146,11 @@ function getPermissionsForRole(role: string): string[] {
         'canManageRoles',
         'canManageFandoms',
         'canManageInvitations',
+        'canViewAuditLogs',
+        'canExportAuditLogs',
+        'canViewAnalytics',
+        'canAccessSettings',
+        'canModifySettings',
       ];
     case 'fandom-admin':
       return [
@@ -148,6 +158,7 @@ function getPermissionsForRole(role: string): string[] {
         'content:moderate',
         'canManageFandoms',
         'canManageInvitations',
+        'canViewAuditLogs',
       ];
     case 'moderator':
       return ['content:moderate'];

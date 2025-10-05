@@ -226,6 +226,34 @@ export const storySubmissions = sqliteTable('story_submissions', {
     .default(sql`(unixepoch())`),
 });
 
+// Pathways table - User-created story pathways
+export const pathways = sqliteTable('pathways', {
+  id: text('id').primaryKey(), // UUID
+  user_id: text('user_id').notNull(), // Clerk user ID
+  fandom_id: text('fandom_id')
+    .notNull()
+    .references(() => fandoms.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  selected_tags: text('selected_tags', { mode: 'json' })
+    .notNull()
+    .$type<string[]>()
+    .default(sql`'[]'`),
+  selected_plot_blocks: text('selected_plot_blocks', { mode: 'json' })
+    .notNull()
+    .$type<string[]>()
+    .default(sql`'[]'`),
+  is_public: integer('is_public', { mode: 'boolean' }).notNull().default(false),
+  view_count: integer('view_count').notNull().default(0),
+  match_count: integer('match_count').notNull().default(0), // Number of matching stories
+  created_at: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // Admin users table
 export const adminUsers = sqliteTable('admin_users', {
   id: text('id').primaryKey(),
@@ -609,6 +637,9 @@ export type NewTestScenario = typeof testScenarios.$inferInsert;
 export type RuleSetExport = typeof ruleSetExports.$inferSelect;
 export type NewRuleSetExport = typeof ruleSetExports.$inferInsert;
 
+export type Pathway = typeof pathways.$inferSelect;
+export type NewPathway = typeof pathways.$inferInsert;
+
 // Export schema object for easy access to all tables
 export const schema = {
   fandoms,
@@ -620,6 +651,7 @@ export const schema = {
   storyTags,
   storyPlotBlocks,
   storySubmissions,
+  pathways,
   adminUsers,
   validationRules,
   ruleConditions,

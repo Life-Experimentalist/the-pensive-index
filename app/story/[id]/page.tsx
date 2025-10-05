@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ResponsiveWrapper } from '@/components/ui/responsive-wrapper';
+import StoryActionButtons from './StoryActionButtons';
+import ChapterList from './ChapterList';
 
 // Types for story detail
 interface StoryDetail {
@@ -346,49 +348,6 @@ function RelatedStoryCard({ story }: { story: RelatedStory }) {
   );
 }
 
-// Chapter list component
-function ChapterList({ chapters }: { chapters: StoryDetail['chapters'] }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm border">
-      <div className="p-6 border-b">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Chapters ({chapters.length})
-        </h3>
-      </div>
-      <div className="divide-y">
-        {chapters.slice(0, 5).map((chapter, index) => (
-          <div key={chapter.id} className="p-4 hover:bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm font-medium text-gray-500">
-                    #{index + 1}
-                  </span>
-                  <h4 className="font-medium text-gray-900">{chapter.title}</h4>
-                </div>
-                <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
-                  <span>{chapter.wordCount.toLocaleString()} words</span>
-                  <span>
-                    {new Date(chapter.publishedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-        ))}
-        {chapters.length > 5 && (
-          <div className="p-4 text-center">
-            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Show all {chapters.length} chapters
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Engagement stats component
 function EngagementStats({ engagement }: { engagement: ReaderEngagement }) {
   return (
@@ -474,16 +433,7 @@ export default async function StoryPage({
                     <span>Back to {story.fandomName}</span>
                   </Link>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                    <Share2 className="w-4 h-4" />
-                    <span>Share</span>
-                  </button>
-                  <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                    <Bookmark className="w-4 h-4" />
-                    <span>Save</span>
-                  </button>
-                </div>
+                <StoryActionButtons />
               </div>
             </div>
           </div>

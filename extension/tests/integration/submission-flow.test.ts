@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { chromium, firefox, Browser, BrowserContext, Page } from 'playwright';
 
 // Mock browser extension APIs for testing
 // Note: These imports will fail initially - that's expected in TDD
-import { ExtensionMessageHandler } from '@/extension/src/background/message-handler';
-import { ContentScriptExtractor } from '@/extension/src/content/content-script';
-import { PopupController } from '@/extension/src/popup/popup-controller';
+import { ExtensionMessageHandler } from '../../../src/background/message-handler';
+import { ContentScriptExtractor } from '../../../src/content/content-script';
+import { PopupController } from '../../../src/popup/popup-controller';
 
 // Mock extension message passing
 const mockChrome = {

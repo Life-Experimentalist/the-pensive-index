@@ -39,6 +39,7 @@ const mockMobileElements = {
       category: 'plot',
       description: 'Characters travel through time',
       isTouchFriendly: true,
+      selected: false,
       tapTarget: { minWidth: 44, minHeight: 44 },
     },
     {
@@ -47,6 +48,7 @@ const mockMobileElements = {
       category: 'relationship',
       description: 'Harry Potter and Hermione Granger pairing',
       isTouchFriendly: true,
+      selected: false,
       tapTarget: { minWidth: 44, minHeight: 44 },
     },
   ],
@@ -269,12 +271,20 @@ describe('Mobile Tap-Select Integration Test (T013)', () => {
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         // Horizontal swipe
-        if (deltaX > minSwipeDistance) return 'swipe-right';
-        if (deltaX < -minSwipeDistance) return 'swipe-left';
+        if (deltaX > minSwipeDistance) {
+          return 'swipe-right';
+        }
+        if (deltaX < -minSwipeDistance) {
+          return 'swipe-left';
+        }
       } else {
         // Vertical swipe
-        if (deltaY > minSwipeDistance) return 'swipe-down';
-        if (deltaY < -minSwipeDistance) return 'swipe-up';
+        if (deltaY > minSwipeDistance) {
+          return 'swipe-down';
+        }
+        if (deltaY < -minSwipeDistance) {
+          return 'swipe-up';
+        }
       }
 
       return 'tap';
@@ -295,8 +305,12 @@ describe('Mobile Tap-Select Integration Test (T013)', () => {
   it('should validate responsive breakpoints', () => {
     // Test responsive design breakpoints
     const getLayoutMode = (width: number) => {
-      if (width < 640) return 'mobile';
-      if (width < 1024) return 'tablet';
+      if (width < 640) {
+        return 'mobile';
+      }
+      if (width < 1024) {
+        return 'tablet';
+      }
       return 'desktop';
     };
 

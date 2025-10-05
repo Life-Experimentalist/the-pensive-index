@@ -219,9 +219,10 @@ describe('Performance Optimization System', () => {
       const filters = { status: 'pending', priority: 'high' };
 
       // Mock the queue query (would normally hit database)
-      const originalFunction = SubmissionOptimizer.optimizeQueueQuery;
+      const originalFunction =
+        SubmissionOptimizer.optimizeQueueQuery.bind(SubmissionOptimizer);
       const mockResult = {
-        submissions: [{ id: 'sub1', status: 'pending' }],
+        submissions: [{ id: 'sub1', status: 'pending' }] as any,
         total: 1,
         queuePositions: { sub1: 1 },
         moderators: {},
@@ -230,7 +231,7 @@ describe('Performance Optimization System', () => {
 
       // First call
       vi.spyOn(SubmissionOptimizer, 'optimizeQueueQuery').mockResolvedValue(
-        mockResult
+        mockResult as any
       );
       const result = await SubmissionOptimizer.optimizeQueueQuery(filters);
 
@@ -278,7 +279,7 @@ describe('Performance Optimization System', () => {
       };
 
       vi.spyOn(ExtensionOptimizer, 'optimizeStoryParsing').mockResolvedValue(
-        mockStoryData
+        mockStoryData as any
       );
 
       const result = await ExtensionOptimizer.optimizeStoryParsing(url);
@@ -292,7 +293,7 @@ describe('Performance Optimization System', () => {
       ];
 
       vi.spyOn(ExtensionOptimizer, 'preloadFandomData').mockResolvedValue(
-        mockFandoms
+        mockFandoms as any
       );
 
       const result = await ExtensionOptimizer.preloadFandomData();
@@ -395,7 +396,8 @@ describe('Performance Optimization System', () => {
       const wrappedHandler = withPerformanceMonitoring(slowHandler);
 
       // Mock timer to always return > 5000ms
-      const originalStartTimer = PerformanceMonitor.startTimer;
+      const originalStartTimer =
+        PerformanceMonitor.startTimer.bind(PerformanceMonitor);
       vi.spyOn(PerformanceMonitor, 'startTimer').mockImplementation(
         () => () => 6000
       );

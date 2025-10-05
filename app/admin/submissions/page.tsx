@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * T039: Admin Moderation Interface
  *
@@ -7,10 +9,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -69,7 +71,6 @@ interface SubmissionQueueItem extends StorySubmission {
     timestamp: Date;
     details?: any;
   }>;
-  qualityScore?: number;
   estimatedReviewTime?: string;
   priority: 'low' | 'normal' | 'high' | 'urgent';
   flags: string[];
@@ -122,9 +123,50 @@ interface QueueStats {
 }
 
 /**
+ * SubmissionQueueCard props interface
+ */
+interface SubmissionQueueCardProps {
+  submission: SubmissionQueueItem;
+  onSelect: (submission: SubmissionQueueItem) => void;
+  onModerationAction: (
+    id: string,
+    action: 'approve' | 'reject' | 'request_changes' | 'assign',
+    data?: any
+  ) => void;
+}
+
+/**
+ * SubmissionDetailModal props interface
+ */
+interface SubmissionDetailModalProps {
+  submission: SubmissionQueueItem;
+  onClose: () => void;
+  onModerationAction: (
+    id: string,
+    action: 'approve' | 'reject' | 'request_changes' | 'assign',
+    data?: any
+  ) => void;
+}
+
+/**
+ * QueueAnalytics props interface
+ */
+interface QueueAnalyticsProps {
+  stats: QueueStats | null;
+}
+
+/**
+ * ModeratorManagement props interface
+ */
+interface ModeratorManagementProps {
+  moderators: Array<{ id: string; name: string }>;
+  stats: QueueStats | null;
+}
+
+/**
  * Admin Moderation Dashboard Component
  */
-export default function AdminModerationPage() {
+export default function AdminModerationPage(): JSX.Element {
   const router = useRouter();
   const [submissions, setSubmissions] = useState<SubmissionQueueItem[]>([]);
   const [stats, setStats] = useState<QueueStats | null>(null);
@@ -140,7 +182,7 @@ export default function AdminModerationPage() {
   });
   const [selectedSubmission, setSelectedSubmission] =
     useState<SubmissionQueueItem | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [moderators, setModerators] = useState<
     Array<{ id: string; name: string }>
@@ -170,7 +212,7 @@ export default function AdminModerationPage() {
   /**
    * Load submission queue data
    */
-  const loadQueueData = async () => {
+  const loadQueueData = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -201,7 +243,7 @@ export default function AdminModerationPage() {
   /**
    * Load available moderators
    */
-  const loadModerators = async () => {
+  const loadModerators = async (): Promise<void> => {
     try {
       const response = await fetch('/api/admin/users/moderators');
       if (response.ok) {
@@ -216,7 +258,7 @@ export default function AdminModerationPage() {
   /**
    * Load available fandoms
    */
-  const loadFandoms = async () => {
+  const loadFandoms = async (): Promise<void> => {
     try {
       const response = await fetch('/api/admin/fandoms');
       if (response.ok) {
@@ -235,7 +277,7 @@ export default function AdminModerationPage() {
     submissionId: string,
     action: 'approve' | 'reject' | 'request_changes' | 'assign',
     data?: any
-  ) => {
+  ): Promise<void> => {
     try {
       setIsLoading(true);
 
@@ -282,7 +324,7 @@ export default function AdminModerationPage() {
     submissionIds: string[],
     action: 'approve' | 'reject' | 'assign',
     data?: any
-  ) => {
+  ): Promise<void> => {
     try {
       setIsLoading(true);
 
@@ -313,14 +355,17 @@ export default function AdminModerationPage() {
   /**
    * Update filters
    */
-  const updateFilters = useCallback((newFilters: Partial<QueueFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  }, []);
+  const updateFilters = useCallback(
+    (newFilters: Partial<QueueFilters>): void => {
+      setFilters(prev => ({ ...prev, ...newFilters }));
+    },
+    []
+  );
 
   /**
    * Reset filters to defaults
    */
-  const resetFilters = () => {
+  const resetFilters = (): void => {
     setFilters({
       status: 'all',
       priority: 'all',
@@ -336,17 +381,17 @@ export default function AdminModerationPage() {
   /**
    * Get status badge color
    */
-  const getStatusBadgeColor = (status: SubmissionStatus) => {
-    switch (status) {
+  const getStatusBadgeColor = (status: SubmissionStatus): string => {
+    switch (status as any) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'under_review':
+      case 'under-review':
         return 'bg-blue-100 text-blue-800';
       case 'approved':
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
-      case 'changes_requested':
+      case 'request-changes':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -356,7 +401,7 @@ export default function AdminModerationPage() {
   /**
    * Get priority badge color
    */
-  const getPriorityBadgeColor = (priority: string) => {
+  const getPriorityBadgeColor = (priority: string): string => {
     switch (priority) {
       case 'urgent':
         return 'bg-red-100 text-red-800';
@@ -663,29 +708,25 @@ function SubmissionQueueCard({
   submission,
   onSelect,
   onModerationAction,
-}: {
-  submission: SubmissionQueueItem;
-  onSelect: (submission: SubmissionQueueItem) => void;
-  onModerationAction: (id: string, action: string, data?: any) => void;
-}) {
-  const getStatusBadgeColor = (status: SubmissionStatus) => {
+}: SubmissionQueueCardProps): JSX.Element {
+  const getStatusBadgeColor = (status: string): string => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'under_review':
+      case 'under-review':
         return 'bg-blue-100 text-blue-800';
       case 'approved':
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
-      case 'changes_requested':
+      case 'request-changes':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getPriorityBadgeColor = (priority: string) => {
+  const getPriorityBadgeColor = (priority: string): string => {
     switch (priority) {
       case 'urgent':
         return 'bg-red-100 text-red-800';
@@ -706,8 +747,10 @@ function SubmissionQueueCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <Badge className={getStatusBadgeColor(submission.status)}>
-                {submission.status.replace('_', ' ').toUpperCase()}
+              <Badge
+                className={getStatusBadgeColor(submission.status || 'pending')}
+              >
+                {submission.status?.replace('_', ' ').toUpperCase()}
               </Badge>
               <Badge className={getPriorityBadgeColor(submission.priority)}>
                 {submission.priority.toUpperCase()}
@@ -721,25 +764,27 @@ function SubmissionQueueCard({
               className="font-medium text-lg mb-1 truncate cursor-pointer hover:text-blue-600"
               onClick={() => onSelect(submission)}
             >
-              {submission.title}
+              {submission.storyTitle}
             </h3>
 
             <p className="text-sm text-gray-600 mb-2">
-              by {submission.submitterName} • {submission.fandom}
+              by {submission.authorName} • {submission.fandomId}
             </p>
 
             <p className="text-sm text-gray-500 line-clamp-2">
-              {submission.description}
+              {submission.summary}
             </p>
 
             <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-              <span>{submission.wordCount.toLocaleString()} words</span>
-              <span>{submission.tags.length} tags</span>
+              <span>{submission.wordCount?.toLocaleString() ?? 0} words</span>
+              <span>{submission.tags?.length ?? 0} tags</span>
               {submission.qualityScore && (
                 <span>Quality: {submission.qualityScore}%</span>
               )}
               <span>
-                {new Date(submission.submissionDate).toLocaleDateString()}
+                {new Date(
+                  submission.submittedAt || new Date()
+                ).toLocaleDateString()}
               </span>
             </div>
           </div>
@@ -763,7 +808,9 @@ function SubmissionQueueCard({
                   variant="outline"
                   onClick={e => {
                     e.stopPropagation();
-                    window.open(submission.githubIssue!.url, '_blank');
+                    if (submission.githubIssue?.url) {
+                      window.open(submission.githubIssue.url, '_blank');
+                    }
                   }}
                 >
                   <ExternalLink className="w-3 h-3" />
@@ -815,23 +862,19 @@ function SubmissionDetailModal({
   submission,
   onClose,
   onModerationAction,
-}: {
-  submission: SubmissionQueueItem;
-  onClose: () => void;
-  onModerationAction: (id: string, action: string, data?: any) => void;
-}) {
-  const [moderationNotes, setModerationNotes] = useState('');
-  const [selectedModerator, setSelectedModerator] = useState('');
+}: SubmissionDetailModalProps): JSX.Element {
+  const [moderationNotes, setModerationNotes] = useState<string>('');
+  const [selectedModerator, setSelectedModerator] = useState<string>('');
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{submission.title}</span>
+            <span>{submission.storyTitle}</span>
             <div className="flex gap-2">
               <Badge className="bg-blue-100 text-blue-800">
-                {submission.status.replace('_', ' ').toUpperCase()}
+                {submission.status?.replace('_', ' ').toUpperCase()}
               </Badge>
               <Badge className="bg-gray-100 text-gray-800">
                 #{submission.queuePosition}
@@ -847,28 +890,31 @@ function SubmissionDetailModal({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium">Author:</span>{' '}
-                {submission.submitterName}
+                {submission.authorName}
               </div>
               <div>
-                <span className="font-medium">Fandom:</span> {submission.fandom}
+                <span className="font-medium">Fandom:</span>{' '}
+                {submission.fandomId}
               </div>
               <div>
                 <span className="font-medium">Word Count:</span>{' '}
-                {submission.wordCount.toLocaleString()}
+                {submission.wordCount?.toLocaleString() ?? 0}
               </div>
               <div>
                 <span className="font-medium">Submitted:</span>{' '}
-                {new Date(submission.submissionDate).toLocaleDateString()}
+                {new Date(
+                  submission.submittedAt || new Date()
+                ).toLocaleDateString()}
               </div>
               <div className="col-span-2">
                 <span className="font-medium">URL:</span>{' '}
                 <a
-                  href={submission.url}
+                  href={submission.storyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
                 >
-                  {submission.url}
+                  {submission.storyUrl}
                 </a>
               </div>
             </div>
@@ -878,7 +924,7 @@ function SubmissionDetailModal({
           <div>
             <h3 className="font-medium mb-2">Description</h3>
             <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-              {submission.description}
+              {submission.summary}
             </p>
           </div>
 
@@ -886,7 +932,7 @@ function SubmissionDetailModal({
           <div>
             <h3 className="font-medium mb-2">Tags</h3>
             <div className="flex flex-wrap gap-1">
-              {submission.tags.map((tag, index) => (
+              {(submission.tags || []).map((tag, index) => (
                 <Badge key={index} variant="secondary">
                   {tag}
                 </Badge>
@@ -904,9 +950,11 @@ function SubmissionDetailModal({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() =>
-                      window.open(submission.githubIssue!.url, '_blank')
-                    }
+                    onClick={() => {
+                      if (submission.githubIssue?.url) {
+                        window.open(submission.githubIssue.url, '_blank');
+                      }
+                    }}
                   >
                     <ExternalLink className="w-3 h-3 mr-1" />
                     View on GitHub
@@ -926,7 +974,9 @@ function SubmissionDetailModal({
                   id="moderation-notes"
                   placeholder="Add moderation notes..."
                   value={moderationNotes}
-                  onChange={e => setModerationNotes(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setModerationNotes(e.target.value)
+                  }
                 />
               </div>
 
@@ -1003,8 +1053,10 @@ function SubmissionDetailModal({
 /**
  * Queue Analytics Component
  */
-function QueueAnalytics({ stats }: { stats: QueueStats | null }) {
-  if (!stats) return <div>Loading analytics...</div>;
+function QueueAnalytics({ stats }: QueueAnalyticsProps): JSX.Element {
+  if (!stats) {
+    return <div>Loading analytics...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -1094,11 +1146,10 @@ function QueueAnalytics({ stats }: { stats: QueueStats | null }) {
 function ModeratorManagement({
   moderators,
   stats,
-}: {
-  moderators: Array<{ id: string; name: string }>;
-  stats: QueueStats | null;
-}) {
-  if (!stats) return <div>Loading moderator data...</div>;
+}: ModeratorManagementProps): JSX.Element {
+  if (!stats) {
+    return <div>Loading moderator data...</div>;
+  }
 
   return (
     <div className="space-y-6">

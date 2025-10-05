@@ -11,6 +11,7 @@
 import UserNavigation from '@/components/HomePage/UserNavigation';
 import UserContent from '@/components/HomePage/UserContent';
 import HydratedLink from '@/components/ui/HydratedLink';
+import ClientThemeToggle from '@/components/theme/ClientThemeToggle';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
@@ -18,18 +19,20 @@ import { FandomModel } from '@/lib/database/models';
 
 // SEO Metadata
 export const metadata: Metadata = {
-  title: 'The Pensieve Index - Library-First Story Discovery Platform',
+  title: 'The Pensieve Index - Discover Your Next Favorite Fanfiction',
   description:
-    'Discover existing fanfiction stories and generate intelligent prompts for new content. Library-first approach prioritizing existing tagged stories with advanced search and relevance scoring.',
+    'The ultimate fanfiction discovery platform for readers and writers. Explore thousands of stories, build custom pathways, and find your perfect read across Harry Potter, Percy Jackson, and more fandoms.',
   keywords: [
     'fanfiction',
+    'fanfic',
     'story discovery',
-    'prompt generator',
-    'library search',
-    'tag-based search',
-    'story recommendations',
-    'creative writing',
-    'fandom stories',
+    'fandom',
+    'Harry Potter fanfiction',
+    'Percy Jackson fanfiction',
+    'ao3',
+    'fanfiction.net',
+    'reading recommendations',
+    'story finder',
   ],
   authors: [{ name: 'The Pensieve Index' }],
   creator: 'The Pensieve Index',
@@ -49,9 +52,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://pensive-index.vercel.app',
-    title: 'The Pensieve Index - Library-First Story Discovery',
+    title: 'The Pensieve Index - Your Fanfiction Discovery Companion',
     description:
-      'Discover existing fanfiction stories and generate intelligent prompts for new content.',
+      'Discover, explore, and track your favorite fanfiction stories across multiple fandoms.',
     siteName: 'The Pensieve Index',
     images: [
       {
@@ -64,14 +67,14 @@ export const metadata: Metadata = {
         url: '/hero.png',
         width: 800,
         height: 400,
-        alt: 'Story Discovery Interface',
+        alt: 'Fanfiction Discovery Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'The Pensieve Index - Story Discovery Platform',
-    description: 'Library-first fanfiction discovery with intelligent prompts',
+    title: 'The Pensieve Index - Discover Amazing Fanfiction',
+    description: 'Your personalized fanfiction discovery and tracking platform',
     images: ['/logo-banner.png'],
   },
   alternates: {
@@ -95,9 +98,9 @@ export default async function HomePage() {
   const fandoms = await getFandomsData();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm fixed w-full top-0 z-50">
+      <header className="bg-white dark:bg-gray-800 shadow-sm fixed w-full top-0 z-50 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -108,11 +111,12 @@ export default async function HomePage() {
                 height={32}
                 className="w-8 h-8"
               />
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 The Pensieve Index
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <ClientThemeToggle />
               <UserNavigation />
             </div>
           </div>
@@ -120,48 +124,77 @@ export default async function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <main className="bg-gradient-to-br from-blue-600 to-purple-700 min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+      <main className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-white dark:bg-gray-800 opacity-10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-1/2 -left-1/4 w-96 h-96 bg-white dark:bg-gray-800 opacity-10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Discover <span className="text-white">Fanfiction Stories</span>
+            <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight">
+              Discover Your Next
               <br />
-              <span className="text-cyan-300">Library First</span>
+              <span className="bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">
+                Favorite Fanfiction
+              </span>
             </h1>
           </div>
-          <p className="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto leading-relaxed opacity-90">
-            The intelligent{' '}
-            <strong className="text-white">
-              fanfiction story discovery platform
-            </strong>{' '}
-            that prioritizes finding existing tagged stories before generating
-            new prompts. Built for readers who want{' '}
-            <em className="text-white">precision</em> and writers who want{' '}
-            <em className="text-white">inspiration</em> across
-            <strong className="text-white">
-              Harry Potter, Percy Jackson, and more fandoms
-            </strong>
-            .
+
+          <p className="text-xl md:text-2xl text-white mb-8 max-w-3xl mx-auto leading-relaxed opacity-95">
+            Dive into thousands of{' '}
+            <strong className="font-bold">tagged stories</strong> across your
+            favorite fandoms.
+            <br />
+            Build custom pathways, discover hidden gems, and never run out of
+            amazing reads.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <HydratedLink
-              href="/discover"
-              className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              href="/fandom"
+              className="px-8 py-4 bg-white text-indigo-600 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-2xl"
             >
-              🔍 Explore Stories
+              🌟 Browse Fandoms
             </HydratedLink>
             <HydratedLink
-              href="/generate"
-              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105"
+              href="/pathway"
+              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:scale-105"
             >
-              ⚡ Generate Prompts
+              🔮 Build Story Pathway
             </HydratedLink>
           </div>
 
           {/* User Authentication */}
           <div className="mb-12">
             <UserContent />
+          </div>
+
+          {/* Stats Section */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20">
+              <div className="text-4xl font-bold text-white mb-2">1000+</div>
+              <div className="text-white text-opacity-90 text-sm">
+                Tagged Stories
+              </div>
+            </div>
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20">
+              <div className="text-4xl font-bold text-white mb-2">50+</div>
+              <div className="text-white text-opacity-90 text-sm">Fandoms</div>
+            </div>
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20">
+              <div className="text-4xl font-bold text-white mb-2">500+</div>
+              <div className="text-white text-opacity-90 text-sm">
+                Tags & Tropes
+              </div>
+            </div>
+            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-white border-opacity-20">
+              <div className="text-4xl font-bold text-white mb-2">10K+</div>
+              <div className="text-white text-opacity-90 text-sm">
+                Monthly Readers
+              </div>
+            </div>
           </div>
 
           {/* Interactive Demo Preview */}
@@ -189,8 +222,8 @@ export default async function HomePage() {
                   <span className="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 bg-opacity-40 text-purple-100 rounded-full text-sm font-medium border border-purple-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
                     ⚡ Marauders Era
                   </span>
-                  <span className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 bg-opacity-40 text-green-100 rounded-full text-sm font-medium border border-green-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
-                    💕 Harry/Hermione
+                  <span className="px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-600 bg-opacity-40 text-pink-100 rounded-full text-sm font-medium border border-pink-400 border-opacity-30 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
+                    💕 Romance
                   </span>
                 </div>
                 <div className="bg-black bg-opacity-20 backdrop-blur-md rounded-xl p-4 border border-white border-opacity-20">
@@ -239,43 +272,81 @@ export default async function HomePage() {
       </main>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose The Pensieve Index?
+            <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+              Everything You Need to Find Amazing Stories
             </h2>
-            <p className="text-xl text-gray-600">
-              Advanced story discovery with intelligent prompt generation
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Powerful features designed for fanfiction lovers
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                📚 Story Discovery
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">📚</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Smart Discovery
               </h3>
-              <p className="text-gray-600">
-                Find existing tagged stories with advanced search and relevance
-                scoring. Library-first approach prioritizes existing content.
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Find exactly what you're looking for with our advanced tag-based
+                search system. Filter by characters, pairings, tropes, and more.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                ✨ Prompt Generation
+
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">🎯</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Custom Pathways
               </h3>
-              <p className="text-gray-600">
-                Generate intelligent story prompts with novelty highlights for
-                unexplored combinations and creative opportunities.
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Build personalized story pathways by combining your favorite
+                tags and tropes. Save and share your perfect combinations.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                🎯 Smart Filtering
+
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">⚡</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Real-Time Results
               </h3>
-              <p className="text-gray-600">
-                Advanced tag-based filtering with real-time validation and
-                conflict detection for optimal results.
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Get instant results as you build your pathway. See matching
+                stories and discover new combinations in real-time.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">🔖</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Save & Track
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Bookmark your favorite stories and pathways. Keep track of what
+                you've read and what's on your to-read list.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">🌐</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Multi-Fandom
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Explore stories across dozens of fandoms from Harry Potter to
+                Percy Jackson and beyond. All in one place.
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
+              <div className="text-5xl mb-4">✨</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Writer's Helper
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Discover gaps in existing stories and get inspired to write what
+                readers are looking for. Generate creative prompts.
               </p>
             </div>
           </div>
@@ -284,14 +355,14 @@ export default async function HomePage() {
 
       {/* Fandoms Section */}
       {fandoms.length > 0 && (
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Explore Popular Fandoms
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+                Dive Into Your Favorite Fandoms
               </h2>
-              <p className="text-xl text-gray-600">
-                Start your story discovery journey
+              <p className="text-xl text-gray-600 dark:text-gray-300">
+                Thousands of stories waiting to be discovered
               </p>
             </div>
 
@@ -300,7 +371,7 @@ export default async function HomePage() {
                 <HydratedLink
                   key={fandom.id}
                   href={`/fandom/${fandom.slug}`}
-                  className="group bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-6 hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                  className="group bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 text-white rounded-lg p-6 hover:from-indigo-600 hover:to-purple-700 dark:hover:from-indigo-700 dark:hover:to-purple-800 transition-all duration-200 transform hover:scale-105 shadow-lg"
                 >
                   <div className="text-center">
                     <h3 className="font-semibold text-xl mb-2">
@@ -317,12 +388,12 @@ export default async function HomePage() {
 
             <div className="text-center mt-12">
               <HydratedLink
-                href="/discover"
-                className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 shadow-lg"
+                href="/fandom"
+                className="inline-flex items-center justify-center px-8 py-4 border-2 border-indigo-600 dark:border-indigo-400 text-lg font-bold rounded-full text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 transition-all duration-300 shadow-lg transform hover:scale-105"
               >
                 Browse All Fandoms
                 <svg
-                  className="ml-2 -mr-1 w-4 h-4"
+                  className="ml-2 -mr-1 w-5 h-5"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -347,7 +418,7 @@ export default async function HomePage() {
             '@type': 'WebApplication',
             name: 'The Pensieve Index',
             description:
-              'Library-first story discovery platform and intelligent prompt generator for fanfiction',
+              'Fanfiction discovery platform for readers and writers across multiple fandoms',
             url: 'https://pensive-index.vercel.app',
             applicationCategory: 'Entertainment',
             operatingSystem: 'Web Browser',
@@ -361,12 +432,13 @@ export default async function HomePage() {
               name: 'The Pensieve Index',
             },
             featureList: [
-              'Story Discovery with Advanced Search',
-              'Intelligent Prompt Generation',
-              'Real-time Validation',
-              'Mobile and Desktop Support',
-              'Tag-based Filtering',
-              'Library-first Approach',
+              'Advanced Story Discovery',
+              'Custom Story Pathways',
+              'Tag-Based Filtering',
+              'Multi-Fandom Support',
+              'Real-Time Search Results',
+              'Story Bookmarking',
+              'Writer Inspiration Tools',
             ],
           }),
         }}

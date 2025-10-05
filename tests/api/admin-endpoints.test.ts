@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 
 // Import the admin API handlers we need to test
 // Note: These imports will fail initially - that's expected in TDD
-import { GET as getModerationQueue } from '@/app/api/v1/admin/submissions/queue/route';
-import { POST as assignSubmission } from '@/app/api/v1/admin/submissions/[id]/assign/route';
-import { POST as reviewSubmission } from '@/app/api/v1/admin/submissions/[id]/review/route';
+import { GET as getModerationQueue } from '../../app/api/v1/admin/submissions/queue/route';
+import { POST as assignSubmission } from '../../app/api/v1/admin/submissions/[id]/assign/route';
+import { POST as reviewSubmission } from '../../app/api/v1/admin/submissions/[id]/review/route';
 
 // Mock Clerk auth
-vi.mock('@clerk/nextjs', () => ({
-  auth: vi.fn(),
+vi.mock('@clerk/nextjs/server', () => ({
+  currentUser: vi.fn(),
 }));
 
 // Mock database
@@ -27,15 +27,19 @@ describe('Admin Moderation API Contract Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock authenticated admin user by default
-    vi.mocked(auth).mockReturnValue({
-      userId: 'user_admin123',
-      sessionId: 'session_admin123',
-      sessionClaims: {
-        metadata: {
-          role: 'SuperAdmin',
+    vi.mocked(currentUser).mockResolvedValue({
+      id: 'user_admin123',
+      username: 'admin',
+      emailAddresses: [
+        {
+          id: 'email_123',
+          emailAddress: 'admin@example.com',
+          verification: { status: 'verified', strategy: 'email_code' },
+          linkedTo: [],
         },
-      },
-    });
+      ],
+      publicMetadata: { role: 'SuperAdmin' },
+    } as any);
   });
 
   afterEach(() => {
@@ -86,16 +90,19 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should filter queue by fandom for FandomAdmin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_fandomadmin123',
-        sessionId: 'session_fandomadmin123',
-        sessionClaims: {
-          metadata: {
-            role: 'FandomAdmin',
-            fandomId: 'harry-potter',
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_fandomadmin123',
+        username: 'fandomadmin',
+        emailAddresses: [
+          {
+            id: 'email_123',
+            emailAddress: 'fandomadmin@example.com',
+            verification: { status: 'verified', strategy: 'email_code' },
+            linkedTo: [],
           },
-        },
-      });
+        ],
+        publicMetadata: { role: 'FandomAdmin', fandomId: 'harry-potter' },
+      } as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/admin/submissions/queue?fandom=harry-potter'
@@ -189,10 +196,7 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/admin/submissions/queue'
@@ -213,15 +217,10 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 403 for non-admin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_regular123',
-        sessionId: 'session_regular123',
-        sessionClaims: {
-          metadata: {
-            role: 'User',
-          },
-        },
-      });
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_regular123',
+        publicMetadata: { role: 'User' },
+      } as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/admin/submissions/queue'
@@ -242,16 +241,13 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 403 for FandomAdmin accessing wrong fandom', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_fandomadmin123',
-        sessionId: 'session_fandomadmin123',
-        sessionClaims: {
-          metadata: {
-            role: 'FandomAdmin',
-            fandomId: 'percy-jackson',
-          },
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_fandomadmin123',
+        publicMetadata: {
+          role: 'FandomAdmin',
+          fandomId: 'percy-jackson',
         },
-      });
+      } as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/admin/submissions/queue?fandom=harry-potter'
@@ -411,10 +407,7 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const assignmentData = {
@@ -442,15 +435,10 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 403 for non-admin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_regular123',
-        sessionId: 'session_regular123',
-        sessionClaims: {
-          metadata: {
-            role: 'User',
-          },
-        },
-      });
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_regular123',
+        publicMetadata: { role: 'User' },
+      } as any);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const assignmentData = {
@@ -664,16 +652,13 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 403 when FandomAdmin tries to review submission from different fandom', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_fandomadmin123',
-        sessionId: 'session_fandomadmin123',
-        sessionClaims: {
-          metadata: {
-            role: 'FandomAdmin',
-            fandomId: 'percy-jackson',
-          },
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_fandomadmin123',
+        publicMetadata: {
+          role: 'FandomAdmin',
+          fandomId: 'percy-jackson',
         },
-      });
+      } as any);
 
       const harryPotterSubmissionId = '123e4567-e89b-12d3-a456-426614174000';
       const reviewData = {
@@ -707,10 +692,7 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const reviewData = {
@@ -738,15 +720,10 @@ describe('Admin Moderation API Contract Tests', () => {
 
     it('should return 403 for non-admin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_regular123',
-        sessionId: 'session_regular123',
-        sessionClaims: {
-          metadata: {
-            role: 'User',
-          },
-        },
-      });
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_regular123',
+        publicMetadata: { role: 'User' },
+      } as any);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const reviewData = {

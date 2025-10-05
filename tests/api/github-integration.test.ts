@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 
 // Import the GitHub integration handlers we need to test
 // Note: These imports will fail initially - that's expected in TDD
-import { POST as handleGitHubWebhook } from '@/app/api/webhooks/github/route';
-import { GET as getGitHubIntegrationStatus } from '@/app/api/v1/github/status/route';
-import { POST as syncWithGitHub } from '@/app/api/v1/github/sync/route';
+import { POST as handleGitHubWebhook } from '../../app/webhooks/github/route';
+import { GET as getGitHubIntegrationStatus } from '../../app/api/v1/github/status/route';
+import { POST as syncWithGitHub } from '../../app/api/v1/github/sync/route';
 
 // Mock Clerk auth
-vi.mock('@clerk/nextjs', () => ({
-  auth: vi.fn(),
+vi.mock('@clerk/nextjs/server', () => ({
+  currentUser: vi.fn(),
 }));
 
 // Mock GitHub service
@@ -38,15 +38,19 @@ describe('GitHub Integration API Contract Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock authenticated admin user by default for admin endpoints
-    vi.mocked(auth).mockReturnValue({
-      userId: 'user_admin123',
-      sessionId: 'session_admin123',
-      sessionClaims: {
-        metadata: {
-          role: 'SuperAdmin',
+    vi.mocked(currentUser).mockResolvedValue({
+      id: 'user_admin123',
+      username: 'admin',
+      emailAddresses: [
+        {
+          id: 'email_123',
+          emailAddress: 'admin@example.com',
+          verification: { status: 'verified', strategy: 'email_code' },
+          linkedTo: [],
         },
-      },
-    });
+      ],
+      publicMetadata: { role: 'SuperAdmin' },
+    } as any);
   });
 
   afterEach(() => {
@@ -477,10 +481,7 @@ submission_id: "123e4567-e89b-12d3-a456-426614174000"
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/github/status'
@@ -501,15 +502,10 @@ submission_id: "123e4567-e89b-12d3-a456-426614174000"
 
     it('should return 403 for non-admin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_regular123',
-        sessionId: 'session_regular123',
-        sessionClaims: {
-          metadata: {
-            role: 'User',
-          },
-        },
-      });
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_regular123',
+        publicMetadata: { role: 'User' },
+      } as any);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/github/status'
@@ -654,7 +650,7 @@ submission_id: "123e4567-e89b-12d3-a456-426614174000"
 
       // Assert - later requests should be rate limited
       const rateLimitedResponses = responses.filter(
-        response => response.status === 429
+        (response: any) => response.status === 429
       );
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
 
@@ -707,10 +703,7 @@ submission_id: "123e4567-e89b-12d3-a456-426614174000"
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const syncRequest = { forceSync: false };
       const request = new NextRequest(
@@ -731,15 +724,10 @@ submission_id: "123e4567-e89b-12d3-a456-426614174000"
 
     it('should return 403 for non-admin users', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: 'user_regular123',
-        sessionId: 'session_regular123',
-        sessionClaims: {
-          metadata: {
-            role: 'User',
-          },
-        },
-      });
+      vi.mocked(currentUser).mockResolvedValue({
+        id: 'user_regular123',
+        publicMetadata: { role: 'User' },
+      } as any);
 
       const syncRequest = { forceSync: false };
       const request = new NextRequest(

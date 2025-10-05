@@ -72,7 +72,7 @@ export function getDatabase(): DatabaseConnection {
 export function getRawDatabase(): RawDatabaseConnection {
   if (!rawSqlite) {
     // Always use test database for raw database access
-    rawSqlite = new Database('./data/the-pensive-index-test.db');
+    rawSqlite = new Database('./data/the-pensive-index.db');
     rawSqlite.pragma('foreign_keys = ON');
 
     // Initialize database with schemas for testing
@@ -149,13 +149,13 @@ export const isTesting = process.env.NODE_ENV === 'test';
 // Database file paths for different environments
 export const DATABASE_PATHS = {
   development: './data/the-pensive-index-dev.db',
-  test: './data/the-pensive-index-test.db',
+  test: './data/the-pensive-index.db',
   production: './data/the-pensive-index.db',
 } as const;
 
 // Get environment-specific database path
 export function getDatabasePath(): string {
-  if (isTesting) return DATABASE_PATHS.test;
-  if (isDevelopment) return DATABASE_PATHS.development;
+  if (isTesting) {return DATABASE_PATHS.test;}
+  if (isDevelopment) {return DATABASE_PATHS.development;}
   return DATABASE_PATHS.production;
 }

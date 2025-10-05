@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 
 // Import the extraction API handlers we need to test
 // Note: These imports will fail initially - that's expected in TDD
-import { POST as extractMetadata } from '@/app/api/v1/extract/metadata/route';
-import { POST as suggestTags } from '@/app/api/v1/suggest/tags/route';
+import { POST as extractMetadata } from '../../app/api/v1/extract/metadata/route';
+import { POST as suggestTags } from '../../app/api/v1/suggest/tags/route';
 
 // Mock Clerk auth
-vi.mock('@clerk/nextjs', () => ({
-  auth: vi.fn(),
+vi.mock('@clerk/nextjs/server', () => ({
+  currentUser: vi.fn(),
 }));
 
 // Mock extractor service
@@ -32,10 +32,18 @@ describe('Metadata Extraction API Contract Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock authenticated user by default
-    vi.mocked(auth).mockReturnValue({
-      userId: 'user_test123',
-      sessionId: 'session_test123',
-    });
+    vi.mocked(currentUser).mockResolvedValue({
+      id: 'user_test123',
+      username: 'testuser',
+      emailAddresses: [
+        {
+          id: 'email_123',
+          emailAddress: 'test@example.com',
+          verification: { status: 'verified', strategy: 'email_code' },
+          linkedTo: [],
+        },
+      ],
+    } as any);
   });
 
   afterEach(() => {
@@ -298,10 +306,7 @@ describe('Metadata Extraction API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const extractionRequest = {
         url: 'https://archiveofourown.org/works/12345',
@@ -352,7 +357,7 @@ describe('Metadata Extraction API Contract Tests', () => {
 
       // Assert - some requests should be rate limited
       const rateLimitedResponses = responses.filter(
-        response => response.status === 429
+        (response: any) => response.status === 429
       );
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
 
@@ -636,10 +641,7 @@ describe('Metadata Extraction API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const suggestionRequest = {
         fandomId: 'harry-potter',

@@ -175,6 +175,7 @@ describe('ValidationEngine Core', () => {
   describe('Validation Context Processing', () => {
     it('should validate a simple context successfully', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'],
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -192,6 +193,7 @@ describe('ValidationEngine Core', () => {
 
     it('should detect shipping conflicts within tag class', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-ginny'], // Conflicting ships
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -214,6 +216,7 @@ describe('ValidationEngine Core', () => {
 
     it('should handle empty applied tags gracefully', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: [],
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -228,6 +231,7 @@ describe('ValidationEngine Core', () => {
 
     it('should validate plot block context when provided', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond
         applied_tags: ['harry-hermione'],
         all_tags: mockTags,
@@ -248,6 +252,7 @@ describe('ValidationEngine Core', () => {
   describe('Tag Class Validation Rules', () => {
     it('should enforce mutual exclusion within class', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-ginny'],
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -269,6 +274,7 @@ describe('ValidationEngine Core', () => {
     it('should enforce instance limits', () => {
       // Create context that violates max_instances: 1 for shipping class
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-luna'], // Assuming both are in shipping class
         all_tags: [
           ...mockTags,
@@ -307,6 +313,7 @@ describe('ValidationEngine Core', () => {
 
     it('should validate required context', () => {
       const contextWithMissingRequirement: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: [], // Missing required 'time-travel' tag for tc-002
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -327,6 +334,7 @@ describe('ValidationEngine Core', () => {
   describe('Plot Block Validation', () => {
     it('should validate plot block requirements', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond - requires 'romantic-tag'
         applied_tags: [], // Missing required tags
         all_tags: mockTags,
@@ -344,6 +352,7 @@ describe('ValidationEngine Core', () => {
 
     it('should detect plot block conflicts', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[1], // Goblin Inheritance - conflicts with 'muggle-raised'
         applied_tags: ['muggle-raised'],
         all_tags: [
@@ -375,6 +384,7 @@ describe('ValidationEngine Core', () => {
 
     it('should handle enhancement relationships', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond - enhanced by 'soulmate'
         applied_tags: ['harry-hermione', 'soulmate'],
         all_tags: mockTags,
@@ -398,6 +408,7 @@ describe('ValidationEngine Core', () => {
       const startTime = performance.now();
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'time-travel'],
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -425,6 +436,7 @@ describe('ValidationEngine Core', () => {
       const engine = new ValidationEngine(malformedTagClasses, mockPlotBlocks);
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'],
         all_tags: mockTags,
         tag_classes: malformedTagClasses,
@@ -446,6 +458,7 @@ describe('ValidationEngine Core', () => {
       const engine = new ValidationEngine(mockTagClasses, malformedPlotBlocks);
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: malformedPlotBlocks[0],
         applied_tags: ['harry-hermione'],
         all_tags: mockTags,
@@ -476,6 +489,7 @@ describe('ValidationEngine Core', () => {
       const startTime = performance.now();
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: largeTags.slice(0, 50).map(t => t.name),
         all_tags: largeTags,
         tag_classes: mockTagClasses,
@@ -496,6 +510,7 @@ describe('ValidationEngine Core', () => {
   describe('Result Structure Validation', () => {
     it('should return properly structured validation result', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'],
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -515,6 +530,7 @@ describe('ValidationEngine Core', () => {
 
     it('should include suggestions when available', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond - soft requires 'soulmate'
         applied_tags: ['harry-hermione'], // Missing soft requirement
         all_tags: mockTags,
@@ -536,6 +552,7 @@ describe('ValidationEngine Core', () => {
 
     it('should provide detailed error information', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-ginny'], // Conflicting ships
         all_tags: mockTags,
         tag_classes: mockTagClasses,
@@ -556,3 +573,6 @@ describe('ValidationEngine Core', () => {
     });
   });
 });
+
+
+

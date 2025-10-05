@@ -267,6 +267,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
   describe('Mutual Exclusion Rules', () => {
     it('should detect conflicts within same tag class', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-ginny'], // Both shipping tags, should conflict
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -306,6 +307,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       const engine = new ValidationEngine(modifiedTagClasses, []);
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'harry-ginny'],
         all_tags: testTags,
         tag_classes: modifiedTagClasses,
@@ -324,6 +326,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should detect conflicts between specific conflicting tags', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['time-turner', 'fixed-timeline'], // Explicitly conflicting
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -354,6 +357,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'friendship-shipping'],
         all_tags: [...testTags, friendshipShippingTag],
         tag_classes: testTagClasses,
@@ -374,6 +378,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
   describe('Instance Limit Rules', () => {
     it('should enforce maximum instance limits', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'hermione-ron', 'harry-ginny'], // 3 shipping tags, max is 2
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -394,6 +399,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should enforce exact instance requirements', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['powerful-harry', 'weak-harry'], // 2 power level tags, exact should be 1
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -445,6 +451,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       );
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['min-tag-1'], // Only 1 tag, min is 2
         all_tags: [...testTags, minTag1],
         tag_classes: [...testTagClasses, minRequiredTagClass],
@@ -464,6 +471,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should pass when instance limits are satisfied', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'], // 1 shipping tag, within limits (max 2)
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -486,6 +494,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
   describe('Required Context Rules', () => {
     it('should detect missing required tags', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'], // Shipping tag without required 'romantic-content'
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -505,6 +514,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should detect missing required metadata', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'romantic-content'],
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -524,6 +534,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should detect missing required tag classes', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['time-turner', 'temporal-mechanics'], // Temporal tags without 'magical-devices' class
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -543,6 +554,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should pass when all required context is present', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione', 'romantic-content'],
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -579,6 +591,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['time-travel'],
         all_tags: [...testTags, timeTag],
         tag_classes: testTagClasses,
@@ -610,6 +623,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['weak-character'],
         all_tags: [...testTags, powerTag],
         tag_classes: testTagClasses,
@@ -629,6 +643,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should require specific plot blocks', () => {
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['time-turner'], // Temporal tag without required plot block
         all_tags: testTags,
         tag_classes: testTagClasses,
@@ -662,6 +677,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['complex-dependent'], // Missing prerequisites
         all_tags: [...testTags, dependentTag],
         tag_classes: testTagClasses,
@@ -694,6 +710,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: [
           'enhancement-source',
           'prerequisite-a',
@@ -735,6 +752,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: [
           'feature-enabler',
           'prerequisite-a',
@@ -780,6 +798,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['orphan-tag'],
         all_tags: [...testTags, orphanTag],
         tag_classes: testTagClasses,
@@ -818,6 +837,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       };
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['empty-rules-tag'],
         all_tags: [...testTags, emptyTag],
         tag_classes: [...testTagClasses, emptyRulesTagClass],
@@ -853,6 +873,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       );
 
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: ['harry-hermione'],
         all_tags: testTags,
         tag_classes: [...testTagClasses, malformedTagClass],
@@ -870,6 +891,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
       // Create a complex context with multiple rule types
       const context: ValidationContext = {
+        fandomId: 'harry-potter',
         applied_tags: [
           'harry-hermione',
           'romantic-content',
@@ -901,3 +923,4 @@ describe('Rule Conditions - Tag Class Validation', () => {
     });
   });
 });
+

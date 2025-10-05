@@ -14,6 +14,7 @@ import React from 'react';
 import {
   GlobalPerformanceMonitor,
   measureAsync,
+  measureSync,
   measureMemory,
   PERFORMANCE_THRESHOLDS,
 } from '../setup/performance-setup';

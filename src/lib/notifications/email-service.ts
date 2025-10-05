@@ -115,6 +115,24 @@ export class EmailService {
   }
 
   /**
+   * Helper to convert null to undefined for template data
+   */
+  private nullToUndefined<T>(value: T | null): T | undefined {
+    return value === null ? undefined : value;
+  }
+
+  /**
+   * Convert submission with null fields to template-compatible format
+   */
+  private prepareSubmissionForTemplate(submission: StorySubmission): any {
+    const result: any = {};
+    for (const [key, value] of Object.entries(submission)) {
+      result[key] = value === null ? undefined : value;
+    }
+    return result;
+  }
+
+  /**
    * Send submission received confirmation
    */
   async sendSubmissionConfirmation(
@@ -126,16 +144,18 @@ export class EmailService {
       `[Email Service] Sending submission confirmation for: ${submission.id}`
     );
 
+    const preparedSubmission = this.prepareSubmissionForTemplate(submission);
+
     const templateData: EmailTemplateData = {
       submission: {
-        ...submission,
+        ...preparedSubmission,
         queuePosition: await this.getQueuePosition(submission.id),
         estimatedReviewTime: await this.getEstimatedReviewTime(),
       },
       user: {
-        id: submission.submittedBy,
+        id: submission.submitterUserId,
         email: submitterEmail,
-        name: submission.submitterName || 'Contributor',
+        name: submission.authorName || 'Contributor',
       },
       metadata: {
         timestamp: new Date(),
@@ -160,6 +180,7 @@ export class EmailService {
    */
   async sendApprovalNotification(
     submission: StorySubmission,
+    submitterEmail: string,
     approvalData: {
       reason?: string;
       approvalDate: Date;
@@ -172,27 +193,29 @@ export class EmailService {
       `[Email Service] Sending approval notification for: ${submission.id}`
     );
 
+    const preparedSubmission = this.prepareSubmissionForTemplate(submission);
+
     const templateData: EmailTemplateData = {
       submission: {
-        ...submission,
+        ...preparedSubmission,
         moderatorName: approvalData.moderatorName,
         githubIssueUrl: approvalData.githubIssueUrl,
       },
       user: {
-        id: submission.submittedBy,
-        email: submission.submitterEmail,
-        name: submission.submitterName || 'Contributor',
+        id: submission.submitterUserId,
+        email: submitterEmail,
+        name: submission.authorName || 'Contributor',
       },
       metadata: {
         timestamp: approvalData.approvalDate,
         reason: approvalData.reason || 'Quality standards met',
-        actionType: 'approved',
+        actionType: ModerationActionType.APPROVE,
       },
     };
 
     return await this.sendTemplatedEmail(
       'submission-approved',
-      submission.submitterEmail,
+      submitterEmail,
       templateData,
       {
         ...options,
@@ -207,6 +230,7 @@ export class EmailService {
    */
   async sendRejectionNotification(
     submission: StorySubmission,
+    submitterEmail: string,
     rejectionData: {
       reason: string;
       rejectionDate: Date;
@@ -220,28 +244,30 @@ export class EmailService {
       `[Email Service] Sending rejection notification for: ${submission.id}`
     );
 
+    const preparedSubmission = this.prepareSubmissionForTemplate(submission);
+
     const templateData: EmailTemplateData = {
       submission: {
-        ...submission,
+        ...preparedSubmission,
         rejectionReason: rejectionData.reason,
         moderatorName: rejectionData.moderatorName,
         githubIssueUrl: rejectionData.githubIssueUrl,
       },
       user: {
-        id: submission.submittedBy,
-        email: submission.submitterEmail,
-        name: submission.submitterName || 'Contributor',
+        id: submission.submitterUserId,
+        email: submitterEmail,
+        name: submission.authorName || 'Contributor',
       },
       metadata: {
         timestamp: rejectionData.rejectionDate,
         reason: rejectionData.reason,
-        actionType: 'rejected',
+        actionType: ModerationActionType.REJECT,
       },
     };
 
     return await this.sendTemplatedEmail(
       'submission-rejected',
-      submission.submitterEmail,
+      submitterEmail,
       templateData,
       {
         ...options,
@@ -256,6 +282,7 @@ export class EmailService {
    */
   async sendChangesRequestedNotification(
     submission: StorySubmission,
+    submitterEmail: string,
     changesData: {
       reason: string;
       requestDate: Date;
@@ -269,28 +296,30 @@ export class EmailService {
       `[Email Service] Sending changes requested notification for: ${submission.id}`
     );
 
+    const preparedSubmission = this.prepareSubmissionForTemplate(submission);
+
     const templateData: EmailTemplateData = {
       submission: {
-        ...submission,
+        ...preparedSubmission,
         requestedChanges: changesData.requestedChanges,
         moderatorName: changesData.moderatorName,
         githubIssueUrl: changesData.githubIssueUrl,
       },
       user: {
-        id: submission.submittedBy,
-        email: submission.submitterEmail,
-        name: submission.submitterName || 'Contributor',
+        id: submission.submitterUserId,
+        email: submitterEmail,
+        name: submission.authorName || 'Contributor',
       },
       metadata: {
         timestamp: changesData.requestDate,
         reason: changesData.reason,
-        actionType: 'changes_requested',
+        actionType: ModerationActionType.REQUEST_CHANGES,
       },
     };
 
     return await this.sendTemplatedEmail(
       'changes-requested',
-      submission.submitterEmail,
+      submitterEmail,
       templateData,
       {
         ...options,
@@ -323,9 +352,11 @@ export class EmailService {
       `[Email Service] Sending moderator assignment notification: ${submission.id} → ${moderator.name}`
     );
 
+    const preparedSubmission = this.prepareSubmissionForTemplate(submission);
+
     const templateData: EmailTemplateData = {
       submission: {
-        ...submission,
+        ...preparedSubmission,
         queuePosition: assignmentData.queuePosition,
         estimatedReviewTime: assignmentData.estimatedReviewTime,
       },
@@ -393,7 +424,12 @@ export class EmailService {
         email,
         {
           ...templateData,
-          admin: { ...templateData.admin!, email },
+          admin: {
+            id: templateData.admin?.id || 'system',
+            name: templateData.admin?.name || 'System Admin',
+            email,
+            role: templateData.admin?.role || 'admin',
+          },
         },
         {
           ...options,
@@ -564,19 +600,19 @@ export class EmailService {
   /**
    * Get queue position for submission
    */
-  private async getQueuePosition(submissionId: string): Promise<number> {
+  private getQueuePosition(submissionId: string): Promise<number> {
     // This would integrate with QueueService to get actual position
     // Placeholder implementation
-    return Math.floor(Math.random() * 20) + 1;
+    return Promise.resolve(Math.floor(Math.random() * 20) + 1);
   }
 
   /**
    * Get estimated review time
    */
-  private async getEstimatedReviewTime(): Promise<string> {
+  private getEstimatedReviewTime(): Promise<string> {
     // This would calculate based on current queue stats
     // Placeholder implementation
-    return '2-3 business days';
+    return Promise.resolve('2-3 business days');
   }
 
   /**
@@ -671,13 +707,13 @@ abstract class EmailTemplate {
  * Submission Received Template
  */
 class SubmissionReceivedTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     const { submission, user } = data;
 
-    return {
-      subject: `Submission Received: "${submission?.title}"`,
+    return Promise.resolve({
+      subject: `Submission Received: "${submission?.storyTitle}"`,
       htmlBody: `
         <h2>Thank you for your submission!</h2>
         <p>Hello ${user?.name || 'Contributor'},</p>
@@ -685,7 +721,7 @@ class SubmissionReceivedTemplate extends EmailTemplate {
 
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3>Submission Details</h3>
-          <p><strong>Title:</strong> ${submission?.title}</p>
+          <p><strong>Title:</strong> ${submission?.storyTitle}</p>
           <p><strong>Fandom:</strong> ${submission?.fandomName || 'N/A'}</p>
           <p><strong>Submitted:</strong> ${this.formatDate(
             data.metadata?.timestamp || new Date()
@@ -703,14 +739,14 @@ class SubmissionReceivedTemplate extends EmailTemplate {
         <p>Thank you for contributing to The Pensieve Index!</p>
       `,
       textBody: `
-        Submission Received: "${submission?.title}"
+        Submission Received: "${submission?.storyTitle}"
 
         Hello ${user?.name || 'Contributor'},
 
         We've received your story submission and added it to our review queue.
 
         Submission Details:
-        - Title: ${submission?.title}
+        - Title: ${submission?.storyTitle}
         - Fandom: ${submission?.fandomName || 'N/A'}
         - Submitted: ${this.formatDate(data.metadata?.timestamp || new Date())}
         - Queue Position: #${submission?.queuePosition || 'TBD'}
@@ -722,7 +758,7 @@ class SubmissionReceivedTemplate extends EmailTemplate {
 
         Thank you for contributing to The Pensieve Index!
       `,
-    };
+    });
   }
 }
 
@@ -730,13 +766,13 @@ class SubmissionReceivedTemplate extends EmailTemplate {
  * Submission Approved Template
  */
 class SubmissionApprovedTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     const { submission, user, metadata } = data;
 
-    return {
-      subject: `✅ Submission Approved: "${submission?.title}"`,
+    return Promise.resolve({
+      subject: `✅ Submission Approved: "${submission?.storyTitle}"`,
       htmlBody: `
         <h2 style="color: #28a745;">Submission Approved! 🎉</h2>
         <p>Hello ${user?.name || 'Contributor'},</p>
@@ -744,7 +780,7 @@ class SubmissionApprovedTemplate extends EmailTemplate {
 
         <div style="background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
           <h3>Approved Submission</h3>
-          <p><strong>Title:</strong> ${submission?.title}</p>
+          <p><strong>Title:</strong> ${submission?.storyTitle}</p>
           <p><strong>Fandom:</strong> ${submission?.fandomName || 'N/A'}</p>
           <p><strong>Approved:</strong> ${this.formatDate(
             metadata?.timestamp || new Date()
@@ -770,14 +806,14 @@ class SubmissionApprovedTemplate extends EmailTemplate {
         }
       `,
       textBody: `
-        Submission Approved: "${submission?.title}"
+        Submission Approved: "${submission?.storyTitle}"
 
         Hello ${user?.name || 'Contributor'},
 
         Great news! Your story submission has been approved and added to The Pensieve Index.
 
         Approved Submission:
-        - Title: ${submission?.title}
+        - Title: ${submission?.storyTitle}
         - Fandom: ${submission?.fandomName || 'N/A'}
         - Approved: ${this.formatDate(metadata?.timestamp || new Date())}
         ${
@@ -795,7 +831,7 @@ class SubmissionApprovedTemplate extends EmailTemplate {
             : ''
         }
       `,
-    };
+    });
   }
 }
 
@@ -803,13 +839,13 @@ class SubmissionApprovedTemplate extends EmailTemplate {
  * Submission Rejected Template
  */
 class SubmissionRejectedTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     const { submission, user, metadata } = data;
 
-    return {
-      subject: `Submission Update: "${submission?.title}"`,
+    return Promise.resolve({
+      subject: `Submission Update: "${submission?.storyTitle}"`,
       htmlBody: `
         <h2 style="color: #dc3545;">Submission Update</h2>
         <p>Hello ${user?.name || 'Contributor'},</p>
@@ -817,7 +853,7 @@ class SubmissionRejectedTemplate extends EmailTemplate {
 
         <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #dc3545;">
           <h3>Submission Details</h3>
-          <p><strong>Title:</strong> ${submission?.title}</p>
+          <p><strong>Title:</strong> ${submission?.storyTitle}</p>
           <p><strong>Fandom:</strong> ${submission?.fandomName || 'N/A'}</p>
           <p><strong>Reviewed:</strong> ${this.formatDate(
             metadata?.timestamp || new Date()
@@ -851,14 +887,14 @@ class SubmissionRejectedTemplate extends EmailTemplate {
         }
       `,
       textBody: `
-        Submission Update: "${submission?.title}"
+        Submission Update: "${submission?.storyTitle}"
 
         Hello ${user?.name || 'Contributor'},
 
         Thank you for your submission to The Pensieve Index. After review, we're unable to approve this submission at this time.
 
         Submission Details:
-        - Title: ${submission?.title}
+        - Title: ${submission?.storyTitle}
         - Fandom: ${submission?.fandomName || 'N/A'}
         - Reviewed: ${this.formatDate(metadata?.timestamp || new Date())}
         ${
@@ -886,7 +922,7 @@ class SubmissionRejectedTemplate extends EmailTemplate {
             : ''
         }
       `,
-    };
+    });
   }
 }
 
@@ -894,13 +930,13 @@ class SubmissionRejectedTemplate extends EmailTemplate {
  * Changes Requested Template
  */
 class ChangesRequestedTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     const { submission, user, metadata } = data;
 
-    return {
-      subject: `Changes Requested: "${submission?.title}"`,
+    return Promise.resolve({
+      subject: `Changes Requested: "${submission?.storyTitle}"`,
       htmlBody: `
         <h2 style="color: #fd7e14;">Changes Requested</h2>
         <p>Hello ${user?.name || 'Contributor'},</p>
@@ -908,7 +944,7 @@ class ChangesRequestedTemplate extends EmailTemplate {
 
         <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #fd7e14;">
           <h3>Submission Details</h3>
-          <p><strong>Title:</strong> ${submission?.title}</p>
+          <p><strong>Title:</strong> ${submission?.storyTitle}</p>
           <p><strong>Fandom:</strong> ${submission?.fandomName || 'N/A'}</p>
           <p><strong>Reviewed:</strong> ${this.formatDate(
             metadata?.timestamp || new Date()
@@ -946,14 +982,14 @@ class ChangesRequestedTemplate extends EmailTemplate {
         }
       `,
       textBody: `
-        Changes Requested: "${submission?.title}"
+        Changes Requested: "${submission?.storyTitle}"
 
         Hello ${user?.name || 'Contributor'},
 
         We've reviewed your submission and would like you to make some adjustments before we can approve it.
 
         Submission Details:
-        - Title: ${submission?.title}
+        - Title: ${submission?.storyTitle}
         - Fandom: ${submission?.fandomName || 'N/A'}
         - Reviewed: ${this.formatDate(metadata?.timestamp || new Date())}
         ${
@@ -981,7 +1017,7 @@ class ChangesRequestedTemplate extends EmailTemplate {
             : ''
         }
       `,
-    };
+    });
   }
 }
 
@@ -989,13 +1025,13 @@ class ChangesRequestedTemplate extends EmailTemplate {
  * Moderator Assignment Template
  */
 class ModeratorAssignedTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     const { submission, moderator, metadata } = data;
 
-    return {
-      subject: `New Submission Assigned: "${submission?.title}"`,
+    return Promise.resolve({
+      subject: `New Submission Assigned: "${submission?.storyTitle}"`,
       htmlBody: `
         <h2>New Moderation Assignment</h2>
         <p>Hello ${moderator?.name},</p>
@@ -1003,7 +1039,7 @@ class ModeratorAssignedTemplate extends EmailTemplate {
 
         <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2196f3;">
           <h3>Assignment Details</h3>
-          <p><strong>Title:</strong> ${submission?.title}</p>
+          <p><strong>Title:</strong> ${submission?.storyTitle}</p>
           <p><strong>Fandom:</strong> ${submission?.fandomName || 'N/A'}</p>
           <p><strong>Priority:</strong> ${metadata?.priority || 'normal'}</p>
           <p><strong>Queue Position:</strong> #${
@@ -1031,7 +1067,7 @@ class ModeratorAssignedTemplate extends EmailTemplate {
         You've been assigned a new submission to review.
 
         Assignment Details:
-        - Title: ${submission?.title}
+        - Title: ${submission?.storyTitle}
         - Fandom: ${submission?.fandomName || 'N/A'}
         - Priority: ${metadata?.priority || 'normal'}
         - Queue Position: #${submission?.queuePosition || 'TBD'}
@@ -1044,60 +1080,60 @@ class ModeratorAssignedTemplate extends EmailTemplate {
 
         View Submission: /admin/submissions/${submission?.id}
       `,
-    };
+    });
   }
 }
 
 // Additional template classes would be implemented similarly...
 class AdminNotificationTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     // Implementation for admin notifications
-    return {
+    return Promise.resolve({
       subject: 'Admin Alert: System Notification',
       htmlBody: '<p>Admin notification content...</p>',
       textBody: 'Admin notification content...',
-    };
+    });
   }
 }
 
 class QueueAlertTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     // Implementation for queue alerts
-    return {
+    return Promise.resolve({
       subject: 'Queue Alert: Review Backlog',
       htmlBody: '<p>Queue alert content...</p>',
       textBody: 'Queue alert content...',
-    };
+    });
   }
 }
 
 class WelcomeTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     // Implementation for welcome emails
-    return {
+    return Promise.resolve({
       subject: 'Welcome to The Pensieve Index',
       htmlBody: '<p>Welcome content...</p>',
       textBody: 'Welcome content...',
-    };
+    });
   }
 }
 
 class ReminderTemplate extends EmailTemplate {
-  async compile(
+  compile(
     data: EmailTemplateData
   ): Promise<{ subject: string; htmlBody: string; textBody: string }> {
     // Implementation for reminder emails
-    return {
+    return Promise.resolve({
       subject: 'Reminder: Pending Action Required',
       htmlBody: '<p>Reminder content...</p>',
       textBody: 'Reminder content...',
-    };
+    });
   }
 }
 
@@ -1121,7 +1157,7 @@ interface EmailProvider {
  * Default Email Provider (placeholder implementation)
  */
 class DefaultEmailProvider implements EmailProvider {
-  async sendEmail(
+  sendEmail(
     email: {
       to: string;
       subject: string;
@@ -1136,13 +1172,13 @@ class DefaultEmailProvider implements EmailProvider {
       `[Email Provider] Sending email: ${email.subject} to ${email.to}`
     );
 
-    return {
+    return Promise.resolve({
       messageId: `msg-${Date.now()}-${Math.random()}`,
-      status: 'sent',
+      status: 'sent' as const,
       recipient: email.to,
       timestamp: new Date(),
       trackingId: email.trackOpening ? `track-${Date.now()}` : undefined,
-    };
+    });
   }
 }
 
@@ -1150,7 +1186,7 @@ class DefaultEmailProvider implements EmailProvider {
  * Email Delivery Tracker
  */
 class EmailDeliveryTracker {
-  async trackDelivery(delivery: {
+  trackDelivery(delivery: {
     messageId: string;
     recipient: string;
     templateType: EmailTemplateType;
@@ -1163,9 +1199,10 @@ class EmailDeliveryTracker {
     console.log(
       `[Email Tracker] Tracking delivery: ${delivery.messageId} -> ${delivery.status}`
     );
+    return Promise.resolve();
   }
 
-  async getStats(
+  getStats(
     dateRange: { start: Date; end: Date },
     templateType?: EmailTemplateType
   ): Promise<{
@@ -1176,16 +1213,16 @@ class EmailDeliveryTracker {
     bounced: number;
   }> {
     // This would query delivery statistics from database
-    return {
+    return Promise.resolve({
       sent: 100,
       failed: 5,
       opened: 75,
       clicked: 25,
       bounced: 2,
-    };
+    });
   }
 
-  async getFailedDeliveries(filters: {
+  getFailedDeliveries(filters: {
     templateType?: EmailTemplateType;
     recipient?: string;
     dateRange?: { start: Date; end: Date };
@@ -1200,6 +1237,6 @@ class EmailDeliveryTracker {
     }>
   > {
     // This would query failed deliveries from database
-    return [];
+    return Promise.resolve([]);
   }
 }

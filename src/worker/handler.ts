@@ -1110,7 +1110,7 @@ export function handleRequest(
     '/story',
     '/sign-in',
     '/sign-up',
-    '/user-profile',
+    '/profile',
     '/_next',
     '/unauthorized',
     '/privacy',

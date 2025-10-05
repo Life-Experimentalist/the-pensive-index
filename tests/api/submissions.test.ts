@@ -1,39 +1,57 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 
 // Import the API handlers we need to test
-// Note: These imports will fail initially - that's expected in TDD
-import { POST as createSubmission } from '@/app/api/v1/submissions/route';
-import { GET as getSubmissions } from '@/app/api/v1/submissions/route';
+import { POST as createSubmission } from '../../app/api/v1/submissions/route';
+import { GET as getSubmissions } from '../../app/api/v1/submissions/route';
 import {
   GET as getSubmission,
   PATCH as updateSubmission,
-} from '@/app/api/v1/submissions/[id]/route';
+} from '../../app/api/v1/submissions/[id]/route';
 
 // Mock Clerk auth
-vi.mock('@clerk/nextjs', () => ({
-  auth: vi.fn(),
+vi.mock('@clerk/nextjs/server', () => ({
+  currentUser: vi.fn(),
 }));
 
-// Mock database
-vi.mock('@/src/lib/database', () => ({
-  db: {
-    select: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  },
+// Mock database services
+vi.mock('../../src/lib/services/submission-service', () => ({
+  SubmissionService: vi.fn(),
+}));
+
+vi.mock('../../src/lib/services/queue-service', () => ({
+  QueueService: vi.fn(),
+}));
+
+vi.mock('../../src/lib/validation/duplicate-detector', () => ({
+  DuplicateDetector: vi.fn(),
+}));
+
+vi.mock('../../src/lib/validation/quality-scorer', () => ({
+  QualityScorer: vi.fn(),
+}));
+
+vi.mock('../../src/lib/validation/tag-suggester', () => ({
+  TagSuggester: vi.fn(),
 }));
 
 describe('Story Submission API Contract Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock authenticated user by default
-    vi.mocked(auth).mockReturnValue({
-      userId: 'user_test123',
-      sessionId: 'session_test123',
-    });
+    vi.mocked(currentUser).mockResolvedValue({
+      id: 'user_test123',
+      username: 'testuser',
+      emailAddresses: [
+        {
+          id: 'email_123',
+          emailAddress: 'test@example.com',
+          verification: { status: 'verified', strategy: 'email_code' },
+          linkedTo: [],
+        },
+      ],
+    } as any);
   });
 
   afterEach(() => {
@@ -260,10 +278,7 @@ describe('Story Submission API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const submissionData = {
         storyUrl: 'https://archiveofourown.org/works/12345',
@@ -403,10 +418,7 @@ describe('Story Submission API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const request = new NextRequest(
         'http://localhost:3000/api/v1/submissions'
@@ -498,10 +510,7 @@ describe('Story Submission API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const request = new NextRequest(
@@ -664,10 +673,7 @@ describe('Story Submission API Contract Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Arrange
-      vi.mocked(auth).mockReturnValue({
-        userId: null,
-        sessionId: null,
-      });
+      vi.mocked(currentUser).mockResolvedValue(null);
 
       const submissionId = '123e4567-e89b-12d3-a456-426614174000';
       const request = new NextRequest(

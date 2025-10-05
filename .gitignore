@@ -84,3 +84,4 @@ temp/
 specs/*/
 !specs/.gitkeep
 backup/*
+check-to-be-trashed

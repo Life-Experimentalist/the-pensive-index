@@ -8,25 +8,55 @@ compatibility_flags = ["nodejs_compat"]
 
 # Environment variables
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", CACHE_TTL_SEARCH = "300", CACHE_TTL_VALIDATION = "3600", CACHE_TTL_STATIC = "86400" }
 
 [env.development]
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", CACHE_TTL_SEARCH = "60", CACHE_TTL_VALIDATION = "300", CACHE_TTL_STATIC = "3600" }
 
 # Static assets
 [site]
 bucket = "public"
 
-# Database binding (if using D1)
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "pensieve-index-db"
-# database_id = "your-database-id"
+# Database binding (D1 - SQLite)
+[[d1_databases]]
+binding = "DB"
+database_name = "pensive-index"
+database_id = "57eace70-cb4f-4fb2-9a7a-8037960f44d6"
+
+# Development database (same as production for now)
+[env.development.d1_databases]
+binding = "DB"
+database_name = "pensive-index"
+database_id = "57eace70-cb4f-4fb2-9a7a-8037960f44d6"
 
 # KV storage for caching
-# [[kv_namespaces]]
-# binding = "CACHE"
-# id = "your-kv-namespace-id"
+[[kv_namespaces]]
+binding = "CACHE"
+id = "4e66268461374e29a8b2ad480cbe2ca7"  # the-pensive-index KV namespace
+preview_id = "4e66268461374e29a8b2ad480cbe2ca7"  # Using same for preview (free tier)
+
+# Development KV namespace
+[env.development.kv_namespaces]
+binding = "CACHE"
+id = "4e66268461374e29a8b2ad480cbe2ca7"  # Using same for dev (free tier)
+
+# Durable Objects for rate limiting
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+script_name = "the-pensive-index"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RateLimiter"]
+
+# Scheduled cron triggers for performance monitoring
+[triggers]
+crons = [
+  "*/5 * * * *",  # Every 5 minutes - Metrics aggregation
+  "0 2 * * *",    # Daily at 2am UTC - Analytics aggregation
+  "0 * * * *"     # Every hour - Resource usage monitoring
+]
 
 # Build configuration - using modern deployment
 # No custom build needed for simple worker

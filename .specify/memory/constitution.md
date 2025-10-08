@@ -2,6 +2,8 @@
 
 ## Core Principles
 
+a. No creating of temporary reports and such markdown files in the project root but they are to be created in the `.project/` folder.
+
 ### I. Story Library First
 Every feature prioritizes existing story discovery before prompt generation:
 - Search existing tagged stories must be the primary function
@@ -16,7 +18,7 @@ Complex data relationships must be maintainable and scalable:
 - Tag Classes enable cross-referential validation (e.g., shipping conflicts)
 - Admin roles respect fandom boundaries (FandomAdmin vs ProjectAdmin)
 
-### III. Test-First Development (NON-NEGOTIABLE)
+### III. Test-First Development
 TDD mandatory for all validation logic and user interactions:
 - Validation engine tests written → User approved → Tests fail → Then implement
 - Complex rule combinations must have comprehensive test coverage

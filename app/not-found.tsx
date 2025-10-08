@@ -7,6 +7,8 @@
  * @version 1.0.0
  */
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import SafeUserButton from '@/components/ui/SafeUserButton';
@@ -159,7 +161,8 @@ export default function NotFoundPage() {
           {/* Fun message */}
           <div className="mt-16 text-gray-400 dark:text-gray-500 text-sm">
             <p>
-              🧙‍♂️ Even wizards get lost sometimes. Let's get you back on track!
+              🧙‍♂️ Even wizards get lost sometimes. Let's apparate or knight bus
+              you back on track!
             </p>
           </div>
         </div>

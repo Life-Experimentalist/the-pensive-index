@@ -398,27 +398,220 @@ X-RateLimit-Reset: 1640995200
 - Parent must exist if specified
 - Cannot be parent of itself (circular reference)
 
+## Performance Optimization Endpoints
+
+### GET /api/admin/performance/metrics
+
+Retrieve performance metrics for monitoring and analysis.
+
+**Authentication**: Admin required
+
+**Query Parameters:**
+- `metric` (string): Specific metric name (cache_hit_rate, error_rate, search_p95, etc.)
+- `start_date` (ISO 8601): Filter from date (default: last 24 hours)
+- `end_date` (ISO 8601): Filter to date (default: now)
+- `aggregation` (string): hourly, daily, weekly (default: hourly)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "metric_name": "cache_hit_rate",
+      "metric_value": 85.3,
+      "metric_unit": "percent",
+      "recorded_at": "2025-10-08T12:00:00.000Z",
+      "metadata": {
+        "cache_type": "search",
+        "fandom": "harry-potter"
+      }
+    }
+  ],
+  "metadata": {
+    "total": 100,
+    "aggregation": "hourly"
+  }
+}
+```
+
+### POST /api/admin/performance/invalidate-cache
+
+Invalidate cached data to force fresh data retrieval.
+
+**Authentication**: Admin required
+
+**Request Body:**
+```json
+{
+  "cacheKey": "all" | "search:fandom-slug" | "validation:fandom-slug" | "tags:fandom-slug"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "invalidated": true,
+    "cache_key": "all",
+    "invalidated_at": "2025-10-08T12:00:00.000Z",
+    "affected_entries": 150
+  }
+}
+```
+
+### GET /api/admin/performance/errors
+
+Retrieve error logs for debugging and monitoring.
+
+**Authentication**: Admin required
+
+**Query Parameters:**
+- `severity` (string): debug, info, warning, error, critical (default: all)
+- `start_date` (ISO 8601): Filter from date (default: last 24 hours)
+- `end_date` (ISO 8601): Filter to date (default: now)
+- `limit` (number): Limit results (default: 50, max: 500)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "severity": "error",
+      "error_message": "Database query timeout",
+      "error_code": "DB_TIMEOUT",
+      "stack_trace": "Error: timeout...",
+      "context": {
+        "query": "SELECT * FROM tags",
+        "duration_ms": 5000
+      },
+      "occurred_at": "2025-10-08T12:00:00.000Z"
+    }
+  ],
+  "metadata": {
+    "total": 25,
+    "severity_breakdown": {
+      "critical": 2,
+      "error": 15,
+      "warning": 8
+    }
+  }
+}
+```
+
+### GET /api/admin/performance/analytics
+
+Retrieve analytics events for usage tracking.
+
+**Authentication**: Admin required
+
+**Query Parameters:**
+- `event_type` (string): search, validation, pathway_created, etc.
+- `start_date` (ISO 8601): Filter from date (default: last 24 hours)
+- `end_date` (ISO 8601): Filter to date (default: now)
+- `limit` (number): Limit results (default: 100, max: 1000)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "event_type": "search",
+      "event_data": {
+        "fandom": "harry-potter",
+        "tags": ["time-travel", "romance"],
+        "results_count": 15
+      },
+      "user_id": "uuid",
+      "session_id": "session-uuid",
+      "occurred_at": "2025-10-08T12:00:00.000Z"
+    }
+  ],
+  "metadata": {
+    "total": 500,
+    "event_type_breakdown": {
+      "search": 300,
+      "validation": 150,
+      "pathway_created": 50
+    }
+  }
+}
+```
+
+### GET /api/admin/performance/resource-usage
+
+Monitor resource usage and capacity.
+
+**Authentication**: Admin required
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "cpu_usage_percent": 45.2,
+    "memory_usage_mb": 256.8,
+    "storage_usage_mb": 1024.5,
+    "request_count": 15000,
+    "error_count": 12,
+    "recorded_at": "2025-10-08T12:00:00.000Z",
+    "limits": {
+      "cpu_limit_percent": 80,
+      "memory_limit_mb": 512,
+      "storage_limit_mb": 5120,
+      "daily_request_limit": 100000
+    },
+    "health_status": "healthy"
+  }
+}
+```
+
 ## Performance Considerations
 
 - CRUD operations complete in <50ms
-- Validation operations complete in <200ms
+- Validation operations complete in <200ms (p95)
+- Search operations complete in <500ms (p95), <200ms cached
 - Complex queries complete in <100ms
 - Bulk operations complete in <500ms
 
 ## Caching
 
-The API implements caching for optimal performance:
-- Fandom data: 1 hour cache
-- Tag/TagClass data: 30 minutes cache
-- Plot block hierarchy: 30 minutes cache
-- Validation rules: 15 minutes cache
+The API implements a 4-layer caching strategy for optimal performance:
 
-Cache headers indicate caching status:
+**Cache Layers:**
+1. **KV Cache** (Cloudflare KV): Global edge caching (60s-3600s TTL)
+2. **Memory Cache**: In-process caching for frequently accessed data (30s TTL)
+3. **Database Cache**: Query result caching (variable TTL)
+4. **CDN Cache**: Static asset caching (24 hours)
+
+**Cache TTLs:**
+- Fandom data: 1 hour (KV)
+- Tag/TagClass data: 30 minutes (KV)
+- Plot block hierarchy: 30 minutes (KV)
+- Validation rules: 15 minutes (KV)
+- Search results: 5 minutes (Memory)
+- Story metadata: 1 hour (Database)
+
+**Cache Headers:**
 ```
-Cache-Control: public, max-age=3600
+Cache-Control: public, max-age=3600, s-maxage=3600
 ETag: "abc123"
 Last-Modified: Mon, 01 Jan 2024 00:00:00 GMT
+X-Cache-Status: HIT | MISS | BYPASS
+X-Cache-Layer: kv | memory | database | cdn
 ```
+
+**Cache Invalidation:**
+- Use `POST /api/admin/performance/invalidate-cache` to clear caches
+- Automatic invalidation on data updates (CRUD operations)
+- TTL-based expiration for stale data
 
 ## Pagination
 

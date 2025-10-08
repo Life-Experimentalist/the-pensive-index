@@ -85,3 +85,5 @@ specs/*/
 !specs/.gitkeep
 backup/*
 check-to-be-trashed
+.github/prompts*
+.specify

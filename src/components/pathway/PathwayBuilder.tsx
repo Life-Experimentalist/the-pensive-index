@@ -189,7 +189,7 @@ export function PathwayBuilder({
 
   return (
     <div className="pathway-builder grid grid-cols-3 gap-6 h-full">
-      {/* Left Panel: Available Tags & Plot Blocks */}
+      {/* Left Panel: Available Tags & Tropes */}
       <div className="col-span-1 space-y-6 overflow-y-auto">
         <div>
           <h3 className="text-lg font-semibold mb-3">Tags</h3>
@@ -210,7 +210,7 @@ export function PathwayBuilder({
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold mb-3">Plot Blocks</h3>
+          <h3 className="text-lg font-semibold mb-3">Tropes</h3>
           <div className="space-y-2">
             {availablePlotBlocks.map(block => (
               <div
@@ -282,7 +282,7 @@ export function PathwayBuilder({
           id="pathway-plotblocks-dropzone"
           className="min-h-[100px] p-4 border-2 border-dashed rounded"
         >
-          <h4 className="font-medium mb-2">Selected Plot Blocks</h4>
+          <h4 className="font-medium mb-2">Selected Tropes</h4>
           <div className="space-y-2">
             {selectedPlotBlocks.map(blockId => {
               const block = availablePlotBlocks.find(b => b.id === blockId);

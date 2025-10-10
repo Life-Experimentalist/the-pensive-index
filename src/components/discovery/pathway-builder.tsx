@@ -325,7 +325,7 @@ export function PathwayBuilder({
             </div>
             <p className="text-gray-500 font-medium">Your pathway is empty</p>
             <p className="text-sm text-gray-400 mt-1">
-              Add tags and plot blocks to build your story pathway
+              Add tags and tropes to build your story pathway
             </p>
           </div>
         ) : (

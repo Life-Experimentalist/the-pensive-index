@@ -12,7 +12,7 @@ import { plotBlocks } from '@/lib/database/schema';
 
 /**
  * GET /api/v1/plot-blocks/[id]
- * Get a specific plot block by ID
+ * Get a specific trope by ID
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
@@ -48,7 +48,7 @@ export const GET = CommonMiddleware.public(
 
 /**
  * PUT /api/v1/plot-blocks/[id]
- * Update a specific plot block (Admin only)
+ * Update a specific trope (Admin only)
  */
 export const PUT = CommonMiddleware.admin(
   withErrorHandling(
@@ -64,7 +64,7 @@ export const PUT = CommonMiddleware.admin(
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
-      // Check if plot block exists
+      // Check if trope exists
       const existingPlotBlock = await db.query.plotBlocks.findFirst({
         where: eq(plotBlocks.id, plotBlockId),
       });
@@ -85,12 +85,12 @@ export const PUT = CommonMiddleware.admin(
         if (conflictingPlotBlock) {
           throw ErrorFactory.businessRule(
             'duplicate_plot_block_name',
-            `Plot block with name "${validatedData.name}" already exists in this fandom`
+            `trope with name "${validatedData.name}" already exists in this fandom`
           );
         }
       }
 
-      // Update plot block
+      // Update trope
       const [updatedPlotBlock] = await db
         .update(plotBlocks)
         .set({
@@ -100,7 +100,7 @@ export const PUT = CommonMiddleware.admin(
         .where(eq(plotBlocks.id, plotBlockId))
         .returning();
 
-      // Return updated plot block with fandom information
+      // Return updated trope with fandom information
       const plotBlockWithFandom = await db.query.plotBlocks.findFirst({
         where: eq(plotBlocks.id, updatedPlotBlock.id),
         with: {
@@ -120,7 +120,7 @@ export const PUT = CommonMiddleware.admin(
 
 /**
  * DELETE /api/v1/plot-blocks/[id]
- * Delete a specific plot block (Admin only)
+ * Delete a specific trope (Admin only)
  */
 export const DELETE = CommonMiddleware.admin(
   withErrorHandling(
@@ -134,7 +134,7 @@ export const DELETE = CommonMiddleware.admin(
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
-      // Check if plot block exists
+      // Check if trope exists
       const existingPlotBlock = await db.query.plotBlocks.findFirst({
         where: eq(plotBlocks.id, plotBlockId),
       });
@@ -143,7 +143,7 @@ export const DELETE = CommonMiddleware.admin(
         throw ErrorFactory.notFound('PlotBlock', plotBlockId);
       }
 
-      // Check for dependencies (this would include child plot blocks and story references)
+      // Check for dependencies (this would include child tropes and story references)
       // For now, we'll just do a soft delete
 
       // Soft delete by setting is_active to false

@@ -328,7 +328,7 @@ describe('Database Relationships', () => {
 
   describe('PlotBlock to Fandom Relationship', () => {
     it('should enforce foreign key constraint on plotBlock.fandom_id', async () => {
-      // Attempt to create plot block with non-existent fandom
+      // Attempt to create trope with non-existent fandom
       expect(async () => {
         await db.insert(schema.plotBlocks).values({
           name: 'Test Block',
@@ -343,8 +343,8 @@ describe('Database Relationships', () => {
       }).rejects.toThrow();
     });
 
-    it('should cascade delete plot blocks when fandom is deleted', async () => {
-      // Create fandom and plot block
+    it('should cascade delete tropes when fandom is deleted', async () => {
+      // Create fandom and trope
       const fandom = await db
         .insert(schema.fandoms)
         .values({
@@ -371,7 +371,7 @@ describe('Database Relationships', () => {
         .delete(schema.fandoms)
         .where(eq(schema.fandoms.id, fandom[0].id));
 
-      // Verify plot block is also deleted (cascade)
+      // Verify trope is also deleted (cascade)
       const remainingBlocks = await db
         .select()
         .from(schema.plotBlocks)
@@ -595,7 +595,7 @@ describe('Database Relationships', () => {
         .values({
           name: 'Parent Plot',
           slug: 'parent-plot',
-          description: 'Parent plot block',
+          description: 'Parent trope',
           fandom_id: fandom[0].id.toString(),
           category: 'inheritance',
           complexity: 'complex',
@@ -609,7 +609,7 @@ describe('Database Relationships', () => {
         .values({
           name: 'Child Plot',
           slug: 'child-plot',
-          description: 'Child plot block',
+          description: 'Child trope',
           fandom_id: fandom[0].id.toString(),
           category: 'inheritance',
           complexity: 'simple',
@@ -657,7 +657,7 @@ describe('Database Relationships', () => {
       expect(remainingConditions).toHaveLength(0);
     });
 
-    it('should prevent circular dependencies in plot block conditions', async () => {
+    it('should prevent circular dependencies in trope conditions', async () => {
       // Create fandom and blocks
       const fandom = await db
         .insert(schema.fandoms)

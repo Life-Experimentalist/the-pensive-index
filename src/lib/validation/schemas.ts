@@ -129,13 +129,13 @@ export const updateTagClassSchema = tagClassSchema.partial().omit({
   created_at: true,
 });
 
-// Plot block validation schema
+// Trope validation schema
 export const plotBlockSchema = z.object({
   id: entityIdSchema.optional(),
   name: z
     .string()
-    .min(1, 'Plot block name is required')
-    .max(200, 'Plot block name too long'),
+    .min(1, 'Trope name is required')
+    .max(200, 'Trope name too long'),
   slug: slugSchema.optional(),
   parent_id: entityIdSchema.optional(),
   fandom_id: entityIdSchema.optional(),
@@ -168,7 +168,7 @@ export const updatePlotBlockSchema = plotBlockSchema.partial().omit({
   created_at: true,
 });
 
-// Plot block condition validation schema
+// Trope condition validation schema
 export const plotBlockConditionSchema = z.object({
   id: entityIdSchema.optional(),
   plot_block_id: z.union([entityIdSchema, z.number()]).optional(),

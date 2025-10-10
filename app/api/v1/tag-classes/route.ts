@@ -93,7 +93,7 @@ export const POST = CommonMiddleware.admin(
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({
-      where: eq(fandoms.id, validatedData.fandom_id),
+      where: eq(fandoms.slug, validatedData.fandom_id),
     });
 
     if (!fandom) {
@@ -167,19 +167,23 @@ export const POST = CommonMiddleware.admin(
       : {};
 
     // Create tag class
+    const classSlug = validatedData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
     const [newTagClass] = await db
       .insert(tagClasses)
       .values({
         id,
         name: validatedData.name,
+        slug: classSlug,
         fandom_id: validatedData.fandom_id,
         description: validatedData.description || '',
         validation_rules: dbValidationRules,
         is_active: validatedData.is_active ?? true,
       })
-      .returning();
-
-    // Return tag class with fandom information
+      .returning(); // Return tag class with fandom information
     const tagClassWithFandom = await db.query.tagClasses.findFirst({
       where: eq(tagClasses.id, newTagClass.id),
       with: {

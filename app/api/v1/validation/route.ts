@@ -28,7 +28,7 @@ const validationRequestSchema = z.object({
 
 /**
  * POST /api/v1/validation/validate
- * Validate a collection of tags and plot blocks
+ * Validate a collection of tags and tropes
  */
 export const POST = CommonMiddleware.public(
   withErrorHandling(async (request: NextRequest) => {
@@ -40,7 +40,7 @@ export const POST = CommonMiddleware.public(
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({
-      where: eq(fandoms.id, validatedData.fandom_id),
+      where: eq(fandoms.slug, validatedData.fandom_id),
     });
 
     if (!fandom) {

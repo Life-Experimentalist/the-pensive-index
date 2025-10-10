@@ -50,7 +50,7 @@ export const fandomTemplates = sqliteTable(
     // JSON configuration containing:
     // - taxonomy_structure: hierarchical content organization rules
     // - default_tags: array of default tags to create
-    // - default_plot_blocks: array of default plot blocks
+    // - default_plot_blocks: array of default tropes
     // - validation_rules: default validation configuration
     // - content_categories: predefined content categories
     configuration: text('configuration', { mode: 'json' }).notNull(),

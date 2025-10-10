@@ -25,7 +25,7 @@ import {
 /**
  * Fandoms Table Schema
  *
- * The top-level container for all fanfiction content. Every tag, plot block,
+ * The top-level container for all fanfiction content. Every tag, trope,
  * and validation rule is scoped to a specific fandom.
  */
 export const fandoms = sqliteTable(
@@ -59,7 +59,7 @@ export const fandoms = sqliteTable(
       .notNull()
       .default(sql`(datetime('now'))`),
   },
-  (table) => ({
+  table => ({
     // Unique constraints
     nameUnique: unique('fandoms_name_unique').on(table.name),
     slugUnique: unique('fandoms_slug_unique').on(table.slug),

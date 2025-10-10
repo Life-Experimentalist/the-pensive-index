@@ -194,7 +194,7 @@ curl http://localhost:3000/api/fandoms/harry-potter/tags
 ### ⚠️ Needs Work
 - [ ] Connect Tag Classes UI to real API
 - [ ] Build dedicated Tag Editor component
-- [ ] Build Trope/Plot Block management UI
+- [ ] Build Trope/Trope management UI
 - [ ] Integrate Clerk users into admin dashboard
 - [ ] Remove dependency on admin_users table (optional)
 

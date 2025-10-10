@@ -68,7 +68,7 @@ export interface ConflictDetail {
  * Features:
  * - Real-time conflict detection (<200ms response time)
  * - Tag class validation and mutual exclusion rules
- * - Plot block dependency and circular reference detection
+ * - Trope dependency and circular reference detection
  * - Compatibility scoring with detailed breakdown
  * - Performance monitoring and caching
  * - Auto-fix suggestions for common conflicts
@@ -138,7 +138,7 @@ export class PathwayValidationService {
       // 2. Tag class conflicts
       await this.validateTagClassConflicts(context, result);
 
-      // 3. Plot block dependencies
+      // 3. Trope dependencies
       await this.validatePlotBlockDependencies(context, result);
 
       // 4. Circular reference detection
@@ -227,8 +227,9 @@ export class PathwayValidationService {
     if (context.pathway.length === 0) {
       result.suggestions.push({
         type: 'suggestion',
-        message: 'Add some tags or plot blocks to build your story pathway',
-        action: 'A pathway needs at least one element to generate meaningful results',
+        message: 'Add some tags or tropes to build your story pathway',
+        action:
+          'A pathway needs at least one element to generate meaningful results',
         target_id: 'pathway_builder',
       });
       return;
@@ -237,7 +238,8 @@ export class PathwayValidationService {
     if (context.pathway.length > 50) {
       result.warnings.push({
         type: 'performance',
-        message: 'Pathway is very long - Pathways with more than 50 items may have slower search performance',
+        message:
+          'Pathway is very long - Pathways with more than 50 items may have slower search performance',
         suggestion: 'Consider removing some items for better performance',
       });
     }
@@ -294,7 +296,12 @@ export class PathwayValidationService {
     };
 
     // TODO: Fix ValidationEngine interface - method doesn't exist
-    const engineResult = { errors: [], warnings: [], suggestions: [], rulesEvaluated: 0 };
+    const engineResult = {
+      errors: [],
+      warnings: [],
+      suggestions: [],
+      rulesEvaluated: 0,
+    };
     // const engineResult = await this.validationEngine.validateTagSelection(
     //   validationContext
     // );
@@ -323,7 +330,7 @@ export class PathwayValidationService {
   }
 
   /**
-   * Validate plot block dependencies
+   * Validate trope dependencies
    */
   private async validatePlotBlockDependencies(
     context: PathwayValidationContext,
@@ -351,7 +358,7 @@ export class PathwayValidationService {
         type: 'dependency',
         severity: 'medium',
         message: `Missing dependency: ${missing.name}`,
-        description: `Plot block "${missing.dependentName}" requires "${missing.name}"`,
+        description: `Trope "${missing.dependentName}" requires "${missing.name}"`,
         source: 'PathwayValidationService',
       });
 
@@ -377,7 +384,7 @@ export class PathwayValidationService {
   }
 
   /**
-   * Validate circular references in plot blocks
+   * Validate circular references in tropes
    */
   private async validateCircularReferences(
     context: PathwayValidationContext,
@@ -402,9 +409,7 @@ export class PathwayValidationService {
         type: 'circular_dependency',
         severity: 'high',
         message: 'Circular reference detected',
-        description: `Circular dependency in plot blocks: ${cycle.path.join(
-          ' → '
-        )}`,
+        description: `Circular dependency in tropes: ${cycle.path.join(' → ')}`,
         source: 'PathwayValidationService',
       });
 
@@ -412,7 +417,7 @@ export class PathwayValidationService {
         type: 'circular_reference',
         severity: 'high',
         message: 'Circular dependency detected',
-        description: `Plot blocks have circular dependencies: ${cycle.path.join(
+        description: `Tropes have circular dependencies: ${cycle.path.join(
           ' → '
         )}`,
         conflictingItems: cycle.plotBlocks.map(pb => ({
@@ -421,8 +426,7 @@ export class PathwayValidationService {
           name: pb.name,
         })),
         canAutoFix: false,
-        suggestion:
-          'Remove one of the conflicting plot blocks to break the cycle',
+        suggestion: 'Remove one of the conflicting tropes to break the cycle',
       });
     }
 
@@ -436,7 +440,7 @@ export class PathwayValidationService {
     context: PathwayValidationContext,
     result: PathwayValidationResult
   ): Promise<void> {
-    // Check for mutually exclusive tags and plot blocks
+    // Check for mutually exclusive tags and tropes
     const conflicts = await this.conflictDetector.detectConflicts({
       selectedItems: context.pathway,
       tags: context.tags,
@@ -527,7 +531,7 @@ export class PathwayValidationService {
   }
 
   /**
-   * Validate adding a new plot block to the pathway
+   * Validate adding a new trope to the pathway
    */
   private async validateNewPlotBlock(
     context: PathwayValidationContext,
@@ -540,8 +544,8 @@ export class PathwayValidationService {
         id: 'plot_block_not_found',
         type: 'reference',
         severity: 'high',
-        message: 'Plot block not found',
-        description: `Plot block with ID ${newPlotBlock.id} does not exist`,
+        message: 'Trope not found',
+        description: `Trope with ID ${newPlotBlock.id} does not exist`,
         source: 'PathwayValidationService',
       });
       return;
@@ -640,7 +644,7 @@ export class PathwayValidationService {
       });
     }
 
-    // Suggest balancing tags and plot blocks
+    // Suggest balancing tags and tropes
     const tagCount = context.pathway.filter(item => item.type === 'tag').length;
     const plotBlockCount = context.pathway.filter(
       item => item.type === 'plot_block'
@@ -650,9 +654,9 @@ export class PathwayValidationService {
       suggestions.push({
         id: 'add_plot_blocks',
         type: 'suggestion',
-        message: 'Try adding some plot blocks',
+        message: 'Try adding some tropes',
         description:
-          'Plot blocks help find stories with specific narrative elements',
+          'Tropes help find stories with specific narrative elements',
         priority: 'medium',
       });
     }

@@ -19,7 +19,7 @@ interface RuleCondition {
     | 'plot_block_selected'
     | 'plot_block_excluded'
     | 'tag_class_constraint';
-  target: string; // tag ID, plot block ID, or tag class ID
+  target: string; // tag ID, trope ID, or tag class ID
   operator:
     | 'equals'
     | 'not_equals'
@@ -181,7 +181,7 @@ describe('Rule Engine Core Functionality', () => {
       expect(result).toBe(true);
     });
 
-    it('should evaluate plot block selection conditions', async () => {
+    it('should evaluate trope selection conditions', async () => {
       // This test MUST FAIL initially
       const condition: RuleCondition = {
         id: 'test-cond',
@@ -301,7 +301,7 @@ describe('Rule Engine Core Functionality', () => {
   });
 
   describe('Circular Dependency Detection', () => {
-    it('should detect circular dependencies in plot block hierarchies', async () => {
+    it('should detect circular dependencies in trope hierarchies', async () => {
       // This test MUST FAIL initially
       const plotBlocks = [
         { id: 'a', parent_id: 'c', name: 'Block A' },

@@ -24,7 +24,7 @@ describe('PlotBlock API Contract Tests', () => {
       body: JSON.stringify({
         name: 'PlotBlock Test Fandom',
         slug: 'plotblock-test-fandom',
-        description: 'Fandom for plot block testing',
+        description: 'Fandom for trope testing',
       }),
     });
     const fandom = await fandomResponse.json();
@@ -53,11 +53,11 @@ describe('PlotBlock API Contract Tests', () => {
   });
 
   beforeEach(() => {
-    console.log('Resetting plot block test state');
+    console.log('Resetting trope test state');
   });
 
   describe('POST /api/v1/plot-blocks', () => {
-    it('should create a new plot block with valid data', async () => {
+    it('should create a new trope with valid data', async () => {
       const plotBlockData = {
         name: "Hero's Journey Beginning",
         slug: 'heros-journey-beginning',
@@ -101,8 +101,8 @@ describe('PlotBlock API Contract Tests', () => {
       });
     });
 
-    it('should create hierarchical plot block with parent', async () => {
-      // Create parent plot block first
+    it('should create hierarchical trope with parent', async () => {
+      // Create parent trope first
       const parentResponse = await fetch('/api/v1/plot-blocks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,7 +117,7 @@ describe('PlotBlock API Contract Tests', () => {
       });
       const parent = await parentResponse.json();
 
-      // Create child plot block
+      // Create child trope
       const childData = {
         name: 'Act 1: Setup',
         slug: 'act-1-setup',
@@ -140,7 +140,7 @@ describe('PlotBlock API Contract Tests', () => {
       expect(child.parent_id).toBe(parent.id);
     });
 
-    it('should reject plot block with non-existent fandom', async () => {
+    it('should reject trope with non-existent fandom', async () => {
       const plotBlockData = {
         name: 'Invalid Fandom Block',
         slug: 'invalid-fandom-block',
@@ -165,7 +165,7 @@ describe('PlotBlock API Contract Tests', () => {
       });
     });
 
-    it('should reject plot block with non-existent parent', async () => {
+    it('should reject trope with non-existent parent', async () => {
       const plotBlockData = {
         name: 'Invalid Parent Block',
         slug: 'invalid-parent-block',
@@ -191,7 +191,7 @@ describe('PlotBlock API Contract Tests', () => {
       });
     });
 
-    it('should reject plot block with invalid tags', async () => {
+    it('should reject trope with invalid tags', async () => {
       const plotBlockData = {
         name: 'Invalid Tags Block',
         slug: 'invalid-tags-block',
@@ -217,7 +217,7 @@ describe('PlotBlock API Contract Tests', () => {
       });
     });
 
-    it('should validate plot block data', async () => {
+    it('should validate trope data', async () => {
       const invalidData = {
         name: '', // Empty name
         slug: 'invalid slug!', // Invalid characters
@@ -292,7 +292,7 @@ describe('PlotBlock API Contract Tests', () => {
 
   describe('GET /api/v1/plot-blocks', () => {
     beforeEach(async () => {
-      // Create test plot blocks
+      // Create test tropes
       const plotBlocks = [
         {
           name: 'Romance Beginning',
@@ -337,7 +337,7 @@ describe('PlotBlock API Contract Tests', () => {
       }
     });
 
-    it('should retrieve all active plot blocks', async () => {
+    it('should retrieve all active tropes', async () => {
       const response = await fetch('/api/v1/plot-blocks');
 
       expect(response.status).toBe(200);
@@ -360,13 +360,13 @@ describe('PlotBlock API Contract Tests', () => {
         limit: 50,
       });
 
-      // Should not include inactive plot blocks
+      // Should not include inactive tropes
       expect(
         data.plot_blocks.find((pb: any) => pb.name === 'Inactive Block')
       ).toBeUndefined();
     });
 
-    it('should filter plot blocks by fandom', async () => {
+    it('should filter tropes by fandom', async () => {
       const response = await fetch(
         `/api/v1/plot-blocks?fandom_id=${testFandomId}`
       );
@@ -379,7 +379,7 @@ describe('PlotBlock API Contract Tests', () => {
       ).toBe(true);
     });
 
-    it('should filter plot blocks by category', async () => {
+    it('should filter tropes by category', async () => {
       const response = await fetch('/api/v1/plot-blocks?category=relationship');
 
       expect(response.status).toBe(200);
@@ -393,7 +393,7 @@ describe('PlotBlock API Contract Tests', () => {
       ).toBeDefined();
     });
 
-    it('should filter plot blocks by complexity', async () => {
+    it('should filter tropes by complexity', async () => {
       const response = await fetch('/api/v1/plot-blocks?complexity=complex');
 
       expect(response.status).toBe(200);
@@ -407,7 +407,7 @@ describe('PlotBlock API Contract Tests', () => {
       ).toBeDefined();
     });
 
-    it('should filter plot blocks by tags', async () => {
+    it('should filter tropes by tags', async () => {
       const response = await fetch(`/api/v1/plot-blocks?tags=${testTagIds[1]}`);
 
       expect(response.status).toBe(200);
@@ -475,7 +475,7 @@ describe('PlotBlock API Contract Tests', () => {
         body: JSON.stringify({
           name: 'Single Test Block',
           slug: 'single-test-block',
-          description: 'Plot block for single retrieval test',
+          description: 'Trope for single retrieval test',
           fandom_id: testFandomId,
           category: 'character-development',
           complexity: 'moderate',
@@ -487,7 +487,7 @@ describe('PlotBlock API Contract Tests', () => {
       testPlotBlockId = plotBlock.id;
     });
 
-    it('should retrieve a specific plot block by ID', async () => {
+    it('should retrieve a specific trope by ID', async () => {
       const response = await fetch(`/api/v1/plot-blocks/${testPlotBlockId}`);
 
       expect(response.status).toBe(200);
@@ -497,7 +497,7 @@ describe('PlotBlock API Contract Tests', () => {
         id: testPlotBlockId,
         name: 'Single Test Block',
         slug: 'single-test-block',
-        description: 'Plot block for single retrieval test',
+        description: 'Trope for single retrieval test',
         fandom_id: testFandomId,
         category: 'character-development',
         complexity: 'moderate',
@@ -540,7 +540,7 @@ describe('PlotBlock API Contract Tests', () => {
       });
     });
 
-    it('should return 404 for non-existent plot block', async () => {
+    it('should return 404 for non-existent trope', async () => {
       const response = await fetch('/api/v1/plot-blocks/non-existent-block');
       expect(response.status).toBe(404);
     });
@@ -568,7 +568,7 @@ describe('PlotBlock API Contract Tests', () => {
       testPlotBlockId = plotBlock.id;
     });
 
-    it('should update plot block with valid data', async () => {
+    it('should update trope with valid data', async () => {
       const updateData = {
         description: 'Updated description',
         category: 'relationship',
@@ -661,7 +661,7 @@ describe('PlotBlock API Contract Tests', () => {
         body: JSON.stringify({
           name: 'Deletable Block',
           slug: 'deletable-block',
-          description: 'Plot block to be deleted',
+          description: 'Trope to be deleted',
           fandom_id: testFandomId,
           category: 'misc',
           complexity: 'simple',
@@ -672,7 +672,7 @@ describe('PlotBlock API Contract Tests', () => {
       testPlotBlockId = plotBlock.id;
     });
 
-    it('should soft delete a plot block', async () => {
+    it('should soft delete a trope', async () => {
       const response = await fetch(`/api/v1/plot-blocks/${testPlotBlockId}`, {
         method: 'DELETE',
       });
@@ -681,14 +681,14 @@ describe('PlotBlock API Contract Tests', () => {
 
       const result = await response.json();
       expect(result).toMatchObject({
-        message: 'Plot block deleted successfully',
+        message: 'Trope deleted successfully',
         deleted: true,
         soft_delete: true,
       });
     });
 
-    it('should handle plot block with children', async () => {
-      // Create child plot block
+    it('should handle trope with children', async () => {
+      // Create child trope
       await fetch('/api/v1/plot-blocks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -771,7 +771,7 @@ describe('PlotBlock API Contract Tests', () => {
       targetParentId = target.id;
     });
 
-    it('should move plot block to new parent', async () => {
+    it('should move trope to new parent', async () => {
       const moveData = {
         new_parent_id: targetParentId,
         position: 0,
@@ -787,7 +787,7 @@ describe('PlotBlock API Contract Tests', () => {
 
       const result = await response.json();
       expect(result).toMatchObject({
-        message: 'Plot block moved successfully',
+        message: 'Trope moved successfully',
         moved: true,
         old_parent_id: parentId,
         new_parent_id: targetParentId,
@@ -799,7 +799,7 @@ describe('PlotBlock API Contract Tests', () => {
       expect(moved.parent_id).toBe(targetParentId);
     });
 
-    it('should move plot block to root level', async () => {
+    it('should move trope to root level', async () => {
       const moveData = {
         new_parent_id: null,
         position: 0,
@@ -941,7 +941,7 @@ describe('PlotBlock API Contract Tests', () => {
   });
 
   describe('GET /api/v1/plot-blocks/categories', () => {
-    it('should return available plot block categories', async () => {
+    it('should return available trope categories', async () => {
       const response = await fetch('/api/v1/plot-blocks/categories');
 
       expect(response.status).toBe(200);

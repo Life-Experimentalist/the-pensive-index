@@ -41,7 +41,7 @@ describe('PlotBlock Database Schema', () => {
         { name: 'updated_at', type: 'INTEGER', pk: 0, notnull: 1 },
       ];
 
-      expectedColumns.forEach((expectedCol) => {
+      expectedColumns.forEach(expectedCol => {
         const column = columns.find(
           (col: any) => col.name === expectedCol.name
         );
@@ -129,7 +129,7 @@ describe('PlotBlock Database Schema', () => {
   });
 
   describe('PlotBlock CRUD Operations', () => {
-    it('should insert a valid root plot block record', async () => {
+    it('should insert a valid root trope record', async () => {
       // This test will fail until we implement the schema
       const plotBlockData = {
         id: 'test-plotblock-uuid-1',
@@ -166,7 +166,7 @@ describe('PlotBlock Database Schema', () => {
       ).resolves.toBeDefined();
     });
 
-    it('should insert a valid child plot block record', async () => {
+    it('should insert a valid child trope record', async () => {
       // This test will fail until we implement the schema
       const parentData = {
         id: 'test-plotblock-parent',
@@ -613,7 +613,7 @@ describe('PlotBlock Database Schema', () => {
         updated_at: Date.now(),
       };
 
-      // Insert plot block
+      // Insert trope
       await db.run(
         `
         INSERT INTO plot_blocks (id, fandom_id, parent_id, name, slug, display_order, is_active, created_at, updated_at)

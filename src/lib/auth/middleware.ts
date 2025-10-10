@@ -72,7 +72,7 @@ export const PERMISSIONS = {
   UPDATE_TAG_CLASS: 'update:tag_class',
   DELETE_TAG_CLASS: 'delete:tag_class',
 
-  // Plot block permissions (legacy)
+  // Trope permissions (legacy)
   CREATE_PLOT_BLOCK: 'create:plot_block',
   UPDATE_PLOT_BLOCK: 'update:plot_block',
   DELETE_PLOT_BLOCK: 'delete:plot_block',
@@ -354,12 +354,12 @@ export class FandomAccessControl {
         throw ErrorFactory.unauthorized('Authentication required');
       }
 
-      // Verify fandom exists
+      // Verify fandom exists (fandomId is a slug from route params)
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
       const fandom = await db.query.fandoms.findFirst({
-        where: eq(fandoms.id, fandomId),
+        where: eq(fandoms.slug, fandomId), // Use slug, not numeric id
       });
 
       if (!fandom) {

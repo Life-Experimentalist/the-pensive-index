@@ -9,7 +9,7 @@ console.log('\n=== TAGS (first 5) ===');
 const tags = db.prepare('SELECT id, name, fandom_id FROM tags LIMIT 5').all();
 tags.forEach(t => console.log(`  ID: ${t.id}, Name: ${t.name}, Fandom: ${t.fandom_id}`));
 
-console.log('\n=== PLOT BLOCKS (first 5) ===');
+console.log('\n=== TROPES (first 5) ===');
 const blocks = db.prepare('SELECT id, name, fandom_id FROM plot_blocks LIMIT 5').all();
 blocks.forEach(b => console.log(`  ID: ${b.id}, Name: ${b.name}, Fandom: ${b.fandom_id}`));
 

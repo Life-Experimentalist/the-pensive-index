@@ -3,17 +3,19 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, X } from 'lucide-react';
-
-interface Fandom {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  storyCount?: number;
-}
+import type { Fandom } from '@/types';
 
 interface FandomSearchProps {
-  fandoms: Fandom[];
+  fandoms: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+    metadata: unknown;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }>;
 }
 
 /**
@@ -25,7 +27,9 @@ export default function FandomSearch({ fandoms }: FandomSearchProps) {
   const [showResults, setShowResults] = useState(false);
 
   const filteredFandoms = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+    if (!searchQuery.trim()) {
+      return [];
+    }
 
     const query = searchQuery.toLowerCase();
     return fandoms
@@ -100,9 +104,6 @@ export default function FandomSearch({ fandoms }: FandomSearchProps) {
                               {fandom.description}
                             </p>
                           )}
-                        </div>
-                        <div className="ml-4 text-sm text-gray-400 dark:text-gray-500">
-                          {fandom.storyCount || 0} stories
                         </div>
                       </div>
                     </Link>

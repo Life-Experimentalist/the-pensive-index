@@ -651,7 +651,7 @@ describe('Tag Class Rule Validation Tests', () => {
   });
 
   describe('Category Applicability Validation', () => {
-    it('should pass when tag class is applicable to plot block category', () => {
+    it('should pass when tag class is applicable to trope category', () => {
       const tagClass = sampleTagClasses[0]; // Relationship Status (applicable to relationship, character-development)
       const plotBlockCategory = 'relationship';
 
@@ -664,7 +664,7 @@ describe('Tag Class Rule Validation Tests', () => {
       expect(result.violations).toHaveLength(0);
     });
 
-    it('should fail when tag class is not applicable to plot block category', () => {
+    it('should fail when tag class is not applicable to trope category', () => {
       const tagClass = sampleTagClasses[0]; // Relationship Status (not applicable to action)
       const plotBlockCategory = 'action';
 

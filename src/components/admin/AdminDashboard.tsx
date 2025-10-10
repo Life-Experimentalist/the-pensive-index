@@ -333,9 +333,9 @@ const TestingWorkflow: React.FC<TestingWorkflowProps> = ({
           onChange={e => setScenarioName(e.target.value)}
         />
         <div data-testid="input-selection">
-          <h4>Input Tags & Plot Blocks</h4>
+          <h4>Input Tags & Tropes</h4>
           <div data-testid="tag-selector">Tag Selector</div>
-          <div data-testid="plot-block-selector">Plot Block Selector</div>
+          <div data-testid="plot-block-selector">Trope Selector</div>
         </div>
         <div data-testid="expected-results">
           <h4>Expected Results</h4>

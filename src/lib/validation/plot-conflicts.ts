@@ -80,8 +80,8 @@ interface PlotBlockConflictResult {
 }
 
 /**
- * Plot Block Conflict Detection
- * Identifies conflicts between plot blocks, conditions, and tags
+ * Trope Conflict Detection
+ * Identifies conflicts between tropes, conditions, and tags
  */
 export class PlotBlockConflictDetector {
   /**
@@ -95,7 +95,7 @@ export class PlotBlockConflictDetector {
     for (const plotBlock of context.selected_plot_blocks) {
       if (plotBlock.conflicts_with) {
         for (const conflictId of plotBlock.conflicts_with) {
-          // Check if the conflicting plot block is also selected
+          // Check if the conflicting trope is also selected
           const conflictingBlock = context.selected_plot_blocks.find(
             pb => pb.id === conflictId
           );
@@ -394,7 +394,7 @@ export class PlotBlockConflictDetector {
   }
 
   /**
-   * Detect direct exclusion conflicts between plot blocks
+   * Detect direct exclusion conflicts between tropes
    */
   private static detectDirectExclusionConflicts(
     context: PlotBlockConflictContext,
@@ -479,7 +479,7 @@ export class PlotBlockConflictDetector {
   ): PlotBlockConflictResult['conflicts'] {
     const conflicts: PlotBlockConflictResult['conflicts'] = [];
 
-    // Group plot blocks by category
+    // Group tropes by category
     const categoryCounts = new Map<string, PlotBlock[]>();
 
     for (const plotBlock of context.plot_blocks) {
@@ -507,7 +507,7 @@ export class PlotBlockConflictDetector {
             conflicts.push({
               type: 'category_exclusion',
               severity: 'error',
-              message: `Cannot select both ${category} and ${exclusiveCategory} plot blocks`,
+              message: `Cannot select both ${category} and ${exclusiveCategory} tropes`,
               conflicting_elements: [
                 ...blocks.map(b => ({
                   id: b.id,
@@ -543,7 +543,7 @@ export class PlotBlockConflictDetector {
   ): PlotBlockConflictResult['conflicts'] {
     const conflicts: PlotBlockConflictResult['conflicts'] = [];
 
-    // Count instances by name (not ID) to catch duplicate plot blocks
+    // Count instances by name (not ID) to catch duplicate tropes
     const nameCounts = new Map<string, PlotBlock[]>();
 
     for (const plotBlock of context.plot_blocks) {
@@ -555,10 +555,10 @@ export class PlotBlockConflictDetector {
       }
     }
 
-    // Check for plot blocks that should only appear once
+    // Check for tropes that should only appear once
     for (const [name, blocks] of nameCounts) {
       if (blocks.length > 1) {
-        // Most plot blocks should only appear once
+        // Most tropes should only appear once
         conflicts.push({
           type: 'instance_limit',
           severity: 'error',
@@ -581,7 +581,7 @@ export class PlotBlockConflictDetector {
   }
 
   /**
-   * Detect condition conflicts within plot blocks
+   * Detect condition conflicts within tropes
    */
   private static detectConditionConflicts(
     context: PlotBlockConflictContext,
@@ -594,7 +594,7 @@ export class PlotBlockConflictDetector {
   ): PlotBlockConflictResult['conflicts'] {
     const conflicts: PlotBlockConflictResult['conflicts'] = [];
 
-    // Group conditions by plot block
+    // Group conditions by trope
     const conditionsByPlotBlock = new Map<string, PlotBlockCondition[]>();
 
     for (const condition of context.conditions) {
@@ -606,7 +606,7 @@ export class PlotBlockConflictDetector {
       }
     }
 
-    // Check for mutually exclusive conditions within the same plot block
+    // Check for mutually exclusive conditions within the same trope
     for (const [plotBlockId, conditions] of conditionsByPlotBlock) {
       // Example: Can't have both "Sirius Lives" and "Sirius Dies" conditions
       const conflictPairs = [
@@ -633,7 +633,7 @@ export class PlotBlockConflictDetector {
           conflicts.push({
             type: 'condition_conflict',
             severity: 'error',
-            message: `Conflicting conditions in plot block: cannot have both ${condition1} and ${condition2}`,
+            message: `Conflicting conditions in trope: cannot have both ${condition1} and ${condition2}`,
             conflicting_elements: conflictingConditions.map(c => ({
               id: c.id,
               type: 'condition' as const,
@@ -661,7 +661,7 @@ export class PlotBlockConflictDetector {
   ): PlotBlockConflictResult['conflicts'] {
     const conflicts: PlotBlockConflictResult['conflicts'] = [];
 
-    // Check if required plot blocks are missing
+    // Check if required tropes are missing
     for (const plotBlock of context.plot_blocks) {
       if (selectedPlotBlocks.has(plotBlock.id) && plotBlock.requires) {
         for (const requiredId of plotBlock.requires) {

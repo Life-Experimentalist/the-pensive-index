@@ -192,14 +192,14 @@ async function seedPathwayData() {
       tagInsert.run(...tag);
     }
 
-    // 4. Plot Blocks (uses TEXT id, TEXT fandom_id, TEXT parent_id, INTEGER timestamps)
-    console.log('📦 Creating plot blocks...');
+    // 4. Tropees TEXT id, TEXT fandom_id, TEXT parent_id, INTEGER timestamps)
+    console.log('📦 Creating tropes...');
     const plotBlockInsert = db.prepare(`
       INSERT OR IGNORE INTO plot_blocks (id, name, slug, fandom_id, description, display_order, parent_id, is_active, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())
     `);
 
-    // First, insert root plot blocks (no parent)
+    // First, insert root tropes (no parent)
     const rootBlocks = [
       [
         'pb-goblin-inheritance',
@@ -247,7 +247,7 @@ async function seedPathwayData() {
       plotBlockInsert.run(...block);
     }
 
-    // Now insert child plot blocks with parent references
+    // Now insert child tropes with parent references
     const childBlocks = [
       [
         'pb-black-lordship',
@@ -297,7 +297,7 @@ async function seedPathwayData() {
 
     console.log('✅ Pathway data seeding complete!');
     console.log(`   - Created 10 tags`);
-    console.log(`   - Created 8 plot blocks`);
+    console.log(`   - Created 8 tropes`);
     console.log('   - Created 2 tag classes for validation');
   } catch (error) {
     console.error('❌ Error seeding pathway data:', error);

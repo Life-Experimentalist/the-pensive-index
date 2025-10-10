@@ -51,7 +51,7 @@ export class DependencyValidator {
     const selectedConditions = new Set(context.selected_conditions || []);
     const selectedTags = new Set(context.selected_tags || []);
 
-    // Validate plot block dependencies
+    // Validate trope dependencies
     for (const pbId of selectedPlotBlocks) {
       const plotBlock = plotBlockMap.get(pbId);
       if (!plotBlock) continue;
@@ -177,18 +177,25 @@ export class DependencyValidator {
 
     let maxLevel = 0;
     for (const depId of plotBlock.requires) {
-      const depLevel = this.calculateDependencyLevel(depId, plotBlockMap, new Set(visited));
+      const depLevel = this.calculateDependencyLevel(
+        depId,
+        plotBlockMap,
+        new Set(visited)
+      );
       maxLevel = Math.max(maxLevel, depLevel + 1);
     }
 
     return maxLevel;
   }
 
-  static detectCircularDependencies(context: DependencyContext): DependencyValidationResult {
-    const missing_requirements: DependencyValidationResult['missing_requirements'] = [];
+  static detectCircularDependencies(
+    context: DependencyContext
+  ): DependencyValidationResult {
+    const missing_requirements: DependencyValidationResult['missing_requirements'] =
+      [];
     const plotBlockMap = new Map(context.plot_blocks.map(pb => [pb.id, pb]));
 
-    // Detect circular dependencies in plot blocks
+    // Detect circular dependencies in tropes
     const visited = new Set<string>();
     const recursionStack = new Set<string>();
 
@@ -241,15 +248,17 @@ export class DependencyValidator {
       is_valid: !circularFound,
       missing_requirements,
       dependency_chain: [],
-      suggested_additions: []
+      suggested_additions: [],
     };
   }
 
-  static buildDependencyChain(context: DependencyContext): DependencyValidationResult {
+  static buildDependencyChain(
+    context: DependencyContext
+  ): DependencyValidationResult {
     const dependency_chain: DependencyValidationResult['dependency_chain'] = [];
     const plotBlockMap = new Map(context.plot_blocks.map(pb => [pb.id, pb]));
 
-    // Build complete dependency chain for all plot blocks
+    // Build complete dependency chain for all tropes
     for (const plotBlock of context.plot_blocks) {
       const dependencies = plotBlock.requires || [];
       if (dependencies.length > 0) {
@@ -274,17 +283,20 @@ export class DependencyValidator {
     };
   }
 
-  static suggestEnhancements(context: DependencyContext): DependencyValidationResult {
-    const suggested_additions: DependencyValidationResult['suggested_additions'] = [];
+  static suggestEnhancements(
+    context: DependencyContext
+  ): DependencyValidationResult {
+    const suggested_additions: DependencyValidationResult['suggested_additions'] =
+      [];
     const plotBlockMap = new Map(context.plot_blocks.map(pb => [pb.id, pb]));
     const selectedPlotBlocks = new Set(context.selected_plot_blocks || []);
 
-    // Suggest plot blocks that could enhance selected ones
+    // Suggest tropes that could enhance selected ones
     for (const pbId of selectedPlotBlocks) {
       const plotBlock = plotBlockMap.get(pbId);
       if (!plotBlock) continue;
 
-      // Look for plot blocks that this one enhances
+      // Look for tropes that this one enhances
       if (plotBlock.enhances) {
         for (const enhancedId of plotBlock.enhances) {
           if (!selectedPlotBlocks.has(enhancedId)) {
@@ -302,13 +314,13 @@ export class DependencyValidator {
         }
       }
 
-      // Look for plot blocks that are enabled by this one
+      // Look for tropes that are enabled by this one
       if ('enabled_by' in plotBlock && plotBlock.enabled_by) {
         // This is handled in the enhancement suggestions
       }
     }
 
-    // Look for plot blocks that could be enabled by current selection
+    // Look for tropes that could be enabled by current selection
     for (const plotBlock of context.plot_blocks) {
       if (
         !selectedPlotBlocks.has(plotBlock.id) &&
@@ -333,7 +345,7 @@ export class DependencyValidator {
       is_valid: true,
       missing_requirements: [],
       dependency_chain: [],
-      suggested_additions
+      suggested_additions,
     };
   }
 }

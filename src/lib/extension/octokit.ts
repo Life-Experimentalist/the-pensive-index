@@ -113,7 +113,7 @@ export function formatSubmissionIssueBody(submission: {
 ## Suggested Tags
 ${submission.suggestedTags.map(tag => `- ${tag.name}`).join('\n')}
 
-## Suggested Plot Blocks
+## Suggested Tropes
 ${submission.suggestedPlotBlocks.map(pb => `- ${pb.name}`).join('\n')}
 
 ## Crowd-Polling Status

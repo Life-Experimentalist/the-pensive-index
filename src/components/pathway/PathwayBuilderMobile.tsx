@@ -170,7 +170,7 @@ export function PathwayBuilderMobile({
               'border-b-2 border-blue-500 text-blue-600'
           )}
         >
-          Plot Blocks ({selectedPlotBlocks.length})
+          Tropes ({selectedPlotBlocks.length})
         </button>
         <button
           onClick={() => setActivePanel('preview')}
@@ -283,7 +283,7 @@ export function PathwayBuilderMobile({
 
             <div>
               <h4 className="font-medium mb-2">
-                Selected Plot Blocks ({selectedPlotBlocks.length})
+                Selected Tropes ({selectedPlotBlocks.length})
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selectedPlotBlocks.map(blockId => {

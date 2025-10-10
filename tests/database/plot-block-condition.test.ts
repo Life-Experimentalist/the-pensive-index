@@ -41,7 +41,7 @@ describe('PlotBlockCondition Database Schema', () => {
         { name: 'updated_at', type: 'INTEGER', pk: 0, notnull: 1 },
       ];
 
-      expectedColumns.forEach((expectedCol) => {
+      expectedColumns.forEach(expectedCol => {
         const column = columns.find(
           (col: any) => col.name === expectedCol.name
         );
@@ -465,7 +465,7 @@ describe('PlotBlockCondition Database Schema', () => {
   });
 
   describe('PlotBlockCondition Complex Scenarios', () => {
-    it('should support multiple conditions for one plot block', async () => {
+    it('should support multiple conditions for one trope', async () => {
       // This test will fail until we implement the schema
       const plotBlockId = 'test-multi-condition-block';
 
@@ -514,7 +514,7 @@ describe('PlotBlockCondition Database Schema', () => {
         );
       }
 
-      // Query all conditions for the plot block
+      // Query all conditions for the trope
       const results = await db.all(
         `
         SELECT * FROM plot_block_conditions WHERE plot_block_id = ? AND is_active = ?
@@ -525,7 +525,7 @@ describe('PlotBlockCondition Database Schema', () => {
       expect(results).toHaveLength(3);
 
       // Verify each condition type is present
-      const types = results.map((r) => r.condition_type);
+      const types = results.map(r => r.condition_type);
       expect(types).toContain('block_dependency');
       expect(types).toContain('tag_dependency');
       expect(types).toContain('mutual_exclusion');
@@ -625,7 +625,7 @@ describe('PlotBlockCondition Database Schema', () => {
       );
 
       expect(blockBTagDeps).toHaveLength(2);
-      const targetTags = blockBTagDeps.map((dep) => dep.target_tag_id);
+      const targetTags = blockBTagDeps.map(dep => dep.target_tag_id);
       expect(targetTags).toContain('tag-x');
       expect(targetTags).toContain('tag-y');
     });

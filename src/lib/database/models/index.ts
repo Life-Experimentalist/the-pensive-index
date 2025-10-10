@@ -4,7 +4,7 @@ export { FandomModel } from './fandom';
 // Tag model exports
 export { TagModel } from './tag';
 
-// Plot Block model exports
+// Trope model exports
 export { PlotBlockModel } from './plot-block';
 
 // Pathway model exports

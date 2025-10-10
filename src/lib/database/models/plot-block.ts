@@ -75,7 +75,7 @@ export interface PlotBlockFilters {
  */
 export class PlotBlockModel {
   /**
-   * Get all root plot blocks for a fandom (no parent)
+   * Get all root tropes for a fandom (no parent)
    */
   static async getRootBlocks(fandomId: string | number): Promise<PlotBlock[]> {
     const db = getDatabase();
@@ -92,7 +92,7 @@ export class PlotBlockModel {
   }
 
   /**
-   * Get child blocks for a parent plot block
+   * Get child blocks for a parent trope
    */
   static async getChildBlocks(parentId: string): Promise<PlotBlock[]> {
     const db = getDatabase();
@@ -106,33 +106,12 @@ export class PlotBlockModel {
   }
 
   /**
-   * Get plot blocks by category for a fandom
-   */
-  static async getByCategory(
-    fandomId: string,
-    category: string
-  ): Promise<PlotBlock[]> {
-    const db = getDatabase();
-    return db
-      .select()
-      .from(plotBlocks)
-      .where(
-        and(
-          eq(plotBlocks.fandom_id, fandomId),
-          eq(plotBlocks.category, category),
-          eq(plotBlocks.is_active, true)
-        )
-      )
-      .orderBy(desc(plotBlocks.name));
-  }
-
-  /**
    * Get full hierarchical tree for a fandom
    */
   static async getTreeStructure(
     fandomId: string
   ): Promise<PlotBlockWithChildren[]> {
-    // Get all plot blocks for the fandom
+    // Get all tropes for the fandom
     const db = getDatabase();
     const allBlocks = await db
       .select()
@@ -174,7 +153,7 @@ export class PlotBlockModel {
   }
 
   /**
-   * Get plot block by ID
+   * Get trope by ID
    */
   static async getById(id: string): Promise<PlotBlock | null> {
     const db = getDatabase();
@@ -188,7 +167,7 @@ export class PlotBlockModel {
   }
 
   /**
-   * Create a new plot block
+   * Create a new trope
    */
   static async create(data: CreatePlotBlockData): Promise<PlotBlock> {
     const plotBlockData = {
@@ -212,7 +191,7 @@ export class PlotBlockModel {
   }
 
   /**
-   * Update existing plot block
+   * Update existing trope
    */
   static async update(
     id: string,
@@ -252,26 +231,12 @@ export class PlotBlockModel {
   }
 
   /**
-   * Search plot blocks with filters
+   * Search tropes with filters
    */
   static async search(filters: PlotBlockFilters = {}): Promise<PlotBlock[]> {
     const db = getDatabase();
 
-    // Build query based on filters to avoid type issues
-    if (filters.fandomId && filters.category) {
-      return db
-        .select()
-        .from(plotBlocks)
-        .where(
-          and(
-            eq(plotBlocks.fandom_id, filters.fandomId),
-            eq(plotBlocks.category, filters.category),
-            eq(plotBlocks.is_active, filters.isActive ?? true)
-          )
-        )
-        .orderBy(desc(plotBlocks.name));
-    }
-
+    // Build query based on filters
     if (filters.fandomId) {
       return db
         .select()
@@ -285,7 +250,7 @@ export class PlotBlockModel {
         .orderBy(desc(plotBlocks.name));
     }
 
-    // Default: all active plot blocks
+    // Default: all active tropes
     return db
       .select()
       .from(plotBlocks)
@@ -294,29 +259,11 @@ export class PlotBlockModel {
   }
 
   /**
-   * Get all categories for a fandom
-   */
-  static async getCategoriesByFandom(fandomId: string): Promise<string[]> {
-    const db = getDatabase();
-    const result = await db
-      .select()
-      .from(plotBlocks)
-      .where(
-        and(eq(plotBlocks.fandom_id, fandomId), eq(plotBlocks.is_active, true))
-      );
-
-    // Extract unique categories
-    const categories = result.map(row => row.category);
-    return [...new Set(categories)].sort();
-  }
-
-  /**
-   * Validate plot block name is unique within fandom and category
+   * Validate trope name is unique within fandom
    */
   static async validateName(
     name: string,
     fandomId: string,
-    category: string,
     excludeId?: string
   ): Promise<boolean> {
     const db = getDatabase();
@@ -324,15 +271,9 @@ export class PlotBlockModel {
       .select()
       .from(plotBlocks)
       .where(
-        and(
-          eq(plotBlocks.name, name),
-          eq(plotBlocks.fandom_id, fandomId),
-          eq(plotBlocks.category, category)
-        )
-      )
-      .limit(1);
+        and(eq(plotBlocks.fandom_id, fandomId), eq(plotBlocks.name, name))
+      );
 
-    // If excluding an ID, check it's not the same record
     if (excludeId && existing.length > 0) {
       return existing[0].id === excludeId;
     }
@@ -341,7 +282,8 @@ export class PlotBlockModel {
   }
 
   /**
-   * Get plot block relationships (conflicts, requirements, etc.)
+   * Get trope relationships (conflicts, requirements, etc.)
+   * Note: These fields were removed from the schema. This method returns empty arrays.
    */
   static async getRelationships(fandomId: string): Promise<{
     conflicts: Array<{ blockId: string; conflictsWith: string[] }>;
@@ -356,62 +298,18 @@ export class PlotBlockModel {
       enabledBy: string[];
     }>;
   }> {
-    const db = getDatabase();
-    const blocks = await db
-      .select()
-      .from(plotBlocks)
-      .where(
-        and(eq(plotBlocks.fandom_id, fandomId), eq(plotBlocks.is_active, true))
-      );
-
-    const conflicts: Array<{ blockId: string; conflictsWith: string[] }> = [];
-    const requirements: Array<{
-      blockId: string;
-      requires: string[];
-      softRequires: string[];
-    }> = [];
-    const enhancements: Array<{
-      blockId: string;
-      enhances: string[];
-      enabledBy: string[];
-    }> = [];
-
-    for (const block of blocks) {
-      if (block.conflicts_with && block.conflicts_with.length > 0) {
-        conflicts.push({
-          blockId: block.id,
-          conflictsWith: block.conflicts_with,
-        });
-      }
-
-      if (
-        (block.requires && block.requires.length > 0) ||
-        (block.soft_requires && block.soft_requires.length > 0)
-      ) {
-        requirements.push({
-          blockId: block.id,
-          requires: block.requires || [],
-          softRequires: block.soft_requires || [],
-        });
-      }
-
-      if (
-        (block.enhances && block.enhances.length > 0) ||
-        (block.enabled_by && block.enabled_by.length > 0)
-      ) {
-        enhancements.push({
-          blockId: block.id,
-          enhances: block.enhances || [],
-          enabledBy: block.enabled_by || [],
-        });
-      }
-    }
-
-    return { conflicts, requirements, enhancements };
+    // These fields (conflicts_with, requires, soft_requires, enhances, enabled_by)
+    // were removed from the plot_blocks schema.
+    // Returning empty arrays for backward compatibility.
+    return {
+      conflicts: [],
+      requirements: [],
+      enhancements: [],
+    };
   }
 
   /**
-   * Soft delete plot block
+   * Soft delete trope
    */
   static async softDelete(id: string): Promise<boolean> {
     const db = getDatabase();

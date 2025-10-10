@@ -143,7 +143,7 @@ export class StorySearchService {
     query: SearchQuery,
     context: SearchContext
   ): Promise<Story[]> {
-    // Extract tag and plot block IDs from pathway
+    // Extract tag and trope IDs from pathway
     const tagIds = query.pathway
       .filter(item => item.type === 'tag')
       .map(item => item.id);
@@ -157,7 +157,7 @@ export class StorySearchService {
       return [];
     }
 
-    // Build SQL query to find stories with any matching tags or plot blocks
+    // Build SQL query to find stories with any matching tags or tropes
     const placeholders = [...tagIds, ...plotBlockIds].map(() => '?').join(',');
 
     const sql = `
@@ -200,7 +200,7 @@ export class StorySearchService {
     const StorySearchResults: StorySearchResult[] = [];
 
     for (const story of stories) {
-      // Get story's tags and plot blocks
+      // Get story's tags and tropes
       const storyTags = await this.getStoryTags(story.id);
       const storyPlotBlocks = await this.getStoryPlotBlocks(story.id);
 
@@ -299,7 +299,7 @@ export class StorySearchService {
   }
 
   /**
-   * Calculate category-based matches (same category tags/plot blocks)
+   * Calculate category-based matches (same category tags/tropes)
    */
   private async calculateCategoryMatches(
     pathway: PathwayItem[],
@@ -329,7 +329,7 @@ export class StorySearchService {
       }
     }
 
-    // Compare pathway plot blocks with story plot blocks by category
+    // Compare pathway tropes with story tropes by category
     const pathwayPlotBlockObjects = pathway
       .filter(p => p.type === 'plot_block')
       .map(p => context.plotBlocks.find(pb => pb.id === p.id))
@@ -714,7 +714,7 @@ export class StorySearchService {
         }
       });
 
-    // Extract from plot block names
+    // Extract from trope names
     pathway
       .filter(p => p.type === 'plot_block')
       .forEach(item => {

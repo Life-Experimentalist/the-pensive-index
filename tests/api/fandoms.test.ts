@@ -524,7 +524,7 @@ describe('Fandom API Contract Tests', () => {
 
     it('should prevent deletion when fandom has associated content', async () => {
       // This test assumes there will be dependent content
-      // Implementation should check for tags, plot blocks, etc.
+      // Implementation should check for tags, tropes, etc.
 
       const response = await fetch(
         `/api/v1/fandoms/${testFandomId}?force=true`,

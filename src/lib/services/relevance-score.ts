@@ -449,18 +449,18 @@ export class RelevanceScoreService {
       }
     }
 
-    // Get pathway plot blocks and their categories
+    // Get pathway tropes and their categories
     const pathwayPlotBlockObjects = pathway
       .filter(p => p.type === 'plot_block')
       .map(p => allPlotBlocks.find(pb => pb.id === p.id))
       .filter(Boolean) as PlotBlock[];
 
-    // Get story plot blocks and their categories
+    // Get story tropes and their categories
     const storyPlotBlockObjects = storyPlotBlocks
       .map(id => allPlotBlocks.find(pb => pb.id === id))
       .filter(Boolean) as PlotBlock[];
 
-    // Compare plot block categories
+    // Compare trope categories
     for (const pathwayPlotBlock of pathwayPlotBlockObjects) {
       for (const storyPlotBlock of storyPlotBlockObjects) {
         totalComparisons++;
@@ -842,7 +842,7 @@ export class RelevanceScoreService {
   }
 
   private async getStoryPlotBlocks(storyId: string): Promise<string[]> {
-    // In practice, query the database for story plot blocks
+    // In practice, query the database for story tropes
     return [];
   }
 

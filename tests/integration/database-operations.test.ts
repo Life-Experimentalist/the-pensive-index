@@ -460,7 +460,7 @@ describe('Integration Tests - Database Operations', () => {
       });
     });
 
-    it('should perform efficient plot block tree queries', async () => {
+    it('should perform efficient trope tree queries', async () => {
       const { rows, metrics } = await dbManager.executeQuery(`
         WITH RECURSIVE plot_tree AS (
           -- Base case: root nodes
@@ -611,7 +611,7 @@ describe('Integration Tests - Database Operations', () => {
   });
 
   describe('Tree Structure Operations', () => {
-    it('should validate plot block tree integrity', async () => {
+    it('should validate trope tree integrity', async () => {
       const validation = await dbManager.validateTreeStructure('plot_blocks');
 
       expect(validation.isValid).toBe(true);

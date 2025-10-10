@@ -107,10 +107,10 @@ export class FandomContentService {
   }
 
   /**
-   * Get plot blocks accessible to a user (filtered by fandom permissions)
+   * Get tropes accessible to a user (filtered by fandom permissions)
    */
   async getPlotBlocks(userId: string): Promise<any[]> {
-    // Mock implementation - would return plot blocks filtered by user's fandom assignments
+    // Mock implementation - would return tropes filtered by user's fandom assignments
     return [
       {
         id: 'plot-1',

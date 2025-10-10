@@ -181,12 +181,12 @@ describe('Performance Validation Tests', () => {
       expect(createdTag.name).toBe(tagData.name);
     });
 
-    it('should create plot block within 50ms', async () => {
+    it('should create trope within 50ms', async () => {
       // Arrange
       const plotBlockData = {
         id: randomUUID(),
-        name: 'Fast Plot Block',
-        description: 'Testing fast plot block creation',
+        name: 'Fast Trope',
+        description: 'Testing fast trope creation',
         fandom_id: testFandomId,
         parent_id: null,
         is_active: true,
@@ -254,11 +254,11 @@ describe('Performance Validation Tests', () => {
 
       await db.insert(tags).values(tagData);
 
-      // Create plot blocks
+      // Create tropes
       const plotBlockData = Array.from({ length: 5 }, (_, i) => ({
         id: randomUUID(),
-        name: `Plot Block ${i + 1}`,
-        description: `Description for plot block ${i + 1}`,
+        name: `Trope ${i + 1}`,
+        description: `Description for trope ${i + 1}`,
         fandom_id: testFandomId,
         parent_id: null,
         is_active: true,
@@ -274,11 +274,11 @@ describe('Performance Validation Tests', () => {
       const pathway = {
         fandom_id: testFandomId,
         tags: ['Tag A', 'Tag E'],
-        plot_blocks: ['Plot Block 1'],
+        plot_blocks: ['Trope 1'],
         pathway: [
           { id: 'Tag A', type: 'tag' as const },
           { id: 'Tag E', type: 'tag' as const },
-          { id: 'Plot Block 1', type: 'plot_block' as const },
+          { id: 'Trope 1', type: 'plot_block' as const },
         ],
       };
 
@@ -299,14 +299,14 @@ describe('Performance Validation Tests', () => {
       const complexPathway = {
         fandom_id: testFandomId,
         tags: ['Tag A', 'Tag D', 'Tag E'], // Tag D requires Tag A
-        plot_blocks: ['Plot Block 1', 'Plot Block 2', 'Plot Block 3'],
+        plot_blocks: ['Trope 1', 'Trope 2', 'Trope 3'],
         pathway: [
           { id: 'Tag A', type: 'tag' as const },
           { id: 'Tag D', type: 'tag' as const },
           { id: 'Tag E', type: 'tag' as const },
-          { id: 'Plot Block 1', type: 'plot_block' as const },
-          { id: 'Plot Block 2', type: 'plot_block' as const },
-          { id: 'Plot Block 3', type: 'plot_block' as const },
+          { id: 'Trope 1', type: 'plot_block' as const },
+          { id: 'Trope 2', type: 'plot_block' as const },
+          { id: 'Trope 3', type: 'plot_block' as const },
         ],
       };
 
@@ -351,11 +351,11 @@ describe('Performance Validation Tests', () => {
       const pathway = {
         fandom_id: testFandomId,
         tags: ['Tag A', 'Tag E'],
-        plot_blocks: ['Plot Block 1'],
+        plot_blocks: ['Trope 1'],
         pathway: [
           { id: 'Tag A', type: 'tag' as const },
           { id: 'Tag E', type: 'tag' as const },
-          { id: 'Plot Block 1', type: 'plot_block' as const },
+          { id: 'Trope 1', type: 'plot_block' as const },
         ],
       };
 
@@ -437,11 +437,11 @@ describe('Performance Validation Tests', () => {
 
       await db.insert(tags).values(tagData);
 
-      // Create plot block hierarchy (20 blocks)
+      // Create trope hierarchy (20 blocks)
       const rootBlocks = Array.from({ length: 5 }, (_, i) => ({
         id: randomUUID(),
-        name: `Root Plot Block ${i + 1}`,
-        description: `Root plot block ${i + 1}`,
+        name: `Root Trope ${i + 1}`,
+        description: `Root trope ${i + 1}`,
         fandom_id: testFandomId,
         parent_id: null,
         is_active: true,
@@ -498,7 +498,7 @@ describe('Performance Validation Tests', () => {
       expect(tagsWithClasses.length).toBeGreaterThan(40); // Should have many tags
     });
 
-    it('should query plot block hierarchy within 100ms', async () => {
+    it('should query trope hierarchy within 100ms', async () => {
       // Arrange
       const startTime = performance.now();
 
@@ -517,7 +517,7 @@ describe('Performance Validation Tests', () => {
       // Assert
       const duration = endTime - startTime;
       expect(duration).toBeLessThan(100);
-      expect(hierarchy.length).toBeGreaterThan(15); // Should have many plot blocks
+      expect(hierarchy.length).toBeGreaterThan(15); // Should have many tropes
     });
 
     it('should count entities by type within 100ms', async () => {

@@ -225,7 +225,7 @@ interface TagClass {
    - Use tag-classes page as template
    - Connect to `/api/v1/tags` endpoints
 
-3. **Implement Plot Blocks Management** (LOW)
+3. **Implement Tropes Management** (LOW)
    - Create `app/admin/plot-blocks/page.tsx`
    - Add hierarchical tree view
    - Connect to tropes API
@@ -259,7 +259,7 @@ interface TagClass {
 - [ ] Pagination not implemented (loads all tag classes)
 - [ ] Activity tracking still returns 0 (needs separate implementation)
 - [ ] Database size calculation not implemented
-- [ ] Plot blocks and validation rules tables not migrated yet
+- [ ] Tropes and validation rules tables not migrated yet
 
 ---
 

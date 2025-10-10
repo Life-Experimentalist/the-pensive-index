@@ -116,7 +116,7 @@ graph TB
 **API Routes Purpose**:
 - **fandoms/route.ts**: Handle HTTP requests for fandom management
 - **tags/route.ts**: Process tag CRUD operations
-- **plot-blocks/route.ts**: Manage plot block operations
+- **plot-blocks/route.ts**: Manage trope operations
 - **health/route.ts**: System health monitoring
 
 **Pages (Future)**:

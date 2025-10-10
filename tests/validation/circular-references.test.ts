@@ -282,7 +282,7 @@ describe('CircularReferenceDetector', () => {
   });
 
   describe('Simple Circular Reference Detection', () => {
-    it('should detect simple plot block circular references', () => {
+    it('should detect simple trope circular references', () => {
       const context: CircularReferenceContext = {
         plot_blocks: [samplePlotBlocks[2], samplePlotBlocks[3]], // pb-circle-a, pb-circle-b
         conditions: [],
@@ -453,18 +453,18 @@ describe('CircularReferenceDetector', () => {
   });
 
   describe('Mixed Type Circular References', () => {
-    it('should detect circles across plot blocks and tags', () => {
+    it('should detect circles across tropes and tags', () => {
       // Create cross-type circular reference
       const mixedCirclePlotBlock = {
         ...samplePlotBlocks[0],
         id: 'mixed-pb',
-        requires: ['mixed-tag'], // Plot block requires tag
+        requires: ['mixed-tag'], // Trope requires tag
       };
 
       const mixedCircleTag = {
         ...sampleTags[0],
         id: 'mixed-tag',
-        enhances: ['mixed-pb'], // Tag enhances plot block (creates circle)
+        enhances: ['mixed-pb'], // Tag enhances trope (creates circle)
       };
 
       const context: CircularReferenceContext = {
@@ -499,19 +499,19 @@ describe('CircularReferenceDetector', () => {
       expect(result.circular_chains[0].relationship_type).toBe('mixed');
     });
 
-    it('should handle cross-condition and plot block references', () => {
-      // Create condition that requires plot block that enables the condition's plot block
+    it('should handle cross-condition and trope references', () => {
+      // Create condition that requires trope that enables the condition's trope
       const crossRefPlotBlock = {
         ...samplePlotBlocks[0],
         id: 'cross-pb',
-        enables: ['pb-1'], // Enables the plot block that contains cross-condition
+        enables: ['pb-1'], // Enables the trope that contains cross-condition
       };
 
       const crossRefCondition = {
         ...sampleConditions[0],
         id: 'cross-cond',
         plot_block_id: 'pb-1',
-        requires: ['cross-pb'], // Condition requires plot block that enables its parent
+        requires: ['cross-pb'], // Condition requires trope that enables its parent
       };
 
       const context: CircularReferenceContext = {
@@ -528,7 +528,7 @@ describe('CircularReferenceDetector', () => {
   });
 
   describe('Hierarchical Circular References', () => {
-    it('should detect parent-child circular hierarchies in plot blocks', () => {
+    it('should detect parent-child circular hierarchies in tropes', () => {
       const context: CircularReferenceContext = {
         plot_blocks: [samplePlotBlocks[8], samplePlotBlocks[9]], // Parent and child with circular dependency
         conditions: [],

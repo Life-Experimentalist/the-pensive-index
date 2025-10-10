@@ -345,7 +345,7 @@ export class FandomQueries {
         }
       }
 
-      // Create default plot blocks from template
+      // Create default tropes from template
       if (
         config.default_plot_blocks &&
         Array.isArray(config.default_plot_blocks)

@@ -224,11 +224,11 @@ Create a new tag class in a fandom.
 }
 ```
 
-### Plot Blocks
+### Tropes
 
 #### GET /api/fandoms/[fandomSlug]/plot-blocks
 
-Retrieve plot blocks for a specific fandom with hierarchy information.
+Retrieve tropes for a specific fandom with hierarchy information.
 
 **Query Parameters:**
 - `parent_id` (string): Filter by parent block ID (null for root blocks)
@@ -266,7 +266,7 @@ Retrieve plot blocks for a specific fandom with hierarchy information.
 
 #### POST /api/fandoms/[fandomSlug]/plot-blocks (Admin Only)
 
-Create a new plot block in a fandom.
+Create a new trope in a fandom.
 
 **Request Body:**
 ```json
@@ -392,7 +392,7 @@ X-RateLimit-Reset: 1640995200
 - Description: Optional, max 500 characters
 - Validation rules must be valid JSON
 
-### Plot Block Validation
+### Trope Validation
 - Name: 1-100 characters, unique within fandom
 - Description: Optional, max 1000 characters
 - Parent must exist if specified
@@ -594,7 +594,7 @@ The API implements a 4-layer caching strategy for optimal performance:
 **Cache TTLs:**
 - Fandom data: 1 hour (KV)
 - Tag/TagClass data: 30 minutes (KV)
-- Plot block hierarchy: 30 minutes (KV)
+- Trope hierarchy: 30 minutes (KV)
 - Validation rules: 15 minutes (KV)
 - Search results: 5 minutes (Memory)
 - Story metadata: 1 hour (Database)

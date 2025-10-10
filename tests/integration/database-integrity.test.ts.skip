@@ -80,13 +80,13 @@ describe('Database Integrity Tests', () => {
       ).rejects.toThrow();
     });
 
-    it('should prevent creating plot block with invalid fandom_id', async () => {
+    it('should prevent creating trope with invalid fandom_id', async () => {
       // Arrange
       const invalidFandomId = randomUUID();
       const plotBlockData = {
         id: randomUUID(),
-        name: 'Invalid Fandom Plot Block',
-        description: 'Plot block with invalid fandom reference',
+        name: 'Invalid Fandom Trope',
+        description: 'Trope with invalid fandom reference',
         fandom_id: invalidFandomId, // This fandom doesn't exist
         parent_id: null,
         is_active: true,
@@ -118,13 +118,13 @@ describe('Database Integrity Tests', () => {
       await expect(db.insert(tags).values(tagData)).rejects.toThrow();
     });
 
-    it('should prevent creating plot block with invalid parent_id', async () => {
+    it('should prevent creating trope with invalid parent_id', async () => {
       // Arrange
       const invalidParentId = randomUUID();
       const plotBlockData = {
         id: randomUUID(),
-        name: 'Invalid Parent Plot Block',
-        description: 'Plot block with invalid parent reference',
+        name: 'Invalid Parent Trope',
+        description: 'Trope with invalid parent reference',
         fandom_id: testFandomId,
         parent_id: invalidParentId, // This parent doesn't exist
         is_active: true,
@@ -284,8 +284,8 @@ describe('Database Integrity Tests', () => {
       const plotBlockId = randomUUID();
       await db.insert(plotBlocks).values({
         id: plotBlockId,
-        name: 'Temp Plot Block',
-        description: 'Plot block in temporary fandom',
+        name: 'Temp Trope',
+        description: 'Trope in temporary fandom',
         fandom_id: tempFandomId,
         parent_id: null,
         is_active: true,
@@ -372,12 +372,12 @@ describe('Database Integrity Tests', () => {
       await db.delete(tagClasses).where(eq(tagClasses.id, tagClassId));
     });
 
-    it('should maintain plot block hierarchy integrity', async () => {
-      // Arrange - Create parent and child plot blocks
+    it('should maintain trope hierarchy integrity', async () => {
+      // Arrange - Create parent and child tropes
       const parentBlockId = randomUUID();
       await db.insert(plotBlocks).values({
         id: parentBlockId,
-        name: 'Parent Plot Block',
+        name: 'Parent Trope',
         description: 'Parent for hierarchy test',
         fandom_id: testFandomId,
         parent_id: null,
@@ -389,7 +389,7 @@ describe('Database Integrity Tests', () => {
       const childBlockId = randomUUID();
       await db.insert(plotBlocks).values({
         id: childBlockId,
-        name: 'Child Plot Block',
+        name: 'Child Trope',
         description: 'Child for hierarchy test',
         fandom_id: testFandomId,
         parent_id: parentBlockId,
@@ -641,12 +641,12 @@ describe('Database Integrity Tests', () => {
       await db.delete(tagClasses).where(eq(tagClasses.id, tagClassId));
     });
 
-    it('should properly handle plot block parent_id nullability', async () => {
-      // Arrange & Act - Create root plot block (parent_id = null)
+    it('should properly handle trope parent_id nullability', async () => {
+      // Arrange & Act - Create root trope (parent_id = null)
       const rootBlockData = {
         id: randomUUID(),
         name: 'Root Block',
-        description: 'Root plot block',
+        description: 'Root trope',
         fandom_id: testFandomId,
         parent_id: null,
         is_active: true,
@@ -666,7 +666,7 @@ describe('Database Integrity Tests', () => {
       const childBlockData = {
         id: randomUUID(),
         name: 'Child Block',
-        description: 'Child plot block',
+        description: 'Child trope',
         fandom_id: testFandomId,
         parent_id: rootBlock.id,
         is_active: true,

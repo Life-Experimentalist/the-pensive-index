@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Pensieve Index has a comprehensive tag and trope (plot blocks) management system. Here's where everything is located and how it works.
+The Pensieve Index has a comprehensive tag and trope (tropes) management system. Here's where everything is located and how it works.
 
 ---
 
@@ -42,7 +42,7 @@ The Pensieve Index has a comprehensive tag and trope (plot blocks) management sy
 
 **Features:**
 - Quick access to tag management
-- Plot blocks management
+- Tropes management
 - Validation rules
 - Story submissions review
 
@@ -50,7 +50,7 @@ The Pensieve Index has a comprehensive tag and trope (plot blocks) management sy
 
 **Action Cards:**
 - "Manage Tags" - Add or edit fandom tags
-- "Plot Blocks" - Manage plot block library
+- "Tropes" - Manage trope library
 - "Validation Rules" - Configure tag validation
 - "Review Stories" - Moderate submissions
 
@@ -151,7 +151,7 @@ GET /api/fandoms/[fandomSlug]/tags
 GET /api/fandoms/[fandomSlug]/tropes
 ```
 📄 File: `app/api/fandoms/[fandom]/tropes/route.ts`
-- Returns all plot blocks (tropes) for a specific fandom
+- Returns all tropes (tropes) for a specific fandom
 
 ---
 
@@ -298,7 +298,7 @@ user.publicMetadata = {
 ### ⚠️ In Progress / Needs Work
 - [ ] Connect Tag Classes UI to real API (currently mock data)
 - [ ] Build dedicated Tag Editor component
-- [ ] Build Plot Block (Trope) management UI
+- [ ] Build Trope (Trope) management UI
 - [ ] Implement Clerk webhook for user sync
 - [ ] Consolidate user management (Clerk vs admin_users table)
 - [ ] Add bulk tag operations
@@ -382,7 +382,7 @@ POST /api/admin/tag-classes
 3. Update admin dashboard to show Clerk users
 4. Remove hardcoded admin user count (currently shows 1)
 
-### Priority 4: Plot Blocks (Tropes)
+### Priority 4: Tropes (Tropes)
 1. Create PlotBlockModel (similar to TagModel)
 2. Build `/admin/plot-blocks` management page
 3. Implement tree structure for hierarchical tropes

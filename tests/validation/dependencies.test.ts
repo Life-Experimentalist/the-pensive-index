@@ -166,7 +166,7 @@ describe('DependencyValidator', () => {
         is_active: true,
         created_at: now,
         updated_at: now,
-        requires: ['pb-5'], // Requires Historical Knowledge plot block
+        requires: ['pb-5'], // Requires Historical Knowledge trope
       },
       {
         id: 'cond-4',
@@ -177,7 +177,7 @@ describe('DependencyValidator', () => {
         is_active: true,
         created_at: now,
         updated_at: now,
-        requires: ['cond-2'], // Requires friendship from other plot block
+        requires: ['cond-2'], // Requires friendship from other trope
       },
     ];
 
@@ -243,7 +243,7 @@ describe('DependencyValidator', () => {
     ];
   });
 
-  describe('Plot Block Dependencies', () => {
+  describe('Trope Dependencies', () => {
     it('should validate missing hard requirements', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[1].id], // Marauders Era Travel (requires Time Travel Setup)
@@ -328,7 +328,7 @@ describe('DependencyValidator', () => {
   });
 
   describe('Condition Dependencies', () => {
-    it('should validate condition requirements within same plot block', () => {
+    it('should validate condition requirements within same trope', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[1].id], // Time Travel + Marauders Era
         selected_conditions: [sampleConditions[1].id], // Befriend James (requires Meet James)
@@ -351,7 +351,7 @@ describe('DependencyValidator', () => {
     it('should validate cross-plot-block condition requirements', () => {
       const context: DependencyContext = {
         selected_plot_blocks: [samplePlotBlocks[0].id, samplePlotBlocks[2].id], // Time Travel + Founders Era (missing Historical Knowledge)
-        selected_conditions: [sampleConditions[2].id], // Meet Godric (requires Historical Knowledge plot block)
+        selected_conditions: [sampleConditions[2].id], // Meet Godric (requires Historical Knowledge trope)
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -375,7 +375,7 @@ describe('DependencyValidator', () => {
           samplePlotBlocks[1].id, // Marauders Era Travel
           samplePlotBlocks[5].id, // Romance Arc
         ],
-        selected_conditions: [sampleConditions[3].id], // First Kiss (requires Befriend James from different plot block)
+        selected_conditions: [sampleConditions[3].id], // First Kiss (requires Befriend James from different trope)
         selected_tags: [],
         plot_blocks: samplePlotBlocks,
         conditions: sampleConditions,
@@ -697,7 +697,7 @@ describe('DependencyValidator', () => {
         .map((_, i) => ({
           ...samplePlotBlocks[0],
           id: `large-pb-${i}`,
-          name: `Large Plot Block ${i}`,
+          name: `Large Trope ${i}`,
           requires: i > 0 ? [`large-pb-${i - 1}`] : undefined, // Chain dependency
         }));
 
@@ -836,5 +836,3 @@ describe('DependencyValidator', () => {
     });
   });
 });
-
-

@@ -2,8 +2,9 @@
 
 import React, { useState, useCallback } from 'react';
 
-// Import our discovery components
-import { FandomSelector, type Fandom } from './fandom-selector';
+// Import types and components
+import type { Fandom } from '@/types';
+import { FandomSelector } from './fandom-selector';
 import { PathwayBuilder } from './pathway-builder';
 import { TagList } from './tag-list';
 import { PlotBlockTree } from './plot-block-tree';
@@ -106,23 +107,21 @@ export function DesktopInterface({
             </div>
 
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">
-                Plot Blocks
-              </h3>
+              <h3 className="text-md font-medium text-gray-900 mb-4">Tropes</h3>
               {selectedFandom ? (
                 <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-md border border-blue-200">
                   <p className="font-medium text-blue-900 mb-2">
-                    ✨ Plot Block Tree Coming Soon
+                    ✨ Trope Tree Coming Soon
                   </p>
                   <p className="text-blue-700">
-                    Expandable plot block tree with dependencies and conflicts
-                    is being implemented. The PlotBlockTree component will be
-                    fully functional soon!
+                    Expandable trope tree with dependencies and conflicts is
+                    being implemented. The PlotBlockTree component will be fully
+                    functional soon!
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-gray-500 italic">
-                  Select a fandom to view plot blocks
+                  Select a fandom to view tropes
                 </p>
               )}
             </div>

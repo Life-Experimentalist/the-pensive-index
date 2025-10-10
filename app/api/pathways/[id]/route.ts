@@ -20,10 +20,10 @@ import { ValidationEngine } from '@/lib/validation/engine';
 // GET /api/pathways/[id] - Get a single pathway
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const pathwayId = params.id;
+    const { id: pathwayId } = await params;
 
     const db = getDatabase();
     const result = await db
@@ -62,10 +62,10 @@ export async function GET(
 // PATCH /api/pathways/[id] - Update pathway with optimistic locking
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const pathwayId = params.id;
+    const { id: pathwayId } = await params;
     const body = await request.json();
 
     const {
@@ -254,10 +254,10 @@ export async function PATCH(
 // DELETE /api/pathways/[id] - Delete a pathway
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const pathwayId = params.id;
+    const { id: pathwayId } = await params;
 
     // Authentication required for deletion
     const authResult = await checkAuth();

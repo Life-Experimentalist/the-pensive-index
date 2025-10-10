@@ -43,7 +43,7 @@ interface ConditionNodeProps {
 const conditionTypes = [
   { value: 'tag-exists', label: 'Tag Exists' },
   { value: 'tag-count', label: 'Tag Count' },
-  { value: 'plot-block-exists', label: 'Plot Block Exists' },
+  { value: 'plot-block-exists', label: 'Trope Exists' },
   { value: 'selection-value', label: 'Selection Value' },
   { value: 'pathway-length', label: 'Pathway Length' },
   { value: 'custom-rule', label: 'Custom Rule' },

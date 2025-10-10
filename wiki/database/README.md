@@ -20,7 +20,7 @@ Fandoms
 TagClasses (validation logic)
 PlotBlockTrees (hierarchical dependencies)
 StoryTags (many-to-many story ↔ tags)
-StoryPlotBlocks (many-to-many story ↔ plot blocks)
+StoryPlotBlocks (many-to-many story ↔ tropes)
 ```
 
 ### Schema Overview
@@ -233,10 +233,10 @@ export async function findStoriesWithTags(
 }
 ```
 
-#### Plot Block Tree Traversal
+#### Trope Tree Traversal
 
 ```typescript
-// Get complete plot block tree
+// Get complete trope tree
 export async function getPlotBlockTree(
   blockId: string
 ): Promise<PlotBlockTree> {
@@ -466,7 +466,7 @@ export async function searchStoriesOptimized(
             AND st.tag_id IN ${pathway.tags}
           ) ELSE 0 END
           +
-          -- Plot block match scoring
+          -- Trope match scoring
           CASE WHEN ${pathway.plotBlocks.length} > 0
           THEN (
             SELECT CAST(COUNT(*) AS REAL) / ${pathway.plotBlocks.length}

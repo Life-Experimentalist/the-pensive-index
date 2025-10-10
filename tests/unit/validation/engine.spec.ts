@@ -1,6 +1,6 @@
 /**
  * Validation Engine Tests
- * Tests for pathway validation logic with tag and plot block rules
+ * Tests for pathway validation logic with tag and trope rules
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -31,15 +31,15 @@ describe('ValidationEngine', () => {
     });
   });
 
-  describe('Plot Block Dependency Validation', () => {
-    it('should require parent plot blocks before children', () => {
-      // TODO: Implement test for plot block tree dependencies
+  describe('Trope Dependency Validation', () => {
+    it('should require parent tropes before children', () => {
+      // TODO: Implement test for trope tree dependencies
       // e.g., "Black Lordship" requires "Goblin Inheritance" parent
       expect(true).toBe(true);
     });
 
-    it('should allow plot blocks with satisfied dependencies', () => {
-      // TODO: Implement test for valid plot block hierarchy
+    it('should allow tropes with satisfied dependencies', () => {
+      // TODO: Implement test for valid trope hierarchy
       expect(true).toBe(true);
     });
 
@@ -50,7 +50,7 @@ describe('ValidationEngine', () => {
   });
 
   describe('Pathway Validation', () => {
-    it('should validate complete pathway with tags and plot blocks', () => {
+    it('should validate complete pathway with tags and tropes', () => {
       // TODO: Implement test for full pathway validation
       expect(true).toBe(true);
     });
@@ -63,7 +63,7 @@ describe('ValidationEngine', () => {
     it('should complete validation within 200ms for complex pathways', async () => {
       // TODO: Implement performance test for validation SLA
       const startTime = Date.now();
-      // Validate complex pathway with 20+ tags and 10+ plot blocks
+      // Validate complex pathway with 20+ tags and 10+ tropes
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(200);
     });
@@ -75,7 +75,7 @@ describe('ValidationEngine', () => {
       expect(true).toBe(true);
     });
 
-    it('should suggest missing parent plot blocks', () => {
+    it('should suggest missing parent tropes', () => {
       // TODO: Implement test for dependency suggestions
       expect(true).toBe(true);
     });

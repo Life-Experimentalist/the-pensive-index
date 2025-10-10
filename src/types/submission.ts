@@ -465,3 +465,30 @@ export type PaginatedResponse<T> = {
     hasPrevious: boolean;
   };
 };
+
+// Browser Extension Message Types
+export type ExtensionMessageType =
+  | 'STORY_DETECTED'
+  | 'STORY_PARSED'
+  | 'SUBMISSION_START'
+  | 'SUBMISSION_PROGRESS'
+  | 'SUBMISSION_COMPLETE'
+  | 'SUBMISSION_ERROR'
+  | 'API_REQUEST'
+  | 'API_RESPONSE'
+  | 'SYNC_REQUEST'
+  | 'STATUS_UPDATE'
+  | 'SETTINGS_UPDATE'
+  | 'BACKGROUND_TASK'
+  | 'CONTENT_SCRIPT_READY'
+  | 'POPUP_OPENED'
+  | 'POPUP_CLOSED';
+
+export interface ExtensionMessage {
+  type: ExtensionMessageType;
+  payload?: any;
+  requestId?: string;
+  tabId?: number;
+  timestamp?: number;
+  origin?: string;
+}

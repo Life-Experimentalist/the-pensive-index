@@ -499,7 +499,7 @@ describe('Fandom Template System Integration', () => {
                 passed: true,
                 warnings: [
                   'Some tags have no descriptions',
-                  'Plot block "Magic Discovery" has no conditions',
+                  'Trope "Magic Discovery" has no conditions',
                 ],
                 errors: [],
               },
@@ -546,7 +546,7 @@ describe('Fandom Template System Integration', () => {
               changes_summary: [
                 'Added 3 new default tags',
                 'Modified validation rule for magic-system category',
-                'Removed deprecated plot block "Old Magic Discovery"',
+                'Removed deprecated trope "Old Magic Discovery"',
               ],
               migration_options: {
                 auto_migrate: true,

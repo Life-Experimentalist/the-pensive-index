@@ -427,7 +427,7 @@ export class ValidationRuleCompiler {
     condition: RuleCondition
   ): (context: ValidationContext) => ConditionResult {
     return (context: ValidationContext): ConditionResult => {
-      // Calculate maximum depth of selected plot blocks
+      // Calculate maximum depth of selected tropes
       let maxDepth = 0;
 
       for (const blockId of context.selectedPlotBlocks) {
@@ -610,7 +610,7 @@ export class ValidationRuleCompiler {
           type: 'error',
           message:
             action.parameters.message ||
-            `Required plot blocks missing: ${missingBlocks.join(', ')}`,
+            `Required tropes missing: ${missingBlocks.join(', ')}`,
           targetIds: missingBlocks,
           suggestedAction: 'add',
         };
@@ -618,7 +618,7 @@ export class ValidationRuleCompiler {
 
       return {
         type: 'suggestion',
-        message: 'All required plot blocks present',
+        message: 'All required tropes present',
       };
     };
   }
@@ -654,14 +654,18 @@ export class ValidationRuleCompiler {
 
       return {
         type: 'plot_warning',
-        message: guidance?.message || 'This combination may present plot development challenges',
+        message:
+          guidance?.message ||
+          'This combination may present plot development challenges',
         plotGuidance: {
           warningType: guidance?.warningType || 'character_dynamic',
           riskLevel: guidance?.riskLevel || 'medium',
-          conflictDescription: guidance?.conflictDescription || 'Potential character inconsistency',
+          conflictDescription:
+            guidance?.conflictDescription ||
+            'Potential character inconsistency',
           rectificationStrategies: guidance?.rectificationStrategies || [],
-          continuationWarnings: guidance?.continuationWarnings || []
-        }
+          continuationWarnings: guidance?.continuationWarnings || [],
+        },
       };
     };
   }
@@ -674,13 +678,15 @@ export class ValidationRuleCompiler {
 
       return {
         type: 'character_guidance',
-        message: characterDynamics?.guidanceNote || 'Consider character development implications',
+        message:
+          characterDynamics?.guidanceNote ||
+          'Consider character development implications',
         characterDynamics: {
           characters: characterDynamics?.characters || [],
           relationshipType: characterDynamics?.relationshipType || 'friendship',
           conflictTriggers: characterDynamics?.conflictTriggers || [],
-          guidanceNote: characterDynamics?.guidanceNote || ''
-        }
+          guidanceNote: characterDynamics?.guidanceNote || '',
+        },
       };
     };
   }
@@ -689,13 +695,13 @@ export class ValidationRuleCompiler {
     action: RuleAction
   ): (context: ValidationContext) => ActionExecutionResult {
     return (context: ValidationContext): ActionExecutionResult => {
-      const alternatives = action.parameters.alternatives as string[] || [];
+      const alternatives = (action.parameters.alternatives as string[]) || [];
 
       return {
         type: 'suggestion',
         message: `Consider these alternatives: ${alternatives.join(', ')}`,
         suggestedAction: 'replace',
-        targetIds: alternatives
+        targetIds: alternatives,
       };
     };
   }

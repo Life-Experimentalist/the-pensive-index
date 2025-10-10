@@ -19,7 +19,7 @@ export class TreeQueryOptimizer {
   }
 
   /**
-   * Get complete plot block tree for a fandom with optimized loading
+   * Get complete trope tree for a fandom with optimized loading
    * Uses single query with CTE for maximum performance
    */
   async getPlotBlockTree(
@@ -75,7 +75,9 @@ export class TreeQueryOptimizer {
     // For now, return empty result to avoid TypeScript errors
     // const results = await this.db.select().from(sql`(${cteSql}) as result`);
     const results: any[] = [];
-    console.warn('TreeQueryOptimizer: getPlotBlockTree temporarily disabled - using empty results');
+    console.warn(
+      'TreeQueryOptimizer: getPlotBlockTree temporarily disabled - using empty results'
+    );
     const tree = this.buildTreeFromFlatResults(results);
 
     // Cache results
@@ -178,7 +180,7 @@ export class TreeQueryOptimizer {
     const plotBlockRequests = requests.filter(r => r.type === 'plotBlock');
     const tagRequests = requests.filter(r => r.type === 'tag');
 
-    // Batch load plot block trees
+    // Batch load trope trees
     if (plotBlockRequests.length > 0) {
       const fandomIds = plotBlockRequests.map(r => r.fandomId);
       const batchResults = await this.batchLoadPlotBlockTrees(fandomIds);
@@ -339,7 +341,7 @@ export class TreeQueryOptimizer {
   private async batchLoadPlotBlockTrees(
     fandomIds: string[]
   ): Promise<PlotBlockTreeNode[][]> {
-    // Implementation for batch loading plot block trees
+    // Implementation for batch loading trope trees
     const results = await Promise.all(
       fandomIds.map(fandomId =>
         this.getPlotBlockTree(fandomId, { useCache: true })

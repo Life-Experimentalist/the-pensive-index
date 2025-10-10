@@ -333,7 +333,7 @@ export class CacheKeyBuilder {
     plotBlocks: string[],
     version: number = 2
   ): string {
-    // Sort tags and plot blocks for consistent keys
+    // Sort tags and tropes for consistent keys
     const sortedTags = [...tags].sort().join(',');
     const sortedBlocks = [...plotBlocks].sort().join(',');
 

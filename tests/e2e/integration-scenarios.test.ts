@@ -356,7 +356,7 @@ class MockIntegrationSystem {
       class: 'selection-panel',
     });
 
-    // Add sample tags and plot blocks
+    // Add sample tags and tropes
     const sampleRules = [
       { id: 'tag-1', name: 'angst', type: 'tag' },
       { id: 'tag-2', name: 'fluff', type: 'tag' },

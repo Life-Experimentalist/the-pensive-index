@@ -6,7 +6,7 @@ Welcome to The Pensieve Index - your gateway to discovering fanfiction that perf
 
 The Pensieve Index is a **library-first story discovery platform**. Unlike other platforms that rely on basic tags, we use:
 
-- **Hierarchical Tagging**: Complex plot blocks with conditional branching
+- **Hierarchical Tagging**: Complex tropes with conditional branching
 - **Existing Story Search**: Find precisely matching stories first
 - **Intelligent Prompts**: Create detailed prompts only when needed
 - **Community Curation**: Admin-managed content for quality assurance
@@ -16,7 +16,7 @@ The Pensieve Index is a **library-first story discovery platform**. Unlike other
 ### 1. Understanding the Interface
 
 #### Desktop Interface (Three Panels)
-- **Left Panel**: Browse fandoms, tags, and plot blocks
+- **Left Panel**: Browse fandoms, tags, and tropes
 - **Center Panel**: Build your story pathway by dragging elements
 - **Right Panel**: View search results and story prompts
 
@@ -29,7 +29,7 @@ The Pensieve Index is a **library-first story discovery platform**. Unlike other
 
 #### Step 1: Select Your Fandom
 1. Choose your fandom from the dropdown (e.g., "Harry Potter")
-2. Browse available tags and plot blocks for that fandom
+2. Browse available tags and tropes for that fandom
 3. Use the search function to find specific elements
 
 #### Step 2: Add Basic Tags
@@ -38,8 +38,8 @@ The Pensieve Index is a **library-first story discovery platform**. Unlike other
 - **Mood Tags**: angst, fluff, humor
 - **Setting Tags**: hogwarts, post-war, alternate-universe
 
-#### Step 3: Add Plot Blocks
-Plot blocks represent major story elements with specific narrative implications:
+#### Step 3: Add Tropes
+Tropes represent major story elements with specific narrative implications:
 
 **Example: Goblin Inheritance**
 - Drag "Goblin Inheritance" to your pathway
@@ -63,7 +63,7 @@ Plot blocks represent major story elements with specific narrative implications:
 
 #### Common Validation Rules
 - **Shipping Conflicts**: Multiple relationships with the same character may require "harem" tag
-- **Plot Conflicts**: Some plot blocks are mutually exclusive
+- **Plot Conflicts**: Some tropes are mutually exclusive
 - **Prerequisites**: Some elements require others to be present first
 
 ## Using Search Results
@@ -92,8 +92,8 @@ Alongside search results, you'll always see:
 - **Share Pathways**: Send pathway links to others
 - **Modify Searches**: Easily adjust and re-search
 
-### Complex Plot Blocks
-Some plot blocks have sophisticated branching:
+### Complex Tropes
+Some tropes have sophisticated branching:
 
 **Goblin Inheritance Example:**
 ```
@@ -117,7 +117,7 @@ Tags belong to classes for smart validation:
 
 ### Effective Pathway Building
 1. **Start Broad**: Begin with basic character and mood tags
-2. **Add Specifics**: Include plot blocks for major story elements
+2. **Add Specifics**: Include tropes for major story elements
 3. **Be Realistic**: Not every combination exists in the library
 4. **Experiment**: Try variations if initial searches are empty
 
@@ -153,7 +153,7 @@ Help grow the library by submitting stories you find:
 
 ### No Search Results
 - Try broader pathways with fewer specific elements
-- Check if you're using conflicting plot blocks
+- Check if you're using conflicting tropes
 - Consider that some combinations may genuinely not exist
 - Use the prompt feature to inspire new story creation
 

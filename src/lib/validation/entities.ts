@@ -157,7 +157,7 @@ export class ValidationRuleEntity {
 
       case 'plot_block_selection':
         if (!condition.value || typeof condition.value !== 'string') {
-          errors.push('Plot block condition requires plot block ID');
+          errors.push('Trope condition requires trope ID');
         }
         break;
 

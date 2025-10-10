@@ -1,8 +1,8 @@
 /**
  * PlotBlockCondition Database Schema
  *
- * Defines the database schema for plot block conditions using Drizzle ORM.
- * Conditions enable dynamic branching logic within plot block hierarchies,
+ * Defines the database schema for trope conditions using Drizzle ORM.
+ * Conditions enable dynamic branching logic within trope hierarchies,
  * allowing complex story pathway generation with prerequisite and conflict checking.
  */
 
@@ -17,10 +17,10 @@ import { plotBlocks } from './plot-block';
 import { tags } from './tag';
 
 /**
- * Plot Block Conditions Table Schema
+ * Trope Conditions Table Schema
  *
- * Conditional logic engine for plot blocks. Conditions define when plot blocks
- * become available based on selected tags, other plot blocks, or custom rules.
+ * Conditional logic engine for tropes. Conditions define when tropes
+ * become available based on selected tags, other tropes, or custom rules.
  * Supports complex dependency trees and validation logic.
  */
 export const plotBlockConditions = sqliteTable(
@@ -29,7 +29,7 @@ export const plotBlockConditions = sqliteTable(
     // Primary identifier
     id: text('id').notNull().primaryKey(),
 
-    // Parent plot block relationship
+    // Parent trope relationship
     plotBlockId: text('plot_block_id').notNull(),
 
     // Condition type and logic

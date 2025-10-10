@@ -73,15 +73,14 @@ export async function GET(
             id: block.id,
             name: block.name,
             description: block.description,
-            category: block.category,
-            requires: block.requires || [],
-            enhances: block.enhances || [],
-            conflicts: [], // Not implemented in current schema
+            slug: block.slug,
+            // Note: category, requires, enhances, conflicts removed from schema
             children:
               block.children?.map(child => ({
                 id: child.id,
                 name: child.name,
                 description: child.description,
+                slug: child.slug,
                 parentId: child.parent_id,
               })) || [],
             isActive: block.is_active,

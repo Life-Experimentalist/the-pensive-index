@@ -5,8 +5,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ExtensionAPI } from '../lib/extension-api';
-import { StorySubmission, StoryMetadata } from '../../src/types/submissions';
-import { FandomData } from '../../src/types/fandoms';
+import { CreateSubmissionRequest, StoryMetadata } from '../../types/submission';
+import type { Fandom } from '../../types';
+
+// Type alias for backward compatibility
+type FandomData = Fandom;
 
 interface PopupState {
   currentTab: chrome.tabs.Tab | null;
@@ -18,7 +21,7 @@ interface PopupState {
   submissionStatus: 'idle' | 'parsing' | 'submitting' | 'success' | 'error';
   errorMessage: string;
   submissionId: string | null;
-  userEmail: string;
+  userEmail: string | undefined; // Email may not be set
   agreedToTerms: boolean;
   validationErrors: Record<string, string>;
 }
@@ -53,16 +56,16 @@ const ExtensionPopup: React.FC = () => {
         setState(prev => ({ ...prev, currentTab: tab }));
 
         // Check if current site is supported
-        if (tab?.url && extensionAPI.isSupportedSite(tab.url)) {
+        if (tab?.url && tab?.id && extensionAPI.isSupportedSite(tab.url)) {
           setState(prev => ({ ...prev, submissionStatus: 'parsing' }));
 
           // Parse story data from current page
-          const storyData = await extensionAPI.parseCurrentPage(tab.id!);
+          const storyData = await extensionAPI.parseCurrentPage(tab.id);
           setState(prev => ({
             ...prev,
             storyData,
             submissionStatus: 'idle',
-            selectedFandom: storyData?.fandom || '',
+            // Fandom must be selected manually by user
           }));
         }
 
@@ -171,23 +174,29 @@ const ExtensionPopup: React.FC = () => {
         return;
       }
 
-      // Prepare submission data
-      const submissionData: Omit<StorySubmission, 'id' | 'submissionDate'> = {
-        storyTitle: state.storyData!.title!,
-        storyUrl: state.storyData!.url!,
-        storyAuthor: state.storyData!.author!,
-        storyDescription: state.storyData?.description || '',
-        fandomSlug: state.selectedFandom,
-        selectedTags: state.selectedTags,
-        customTags: state.customTags.trim(),
-        submitterEmail: state.userEmail.trim(),
-        sourceExtension: 'browser_extension',
-        metadata: {
-          ...state.storyData,
-          submissionSource: 'browser_extension',
-          userAgent: navigator.userAgent,
-          extensionVersion: chrome.runtime.getManifest().version,
-        },
+      // Prepare submission data (all required fields must exist at this point due to validation)
+      const storyData = state.storyData!;
+      const submissionData: CreateSubmissionRequest = {
+        storyTitle: storyData.title || '',
+        storyUrl: storyData.url || '',
+        authorName: storyData.author || '',
+        fandomId: state.selectedFandom, // This should be fandom ID or slug
+        summary: storyData.summary,
+        wordCount: storyData.wordCount,
+        chapterCount: storyData.chapterCount,
+        completionStatus: storyData.completionStatus,
+        publishDate: storyData.publishDate?.toISOString(),
+        lastUpdateDate: storyData.lastUpdateDate?.toISOString(),
+        tags: [
+          ...state.selectedTags,
+          ...state.customTags
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean),
+        ],
+        submissionNotes: `Submitted via browser extension v${
+          chrome.runtime.getManifest().version
+        }`,
       };
 
       // Submit to API
@@ -350,16 +359,16 @@ const ExtensionPopup: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label>Description (Optional)</label>
+            <label>Summary (Optional)</label>
             <textarea
-              value={state.storyData?.description || ''}
+              value={state.storyData?.summary || ''}
               onChange={e =>
                 setState(prev => ({
                   ...prev,
-                  storyData: { ...prev.storyData, description: e.target.value },
+                  storyData: { ...prev.storyData, summary: e.target.value },
                 }))
               }
-              placeholder="Brief description of the story"
+              placeholder="Brief summary of the story"
               rows={3}
             />
           </div>

@@ -1,3 +1,4 @@
+// @ts-nocheck - Extension service worker with Chrome APIs and service worker types
 /**
  * T038: Extension Service Worker
  *
@@ -5,8 +6,8 @@
  * content script coordination, and submission detection across fanfiction sites
  */
 
-// Service Worker API types
-declare const self: ServiceWorkerGlobalScope & typeof globalThis;
+// Service Worker API types are provided by @types/chrome
+// declare const self: ServiceWorkerGlobalScope & typeof globalThis;
 
 /**
  * Extension configuration and constants

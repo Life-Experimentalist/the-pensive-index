@@ -102,7 +102,7 @@ export function TemplateSelector({
         }
       }
 
-      // Plot blocks filter
+      // Tropes filter
       if (filters.plotBlocks.length > 0) {
         const config = template.configuration as any;
         const templateBlocks = config?.default_plot_blocks?.map((b: any) => b.name) || [];
@@ -250,7 +250,7 @@ export function TemplateSelector({
               </div>
               <div className="text-center">
                 <div className="font-semibold text-gray-900">{blockCount}</div>
-                <div className="text-gray-500">Plot Blocks</div>
+                <div className="text-gray-500">Tropes</div>
               </div>
               <div className="text-center">
                 <div className="font-semibold text-gray-900">{classCount}</div>
@@ -548,7 +548,7 @@ export function TemplateSelector({
 
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">
-                    Plot Blocks (
+                    Tropes (
                     {previewTemplate.base_fandom.plot_blocks?.length || 0})
                   </h4>
                   <div className="space-y-1 max-h-32 overflow-y-auto">

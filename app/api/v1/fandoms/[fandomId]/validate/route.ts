@@ -47,9 +47,9 @@ export const POST = CommonMiddleware.public(
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
-      // Verify fandom exists
+      // Verify fandom exists (fandomId is actually a slug)
       const fandom = await db.query.fandoms.findFirst({
-        where: eq(fandoms.id, fandomId),
+        where: eq(fandoms.slug, fandomId),
       });
 
       if (!fandom) {
@@ -115,18 +115,7 @@ export const POST = CommonMiddleware.public(
           ...tc,
           validation_rules: tc.validation_rules || {},
         })),
-        fandomPlotBlocks.map(pb => ({
-          ...pb,
-          requires: pb.requires || undefined,
-          enhances: pb.enhances || undefined,
-          conflicts_with: pb.conflicts_with || undefined,
-          soft_requires: pb.soft_requires || undefined,
-          enabled_by: pb.enabled_by || undefined,
-          parent_id: pb.parent_id || undefined,
-          children: pb.children || undefined,
-          excludes_categories: pb.excludes_categories || undefined,
-          max_instances: pb.max_instances || undefined,
-        }))
+        fandomPlotBlocks // Plot blocks as-is (relationship fields removed from schema)
       );
 
       // Perform validation based on type

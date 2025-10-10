@@ -80,11 +80,10 @@ export const POST = CommonMiddleware.admin(
       );
     }
 
-    // Insert new fandom
+    // Insert new fandom (id is auto-increment, don't specify it)
     const newFandom = await db
       .insert(schema.fandoms)
       .values({
-        id: crypto.randomUUID(),
         name: validatedData.name,
         slug: slug,
         description: validatedData.description || '',

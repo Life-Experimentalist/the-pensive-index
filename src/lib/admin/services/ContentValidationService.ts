@@ -61,10 +61,10 @@ export class ContentValidationService {
     warnings: string[]
   ): void {
     if (!data.name) {
-      errors.push('Plot block name is required');
+      errors.push('Trope name is required');
     }
     if (!data.description) {
-      warnings.push('Plot block should have a description');
+      warnings.push('Trope should have a description');
     }
   }
 

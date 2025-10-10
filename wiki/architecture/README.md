@@ -40,7 +40,7 @@ The Pensieve Index is built as a modern web application following library-first 
 - **Validation Engine**: Complex rule checking and conflict resolution
 
 ### 3. Database Layer (Cloudflare D1)
-- **Hierarchical Data**: Plot blocks with tree relationships
+- **Hierarchical Data**: Tropes with tree relationships
 - **Tag Classification**: Tag classes for validation logic
 - **Story Pathways**: Complete tagging information for stories
 - **Performance Optimized**: Indexed queries for fast searches

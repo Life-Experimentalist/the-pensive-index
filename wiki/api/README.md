@@ -50,7 +50,7 @@ List all available fandoms with basic metadata.
 
 #### GET /api/fandoms/[fandomId]
 
-Get detailed fandom information including available tags and plot blocks.
+Get detailed fandom information including available tags and tropes.
 
 **Parameters:**
 - `fandomId`: String - Fandom identifier
@@ -292,14 +292,14 @@ Create a new tag.
 }
 ```
 
-## Plot Block Tree API
+## Trope Tree API
 
 ### GET /api/plot-blocks/[blockId]/tree
 
-Get the complete tree structure for a plot block.
+Get the complete tree structure for a trope.
 
 **Parameters:**
-- `blockId`: String - Plot block identifier
+- `blockId`: String - Trope identifier
 
 **Response:**
 ```json

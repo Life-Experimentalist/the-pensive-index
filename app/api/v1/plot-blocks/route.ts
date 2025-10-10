@@ -35,9 +35,10 @@ export const GET = CommonMiddleware.public(
       conditions.push(eq(plotBlocks.fandom_id, fandomId));
     }
 
-    if (category) {
-      conditions.push(eq(plotBlocks.category, category));
-    }
+    // Note: category filter removed as field no longer exists in schema
+    // if (category) {
+    //   conditions.push(eq(plotBlocks.category, category));
+    // }
 
     if (name) {
       conditions.push(ilike(plotBlocks.name, `%${name}%`));
@@ -53,7 +54,7 @@ export const GET = CommonMiddleware.public(
       where: whereClause,
       limit,
       offset,
-      orderBy: [plotBlocks.category, plotBlocks.name],
+      orderBy: [plotBlocks.display_order, plotBlocks.name],
       with: {
         fandom: {
           columns: {
@@ -96,9 +97,9 @@ export const POST = CommonMiddleware.admin(
       throw ErrorFactory.validation('fandom_id is required');
     }
 
-    // Verify fandom exists
+    // Verify fandom exists (use slug since fandom_id is text but fandoms.id is integer)
     const fandom = await db.query.fandoms.findFirst({
-      where: eq(fandoms.id, validatedData.fandom_id),
+      where: eq(fandoms.slug, validatedData.fandom_id),
     });
 
     if (!fandom) {
@@ -120,29 +121,25 @@ export const POST = CommonMiddleware.admin(
       );
     }
 
-    // Create trope
+    // Create trope (removed fields: category, requires, enhances, etc.)
+    const slug = validatedData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
     const [newPlotBlock] = await db
       .insert(plotBlocks)
       .values({
         id: crypto.randomUUID(),
         name: validatedData.name,
+        slug: slug,
         description: validatedData.description || '',
         fandom_id: validatedData.fandom_id,
-        parent_id: validatedData.parent_id,
-        category: validatedData.category || '',
+        parent_id: validatedData.parent_id || null,
+        display_order: 0, // Default display order
         is_active: validatedData.is_active ?? true,
-        requires: validatedData.requires,
-        enhances: validatedData.enhances,
-        soft_requires: validatedData.soft_requires,
-        enabled_by: validatedData.enabled_by,
-        conflicts_with: validatedData.conflicts_with,
-        excludes_categories: validatedData.excludes_categories,
-        max_instances: validatedData.max_instances,
-        children: validatedData.children,
       })
-      .returning();
-
-    // Return trope with fandom information
+      .returning(); // Return trope with fandom information
     const plotBlockWithFandom = await db.query.plotBlocks.findFirst({
       where: eq(plotBlocks.id, newPlotBlock.id),
       with: {

@@ -23,9 +23,9 @@ export const GET = CommonMiddleware.public(
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
-      // Verify fandom exists
+      // Verify fandom exists (fandomId is actually a slug)
       const fandom = await db.query.fandoms.findFirst({
-        where: eq(fandoms.id, fandomId),
+        where: eq(fandoms.slug, fandomId),
       });
 
       if (!fandom) {
@@ -64,7 +64,7 @@ export const GET = CommonMiddleware.public(
         where: plotBlockActiveFilter
           ? and(eq(plotBlocks.fandom_id, fandomId), plotBlockActiveFilter)
           : eq(plotBlocks.fandom_id, fandomId),
-        orderBy: [plotBlocks.category, plotBlocks.name],
+        orderBy: [plotBlocks.display_order, plotBlocks.name],
       });
 
       // Build tag hierarchy by tag class
@@ -85,15 +85,6 @@ export const GET = CommonMiddleware.public(
       // Build trope tree structure
       const plotBlockTree = buildPlotBlockTree(fandomPlotBlocks);
 
-      // Group tropes by category
-      const plotBlocksByCategory = new Map<string, typeof fandomPlotBlocks>();
-      for (const plotBlock of fandomPlotBlocks) {
-        if (!plotBlocksByCategory.has(plotBlock.category)) {
-          plotBlocksByCategory.set(plotBlock.category, []);
-        }
-        plotBlocksByCategory.get(plotBlock.category)?.push(plotBlock);
-      }
-
       // Build the complete tree structure
       const contentTree = {
         fandom: {
@@ -109,13 +100,6 @@ export const GET = CommonMiddleware.public(
         })),
         unclassified_tags: unclassifiedTags,
         plot_blocks: {
-          by_category: Array.from(plotBlocksByCategory.entries()).map(
-            ([category, blocks]) => ({
-              category,
-              blocks,
-              count: blocks.length,
-            })
-          ),
           tree_structure: plotBlockTree,
           total_count: fandomPlotBlocks.length,
         },

@@ -50,7 +50,7 @@ export interface RuleAction {
 }
 
 export interface Fandom {
-  id: string;
+  id: number; // Auto-increment integer in schema
   name: string;
   description: string;
   slug: string;
@@ -83,6 +83,7 @@ export interface Tag {
 export interface TagClass {
   id: string;
   name: string;
+  slug: string;
   fandom_id: string;
   description: string;
   validation_rules: TagClassValidationRules;
@@ -131,14 +132,18 @@ export interface TagClassValidationRules {
 export interface PlotBlock {
   id: string;
   name: string;
-  fandom_id: string;
-  category: string;
+  slug: string;
   description: string;
+  fandom_id: string;
+  parent_id: string | null;
+  display_order: number;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
 
-  // Relationship properties
+  // Note: The following fields were removed from schema.
+  // Kept as optional for backward compatibility in some validation logic.
+  category?: string;
   conflicts_with?: string[];
   requires?: string[];
   soft_requires?: string[];
@@ -146,9 +151,6 @@ export interface PlotBlock {
   enabled_by?: string[];
   excludes_categories?: string[];
   max_instances?: number;
-
-  // Hierarchical properties
-  parent_id?: string;
   children?: string[];
 }
 

@@ -80,7 +80,7 @@ export const POST = CommonMiddleware.admin(
 
     // Verify fandom exists and user has access
     const fandom = await db.query.fandoms.findFirst({
-      where: eq(fandoms.id, validatedData.fandomId),
+      where: eq(fandoms.slug, validatedData.fandomId),
     });
 
     if (!fandom) {

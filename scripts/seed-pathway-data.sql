@@ -1,5 +1,5 @@
 -- Enhanced Database Seed Script for Pathway Builder
--- Seeds comprehensive fandom data including tags, plot blocks, and tag classes
+-- Seeds comprehensive fandom data including tags, tropes, and tag classes
 -- Run with: sqlite3 ./data/the-pensive-index.db < ./scripts/seed-pathway-data.sql
 -- 1. Ensure Harry Potter fandom exists
 INSERT
@@ -203,7 +203,7 @@ VALUES (
         unixepoch(),
         unixepoch()
     );
--- 4. Create Plot Blocks with dependencies
+-- 4. Create Tropes with dependencies
 INSERT
     OR IGNORE INTO plot_blocks (
         id,

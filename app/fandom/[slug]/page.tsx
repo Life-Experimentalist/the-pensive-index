@@ -48,7 +48,7 @@ export async function generateMetadata({
       fandom.name
     } fanfiction stories and generate creative prompts. ${
       fandom.description ||
-      `Explore tags, plot blocks, and existing stories in the ${fandom.name} universe.`
+      `Explore tags, tropes, and existing stories in the ${fandom.name} universe.`
     }`,
     keywords: [
       fandom.name,
@@ -211,7 +211,7 @@ export default async function FandomDiscoveryPage({
                 <div className="text-2xl font-bold text-indigo-600">
                   {plotBlocks.length}
                 </div>
-                <div className="text-sm text-gray-500">Plot Blocks</div>
+                <div className="text-sm text-gray-500">Tropes</div>
               </div>
             </div>
           </div>

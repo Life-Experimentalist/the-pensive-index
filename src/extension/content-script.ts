@@ -548,7 +548,10 @@ class ContentScript {
       }
     } catch (error) {
       console.error('[Content Script] Message handling failed:', error);
-      sendResponse({ error: error.message });
+      sendResponse({
+        error:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      });
     }
   }
 

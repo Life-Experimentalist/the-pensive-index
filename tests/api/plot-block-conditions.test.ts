@@ -4,7 +4,7 @@
  * Tests the complete PlotBlockCondition API interface including:
  * - CRUD operations for condition management
  * - Condition validation and evaluation
- * - Relationship between plot blocks through conditions
+ * - Relationship between tropes through conditions
  * - Complex condition logic (AND/OR, nested conditions)
  * - Error handling and edge cases
  */
@@ -47,7 +47,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       testTagIds.push(tag.id);
     }
 
-    // Create test plot blocks
+    // Create test tropes
     testPlotBlockIds = [];
     const plotBlocks = [
       { name: 'Character Introduction', slug: 'character-introduction' },
@@ -81,7 +81,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
   });
 
   describe('POST /api/v1/plot-block-conditions', () => {
-    it('should create plot block prerequisite condition', async () => {
+    it('should create trope prerequisite condition', async () => {
       const conditionData = {
         source_block_id: testPlotBlockIds[1], // First Date
         target_block_id: testPlotBlockIds[0], // Character Introduction
@@ -217,7 +217,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       });
     });
 
-    it('should reject condition with non-existent plot blocks', async () => {
+    it('should reject condition with non-existent tropes', async () => {
       const conditionData = {
         source_block_id: 'non-existent-source',
         target_block_id: 'non-existent-target',
@@ -236,7 +236,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       const error = await response.json();
       expect(error).toMatchObject({
         error: 'Bad Request',
-        message: expect.stringContaining('plot block'),
+        message: expect.stringContaining('trope'),
       });
     });
 
@@ -425,7 +425,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       });
     });
 
-    it('should include related plot block data when requested', async () => {
+    it('should include related trope data when requested', async () => {
       const response = await fetch(
         '/api/v1/plot-block-conditions?include_blocks=true'
       );
@@ -675,7 +675,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       testPlotBlockId = testPlotBlockIds[2]; // Relationship Development
       conditionIds = [];
 
-      // Create multiple conditions for the plot block
+      // Create multiple conditions for the trope
       const conditions = [
         {
           source_block_id: testPlotBlockId,
@@ -703,7 +703,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       }
     });
 
-    it('should validate all conditions for a plot block', async () => {
+    it('should validate all conditions for a trope', async () => {
       const response = await fetch(
         `/api/v1/plot-blocks/${testPlotBlockId}/validate-conditions`,
         {
@@ -844,7 +844,7 @@ describe('PlotBlockCondition API Contract Tests', () => {
       }
     });
 
-    it('should return dependency graph for plot block', async () => {
+    it('should return dependency graph for trope', async () => {
       const response = await fetch(
         `/api/v1/plot-blocks/${testPlotBlockId}/dependencies`
       );

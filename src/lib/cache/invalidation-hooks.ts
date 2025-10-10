@@ -4,7 +4,7 @@
  *
  * Auto-invalidation on content updates:
  * - Tag updates → invalidate search cache
- * - Plot block updates → invalidate search cache
+ * - Trope updates → invalidate search cache
  * - Validation rule updates → invalidate validation cache + increment version
  * - Admin content updates → log to cache_invalidations table
  *
@@ -91,8 +91,8 @@ export async function invalidateOnTagUpdate(
 }
 
 /**
- * Invalidate search cache when plot blocks are updated
- * Triggered by: Plot block CRUD operations
+ * Invalidate search cache when tropes are updated
+ * Triggered by: Trope CRUD operations
  */
 export async function invalidateOnPlotBlockUpdate(
   fandomId: number,
@@ -129,7 +129,7 @@ export async function invalidateOnPlotBlockUpdate(
     };
   } catch (error) {
     console.error(
-      '[CacheInvalidation] Error invalidating on plot block update:',
+      '[CacheInvalidation] Error invalidating on trope update:',
       error
     );
     return {

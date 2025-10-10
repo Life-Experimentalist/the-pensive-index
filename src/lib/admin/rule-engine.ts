@@ -2,7 +2,7 @@
  * Rule Engine Core Implementation
  *
  * High-performance validation engine for story pathways with support for:
- * - Conditional rules (tag presence, plot block selection)
+ * - Conditional rules (tag presence, trope selection)
  * - Complex nested conditions with logical operators
  * - Performance optimization (<100ms for 50+ rules)
  * - Circular dependency detection
@@ -155,7 +155,7 @@ export class RuleEngine {
           id: 'suspicious-plot-blocks',
           type: 'warning',
           severity: 'low',
-          message: `${suspiciousBlocksCount} potentially invalid plot block(s) selected`,
+          message: `${suspiciousBlocksCount} potentially invalid trope(s) selected`,
         });
       }
     }
@@ -370,7 +370,7 @@ export class RuleEngine {
   }
 
   /**
-   * Evaluates plot block selection condition
+   * Evaluates trope selection condition
    */
   private static evaluatePlotBlockSelected(
     condition: LegacyRuleCondition,
@@ -389,7 +389,7 @@ export class RuleEngine {
   }
 
   /**
-   * Evaluates plot block exclusion condition
+   * Evaluates trope exclusion condition
    */
   private static evaluatePlotBlockExcluded(
     condition: LegacyRuleCondition,
@@ -436,9 +436,9 @@ export class RuleEngine {
   }
 
   /**
-   * Detects circular dependencies in plot block hierarchies
+   * Detects circular dependencies in trope hierarchies
    *
-   * @param plotBlocks - Array of plot blocks with parent_id relationships
+   * @param plotBlocks - Array of tropes with parent_id relationships
    * @returns string[] - Array of error messages for detected cycles
    */
   static detectCircularDependencies(plotBlocks: any[]): string[] {

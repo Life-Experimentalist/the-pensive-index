@@ -152,7 +152,7 @@ describe('ValidationEngine Core', () => {
       expect(engine).toBeDefined();
     });
 
-    it('should accept tag classes and plot blocks in constructor', () => {
+    it('should accept tag classes and tropes in constructor', () => {
       const engine = new ValidationEngine(mockTagClasses, mockPlotBlocks);
       expect(engine).toBeDefined();
     });
@@ -164,10 +164,10 @@ describe('ValidationEngine Core', () => {
       expect(engine).toBeDefined();
     });
 
-    it('should load plot blocks correctly', () => {
+    it('should load tropes correctly', () => {
       const engine = new ValidationEngine();
       engine.loadPlotBlocks(mockPlotBlocks);
-      // Test by running validation that would use plot blocks
+      // Test by running validation that would use tropes
       expect(engine).toBeDefined();
     });
   });
@@ -229,7 +229,7 @@ describe('ValidationEngine Core', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should validate plot block context when provided', () => {
+    it('should validate trope context when provided', () => {
       const context: ValidationContext = {
         fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond
@@ -331,8 +331,8 @@ describe('ValidationEngine Core', () => {
     });
   });
 
-  describe('Plot Block Validation', () => {
-    it('should validate plot block requirements', () => {
+  describe('Trope Validation', () => {
+    it('should validate trope requirements', () => {
       const context: ValidationContext = {
         fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[0], // Soul Bond - requires 'romantic-tag'
@@ -350,7 +350,7 @@ describe('ValidationEngine Core', () => {
       ).toBeGreaterThanOrEqual(0);
     });
 
-    it('should detect plot block conflicts', () => {
+    it('should detect trope conflicts', () => {
       const context: ValidationContext = {
         fandomId: 'harry-potter',
         plot_block: mockPlotBlocks[1], // Goblin Inheritance - conflicts with 'muggle-raised'
@@ -447,7 +447,7 @@ describe('ValidationEngine Core', () => {
       expect(() => engine.validate(context)).not.toThrow();
     });
 
-    it('should handle malformed plot blocks gracefully', () => {
+    it('should handle malformed tropes gracefully', () => {
       const malformedPlotBlocks = [
         {
           id: 'bad-pb',
@@ -573,6 +573,3 @@ describe('ValidationEngine Core', () => {
     });
   });
 });
-
-
-

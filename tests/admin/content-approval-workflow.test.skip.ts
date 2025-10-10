@@ -166,7 +166,7 @@ describe('Content Approval Workflow Integration', () => {
           data: {
             workflow: {
               id: 'workflow-multi-1',
-              name: 'Plot Block Addition',
+              name: 'Trope Addition',
               approval_levels: [
                 {
                   level: 1,

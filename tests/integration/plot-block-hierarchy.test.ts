@@ -8,17 +8,17 @@ import { randomUUID } from 'crypto';
 import { SQLiteTableWithColumns, SQLiteColumn } from 'drizzle-orm/sqlite-core';
 
 /**
- * Integration Test for Scenario 3: Plot Block Hierarchy
+ * Integration Test for Scenario 3: Trope Hierarchy
  *
- * This test validates the complete plot block hierarchy management:
- * 1. Create root plot blocks
- * 2. Create child plot blocks with parent relationships
+ * This test validates the complete trope hierarchy management:
+ * 1. Create root tropes
+ * 2. Create child tropes with parent relationships
  * 3. Navigate tree structures efficiently
  * 4. Prevent circular dependencies
  * 5. Maintain referential integrity
  * 6. Handle complex tree operations
  */
-describe('Plot Block Hierarchy Integration Tests', () => {
+describe('Trope Hierarchy Integration Tests', () => {
   let db: DatabaseConnection;
   let testFandomId: string;
   let rootPlotBlockId: string;
@@ -34,33 +34,29 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
   beforeEach(async () => {
     // Clean up test data
-    await db
-      .delete(plotBlocks)
-      .where(eq(plotBlocks.name, 'Test Root Plot Block'));
-    await db
-      .delete(plotBlocks)
-      .where(eq(plotBlocks.name, 'Test Child Plot Block'));
-    await db.delete(fandoms).where(eq(fandoms.name, 'Plot Block Test Fandom'));
+    await db.delete(plotBlocks).where(eq(plotBlocks.name, 'Test Root Trope'));
+    await db.delete(plotBlocks).where(eq(plotBlocks.name, 'Test Child Trope'));
+    await db.delete(fandoms).where(eq(fandoms.name, 'Trope Test Fandom'));
 
     // Create test fandom
     const [fandom] = await db
       .insert(fandoms)
       .values(
         createTestFandom({
-          name: 'Plot Block Test Fandom',
-          description: 'Test fandom for plot block hierarchy',
+          name: 'Trope Test Fandom',
+          description: 'Test fandom for trope hierarchy',
         })
       )
       .returning();
     testFandomId = fandom.id;
   });
 
-  describe('Root Plot Block Creation', () => {
-    it('should create a root plot block successfully', async () => {
+  describe('Root Trope Creation', () => {
+    it('should create a root trope successfully', async () => {
       // Arrange
       const plotBlockData = createTestPlotBlock({
-        name: 'Test Root Plot Block',
-        description: 'A root plot block for testing',
+        name: 'Test Root Trope',
+        description: 'A root trope for testing',
         fandom_id: testFandomId,
         category: 'general',
         parent_id: null,
@@ -84,11 +80,11 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       rootPlotBlockId = createdPlotBlock.id;
     });
 
-    it('should prevent duplicate plot block names within same fandom', async () => {
+    it('should prevent duplicate trope names within same fandom', async () => {
       // Arrange
       const plotBlockData = createTestPlotBlock({
-        name: 'Test Root Plot Block',
-        description: 'Original plot block',
+        name: 'Test Root Trope',
+        description: 'Original trope',
         category: 'inheritance',
         fandom_id: testFandomId,
         parent_id: null,
@@ -98,8 +94,8 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
       // Act & Assert
       const duplicateData = createTestPlotBlock({
-        name: 'Test Root Plot Block',
-        description: 'Duplicate plot block',
+        name: 'Test Root Trope',
+        description: 'Duplicate trope',
         category: 'inheritance',
         fandom_id: testFandomId,
         parent_id: null,
@@ -110,21 +106,21 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       ).rejects.toThrow(); // Should fail on unique constraint
     });
 
-    it('should allow same plot block name in different fandoms', async () => {
+    it('should allow same trope name in different fandoms', async () => {
       // Arrange
       const [anotherFandom] = await db
         .insert(fandoms)
         .values(
           createTestFandom({
-            name: 'Another Plot Block Test Fandom',
+            name: 'Another Trope Test Fandom',
             description: 'Another test fandom',
           })
         )
         .returning();
 
       const plotBlockData = createTestPlotBlock({
-        name: 'Test Root Plot Block',
-        description: 'Plot block in first fandom',
+        name: 'Test Root Trope',
+        description: 'Trope in first fandom',
         category: 'inheritance',
         fandom_id: testFandomId,
         parent_id: null,
@@ -137,8 +133,8 @@ describe('Plot Block Hierarchy Integration Tests', () => {
 
       // Act
       const sameNameData = createTestPlotBlock({
-        name: 'Test Root Plot Block',
-        description: 'Plot block in second fandom',
+        name: 'Test Root Trope',
+        description: 'Trope in second fandom',
         category: 'inheritance',
         fandom_id: anotherFandom.id,
         parent_id: null,
@@ -156,14 +152,14 @@ describe('Plot Block Hierarchy Integration Tests', () => {
     });
   });
 
-  describe('Child Plot Block Creation', () => {
+  describe('Child Trope Creation', () => {
     beforeEach(async () => {
-      // Create root plot block for parent-child tests
+      // Create root trope for parent-child tests
       const [rootBlock] = await db
         .insert(plotBlocks)
         .values(
           createTestPlotBlock({
-            name: 'Test Root Plot Block',
+            name: 'Test Root Trope',
             description: 'Root block for hierarchy tests',
             category: 'inheritance',
             fandom_id: testFandomId,
@@ -174,11 +170,11 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       rootPlotBlockId = rootBlock.id;
     });
 
-    it('should create a child plot block with valid parent', async () => {
+    it('should create a child trope with valid parent', async () => {
       // Arrange
       const childData = createTestPlotBlock({
-        name: 'Test Child Plot Block',
-        description: 'A child plot block for testing',
+        name: 'Test Child Trope',
+        description: 'A child trope for testing',
         category: 'lordship',
         fandom_id: testFandomId,
         parent_id: rootPlotBlockId,
@@ -242,7 +238,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
     });
 
     it('should prevent self-referencing parent', async () => {
-      // Arrange - Create a plot block first
+      // Arrange - Create a trope first
       const [plotBlock] = await db
         .insert(plotBlocks)
         .values(
@@ -279,7 +275,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
         .values(
           createTestPlotBlock({
             name: 'Goblin Inheritance',
-            description: 'Root inheritance plot block',
+            description: 'Root inheritance trope',
             category: 'inheritance',
             fandom_id: testFandomId,
             parent_id: null,
@@ -346,7 +342,7 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       rootPlotBlockId = root.id;
     });
 
-    it('should retrieve all root plot blocks', async () => {
+    it('should retrieve all root tropes', async () => {
       // Act
       const rootBlocks = await db
         .select()
@@ -794,13 +790,13 @@ describe('Plot Block Hierarchy Integration Tests', () => {
   });
 
   describe('Performance Validation', () => {
-    it('should complete plot block creation within performance requirements', async () => {
+    it('should complete trope creation within performance requirements', async () => {
       // Arrange
       const startTime = performance.now();
 
       const plotBlockData = createTestPlotBlock({
-        name: 'Performance Test Plot Block',
-        description: 'Testing plot block creation performance',
+        name: 'Performance Test Trope',
+        description: 'Testing trope creation performance',
         category: 'performance',
         fandom_id: testFandomId,
         parent_id: null,
@@ -877,14 +873,14 @@ describe('Plot Block Hierarchy Integration Tests', () => {
       expect(results.length).toBe(5); // 5 levels
     });
 
-    it('should handle bulk plot block operations efficiently', async () => {
+    it('should handle bulk trope operations efficiently', async () => {
       // Arrange
       const startTime = performance.now();
 
       const bulkData = Array.from({ length: 20 }, (_, i) =>
         createTestPlotBlock({
-          name: `Bulk Plot Block ${i}`,
-          description: `Bulk created plot block ${i}`,
+          name: `Bulk Trope ${i}`,
+          description: `Bulk created trope ${i}`,
           category: 'bulk',
           fandom_id: testFandomId,
           parent_id: null,

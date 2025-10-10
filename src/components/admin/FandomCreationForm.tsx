@@ -160,7 +160,7 @@ export function FandomCreationForm({
           Create New Fandom
         </h2>
         <p className="text-gray-600">
-          Configure a new fandom with tags, plot blocks, and validation rules.
+          Configure a new fandom with tags, tropes, and validation rules.
         </p>
       </div>
 
@@ -313,16 +313,14 @@ export function FandomCreationForm({
               </div>
             </div>
 
-            {/* Plot Blocks */}
+            {/* Trope */}
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">
-                Plot Blocks ({formData.plot_blocks.length})
+                Tropes ({formData.plot_blocks.length})
               </h4>
               <div className="border border-gray-300 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
                 {formData.plot_blocks.length === 0 ? (
-                  <p className="text-gray-500 text-sm">
-                    No plot blocks added yet
-                  </p>
+                  <p className="text-gray-500 text-sm">No tropes added yet</p>
                 ) : (
                   <div className="space-y-1">
                     {formData.plot_blocks.map((block: any, index: number) => (

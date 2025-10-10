@@ -45,7 +45,7 @@ interface CircularReferenceResult {
 }
 
 /**
- * Circular Reference Detection for Plot Blocks, Conditions, and Tags
+ * Circular Reference Detection for Tropes, Conditions, and Tags
  * Implements graph algorithms to detect and resolve circular dependencies
  */
 export class CircularReferenceDetector {
@@ -101,7 +101,7 @@ export class CircularReferenceDetector {
   }
 
   /**
-   * Detect circular references in plot blocks
+   * Detect circular references in tropes
    */
   static detectPlotBlockCircles(
     plotBlocks: PlotBlock[]
@@ -219,7 +219,7 @@ export class CircularReferenceDetector {
           chain,
           relationship_type: 'requires',
           severity: 'error',
-          message: `Circular dependency detected between plot blocks: ${chain
+          message: `Circular dependency detected between tropes: ${chain
             .map(c => c.name)
             .join(' -> ')}`,
         };
@@ -500,7 +500,7 @@ export class CircularReferenceDetector {
       { type: string; name: string; item: any }
     >();
 
-    // Add plot blocks to graph
+    // Add tropes to graph
     for (const plotBlock of context.plot_blocks) {
       graph.set(plotBlock.id, new Set());
       itemMap.set(plotBlock.id, {

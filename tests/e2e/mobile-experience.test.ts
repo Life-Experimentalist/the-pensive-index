@@ -481,7 +481,7 @@ class MockMobileRuleBuilder {
           <div class="rule-categories" data-testid="rule-categories">
             <div class="category-tabs" data-testid="category-tabs">
               <button class="tab active" data-category="tags" data-testid="tab-tags">Tags</button>
-              <button class="tab" data-category="plot-blocks" data-testid="tab-plot-blocks">Plot Blocks</button>
+              <button class="tab" data-category="plot-blocks" data-testid="tab-plot-blocks">Tropes</button>
               <button class="tab" data-category="conditions" data-testid="tab-conditions">Conditions</button>
             </div>
 

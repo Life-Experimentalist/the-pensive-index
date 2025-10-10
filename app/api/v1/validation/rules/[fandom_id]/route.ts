@@ -21,9 +21,9 @@ export const GET = CommonMiddleware.public(
       const dbManager = DatabaseManager.getInstance();
       const db = dbManager.getConnection();
 
-      // Verify fandom exists
+      // Verify fandom exists (fandom_id is actually a slug)
       const fandom = await db.query.fandoms.findFirst({
-        where: eq(fandoms.id, fandomId),
+        where: eq(fandoms.slug, fandomId),
       });
 
       if (!fandom) {
@@ -43,8 +43,8 @@ export const GET = CommonMiddleware.public(
         },
       });
 
-      // Get plot block dependencies and conflicts
-      // This would require additional schema for plot block relationships
+      // Get trope dependencies and conflicts
+      // This would require additional schema for trope relationships
       // For now, return basic structure
 
       return ResponseHandler.success({
@@ -54,7 +54,7 @@ export const GET = CommonMiddleware.public(
         },
         tag_classes: tagClassesList,
         plot_block_rules: {
-          // This would be expanded with actual plot block relationship data
+          // This would be expanded with actual trope relationship data
           dependencies: [],
           conflicts: [],
           tree_structure: [],

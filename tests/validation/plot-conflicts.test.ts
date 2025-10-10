@@ -142,8 +142,8 @@ describe('PlotBlockConflictDetector', () => {
     ];
   });
 
-  describe('Direct Plot Block Conflicts', () => {
-    it('should detect explicitly conflicting plot blocks', () => {
+  describe('Direct Trope Conflicts', () => {
+    it('should detect explicitly conflicting tropes', () => {
       const context: ConflictDetectionContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[2]], // Goblin Inheritance + Muggle Raised
         selected_conditions: [],
@@ -179,7 +179,7 @@ describe('PlotBlockConflictDetector', () => {
       expect(result.conflicts[0].type).toBe('direct_exclusion');
     });
 
-    it('should not detect conflicts between compatible plot blocks', () => {
+    it('should not detect conflicts between compatible tropes', () => {
       const context: ConflictDetectionContext = {
         selected_plot_blocks: [samplePlotBlocks[0], samplePlotBlocks[6]], // Goblin Inheritance + Character Development
         selected_conditions: [],
@@ -312,7 +312,7 @@ describe('PlotBlockConflictDetector', () => {
   });
 
   describe('Condition Conflicts', () => {
-    it('should detect conflicting conditions within same plot block', () => {
+    it('should detect conflicting conditions within same trope', () => {
       const context: ConflictDetectionContext = {
         selected_plot_blocks: [samplePlotBlocks[0]], // Goblin Inheritance
         selected_conditions: [sampleConditions[0], sampleConditions[2]], // Black + Malfoy Lordships
@@ -366,7 +366,7 @@ describe('PlotBlockConflictDetector', () => {
   });
 
   describe('Missing Requirements', () => {
-    it('should detect missing required plot blocks', () => {
+    it('should detect missing required tropes', () => {
       const context: ConflictDetectionContext = {
         selected_plot_blocks: [samplePlotBlocks[5]], // Romance Arc (requires Character Development)
         selected_conditions: [],
@@ -491,7 +491,7 @@ describe('PlotBlockConflictDetector', () => {
         .map((_, i) => ({
           ...samplePlotBlocks[0],
           id: `pb-${i}`,
-          name: `Plot Block ${i}`,
+          name: `Trope ${i}`,
           conflicts_with: i % 2 === 0 ? [`pb-${i + 1}`] : [`pb-${i - 1}`],
         }));
 

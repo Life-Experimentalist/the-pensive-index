@@ -41,7 +41,7 @@ import {
 
 /**
  * Core validation engine for The Pensieve Index
- * Handles tag conflicts, plot block dependencies, and business rule validation
+ * Handles tag conflicts, trope dependencies, and business rule validation
  */
 export class ValidationEngine {
   private tagClasses: Map<string, TagClass> = new Map();
@@ -63,7 +63,7 @@ export class ValidationEngine {
   }
 
   /**
-   * Load plot blocks into the engine
+   * Load tropes into the engine
    */
   public loadPlotBlocks(plotBlocks: PlotBlock[]): void {
     this.plotBlocks.clear();
@@ -88,7 +88,7 @@ export class ValidationEngine {
       suggestions.push(...tagClassResult.suggestions);
     }
 
-    // Validate plot block dependencies
+    // Validate trope dependencies
     const plotBlockResult = this.validatePlotBlocks(context);
     errors.push(...plotBlockResult.errors);
     warnings.push(...plotBlockResult.warnings);
@@ -381,7 +381,7 @@ export class ValidationEngine {
           }
         }
 
-        // Check required plot blocks
+        // Check required tropes
         if (rules.category_restrictions.required_plot_blocks) {
           const hasRequiredPlotBlocks =
             rules.category_restrictions.required_plot_blocks.some(plotBlockId =>
@@ -391,7 +391,7 @@ export class ValidationEngine {
             errors.push({
               type: 'missing_required_plot_block',
               name: 'missing_required_plot_block',
-              message: `Missing required plot block for ${tagClass.name}`,
+              message: `Missing required trope for ${tagClass.name}`,
               field: 'plot_blocks',
               value: rules.category_restrictions.required_plot_blocks,
               severity: 'error',
@@ -455,14 +455,14 @@ export class ValidationEngine {
   }
 
   /**
-   * Validate plot block dependencies and conflicts
+   * Validate trope dependencies and conflicts
    */
   private validatePlotBlocks(context: ValidationContext): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const suggestions: ValidationSuggestion[] = [];
 
-    // For now, just validate the single plot block in context if present
+    // For now, just validate the single trope in context if present
     if (context.plot_block) {
       const plotBlock = context.plot_block;
 
@@ -472,9 +472,9 @@ export class ValidationEngine {
           // In a real implementation, we'd check if dependent blocks are selected
           warnings.push({
             type: 'dependency_check',
-            message: `Plot block "${plotBlock.name}" has dependency: ${depId}`,
+            message: `Trope "${plotBlock.name}" has dependency: ${depId}`,
             field: 'plot_blocks',
-            suggestion: `Ensure dependent plot block is selected: ${depId}`,
+            suggestion: `Ensure dependent trope is selected: ${depId}`,
           });
         }
       }
@@ -484,9 +484,9 @@ export class ValidationEngine {
         for (const conflictId of plotBlock.conflicts_with) {
           warnings.push({
             type: 'conflict_check',
-            message: `Plot block "${plotBlock.name}" conflicts with: ${conflictId}`,
+            message: `Trope "${plotBlock.name}" conflicts with: ${conflictId}`,
             field: 'plot_blocks',
-            suggestion: `Avoid selecting conflicting plot block: ${conflictId}`,
+            suggestion: `Avoid selecting conflicting trope: ${conflictId}`,
           });
         }
       }
@@ -501,7 +501,7 @@ export class ValidationEngine {
   }
 
   /**
-   * Check for circular dependencies in plot blocks
+   * Check for circular dependencies in tropes
    */
   private checkCircularDependencies(
     context: ValidationContext
@@ -511,7 +511,7 @@ export class ValidationEngine {
     const suggestions: ValidationSuggestion[] = [];
 
     // For now, this is a placeholder implementation
-    // In a real implementation, we'd need access to all selected plot blocks
+    // In a real implementation, we'd need access to all selected tropes
     if (context.plot_block) {
       // Basic circular dependency check would require the full selection context
       // This is a simplified version
@@ -619,7 +619,7 @@ export class ValidationEngine {
       }
     }
 
-    // Check plot block conflicts
+    // Check trope conflicts
     const plotBlockItems = context.items.filter(
       item => item.type === 'plot_block'
     );
@@ -661,7 +661,7 @@ export class ValidationEngine {
   }
 
   /**
-   * Check conflict between two plot blocks
+   * Check conflict between two tropes
    */
   private async checkPlotBlockConflict(
     plotBlockId1: string,
@@ -671,7 +671,7 @@ export class ValidationEngine {
     severity: 'error' | 'warning';
     description: string;
   } | null> {
-    // This would implement actual plot block conflict checking logic
+    // This would implement actual trope conflict checking logic
     // For now, return null (no conflicts)
     return null;
   }
@@ -686,10 +686,10 @@ export class ValidationEngine {
     const warnings: ValidationWarning[] = [];
     const suggestions: ValidationSuggestion[] = [];
 
-    // We need to get plot block information from metadata or create a minimal context
+    // We need to get trope information from metadata or create a minimal context
     const selectedPlotBlocks = context.metadata?.selected_plot_blocks || [];
 
-    // Get applicable warning templates based on current tags and plot blocks
+    // Get applicable warning templates based on current tags and tropes
     const applicableTemplates = getWarningTemplateByTags(
       context.applied_tags,
       selectedPlotBlocks

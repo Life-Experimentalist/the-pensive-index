@@ -211,7 +211,7 @@ export function ContentManagementPanel({
 
       try {
         const bulkRequest: BulkOperationRequest = {
-          fandom_id: fandom.id,
+          fandom_id: String(fandom.id), // Convert numeric id to string
           operation_type: operationType as any,
           target_ids: Array.from(selectedItems),
           operation_data: {},
@@ -427,7 +427,7 @@ export function ContentManagementPanel({
             >
               <option value="all">All Types</option>
               <option value="tags">Tags</option>
-              <option value="plot_blocks">Plot Blocks</option>
+              <option value="plot_blocks">Tropes</option>
               <option value="tag_classes">Tag Classes</option>
             </select>
           </div>

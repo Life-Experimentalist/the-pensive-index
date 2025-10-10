@@ -50,7 +50,7 @@ Sitemap: https://pensive.vkrishna04.me/sitemap.xml
           Our platform prioritizes finding tagged stories before suggesting new content.
         </p>
         <p class="text-lg md:text-xl mb-8 opacity-80 max-w-3xl mx-auto">
-          Advanced search with <em>plot blocks</em>, <em>character relationships</em>, and
+          Advanced search with <em>tropes</em>, <em>character relationships</em>, and
           <em>relevance scoring</em>. Build story pathways with drag-and-drop interface,
           then generate intelligent prompts highlighting novelty aspects for creative writing.
         </p>
@@ -193,7 +193,7 @@ const ENHANCED_DOCS_HTML = `
   <title>The Pensive Index - Library-First Fanfiction Story Discovery Platform | Find & Generate Stories</title>
   <meta name="title" content="The Pensive Index - Library-First Fanfiction Story Discovery Platform | Find & Generate Stories" />
   <meta name="description" content="Discover existing fanfiction stories with precision using our intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, Marvel, DC Comics, and 50+ other fandoms. Library-first approach prioritizes finding existing content before suggesting new stories." />
-  <meta name="keywords" content="fanfiction search engine, fanfic discovery platform, story finder, Harry Potter fanfiction, Percy Jackson stories, Marvel fanfiction, DC Comics fanfic, Anime fanfiction, tagged stories, plot generator, story prompts, creative writing, fandom stories, fanfic library, fiction search, story recommendations, character relationships, plot blocks, drag and drop story builder, intelligent search, relevance scoring, fanfiction tags, story pathways, creative prompts, writing inspiration, fanfic community" />
+  <meta name="keywords" content="fanfiction search engine, fanfic discovery platform, story finder, Harry Potter fanfiction, Percy Jackson stories, Marvel fanfiction, DC Comics fanfic, Anime fanfiction, tagged stories, plot generator, story prompts, creative writing, fandom stories, fanfic library, fiction search, story recommendations, character relationships, tropes, drag and drop story builder, intelligent search, relevance scoring, fanfiction tags, story pathways, creative prompts, writing inspiration, fanfic community" />
   <meta name="author" content="Krishna GSVV (VKrishna04)" />
   <meta name="creator" content="Krishna GSVV" />
   <meta name="publisher" content="The Pensive Index" />
@@ -222,7 +222,7 @@ const ENHANCED_DOCS_HTML = `
   <meta property="og:url" content="https://pensive.vkrishna04.me/" />
   <meta property="og:image" content="https://pensive.vkrishna04.me/social-banner.png" />
   <meta property="og:image:secure_url" content="https://pensive.vkrishna04.me/social-banner.png" />
-  <meta property="og:image:alt" content="The Pensive Index - Fanfiction Story Discovery Platform with search interface showing tagged stories and plot blocks" />
+  <meta property="og:image:alt" content="The Pensive Index - Fanfiction Story Discovery Platform with search interface showing tagged stories and tropes" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="en_US" />
@@ -431,7 +431,7 @@ const ENHANCED_DOCS_HTML = `
       "Multi-fandom support (Harry Potter, Percy Jackson, Marvel, DC, Anime, etc.)",
       "Drag-and-drop pathway builder",
       "Relevance scoring algorithm",
-      "Plot block combinations",
+      "Trope combinations",
       "Character relationship mapping",
       "Mobile-responsive interface",
       "Real-time search results"
@@ -475,7 +475,7 @@ const ENHANCED_DOCS_HTML = `
         "name": "Which fandoms are supported?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "We support 50+ fandoms including Harry Potter, Percy Jackson, Marvel Universe, DC Comics, Star Wars, Lord of the Rings, Naruto, My Hero Academia, Attack on Titan, Supernatural, Sherlock Holmes, and many more. Each fandom has specialized tags, plot blocks, and character relationships for precise story discovery."
+          "text": "We support 50+ fandoms including Harry Potter, Percy Jackson, Marvel Universe, DC Comics, Star Wars, Lord of the Rings, Naruto, My Hero Academia, Attack on Titan, Supernatural, Sherlock Holmes, and many more. Each fandom has specialized tags, tropes, and character relationships for precise story discovery."
         }
       },
       {
@@ -491,7 +491,7 @@ const ENHANCED_DOCS_HTML = `
         "name": "How accurate is the story matching algorithm?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Our relevance scoring algorithm uses advanced tagging, plot block analysis, and character relationship mapping to provide highly accurate matches. The system considers tag combinations, story themes, character dynamics, and plot elements to ensure you find stories that truly match your interests with precision scoring and ranked results."
+          "text": "Our relevance scoring algorithm uses advanced tagging, trope analysis, and character relationship mapping to provide highly accurate matches. The system considers tag combinations, story themes, character dynamics, and plot elements to ensure you find stories that truly match your interests with precision scoring and ranked results."
         }
       }
     ]
@@ -744,7 +744,7 @@ const ENHANCED_DOCS_HTML = `
               Advanced <strong>fanfiction search engine</strong> with intelligent tagging system.
               Search through <strong>10,000+ tagged stories</strong> across multiple fandoms including
               Harry Potter, Percy Jackson, Marvel, and DC Comics. Features <em>relevance scoring</em>,
-              <em>plot block filtering</em>, and <em>character relationship mapping</em> for precise story discovery.
+              <em>trope filtering</em>, and <em>character relationship mapping</em> for precise story discovery.
             </p>
             <meta itemprop="applicationCategory" content="EntertainmentApplication" />
             <meta itemprop="operatingSystem" content="Web Browser" />
@@ -784,7 +784,7 @@ const ENHANCED_DOCS_HTML = `
             <p class="text-gray-600 leading-relaxed" itemprop="description">
               Revolutionary <strong>drag-and-drop story builder</strong> for desktop and
               <em>tap-to-select mobile interface</em>. Create complex story pathways combining
-              <strong>plot blocks</strong>, <strong>character tags</strong>, and <strong>relationship dynamics</strong>.
+              <strong>tropes</strong>, <strong>character tags</strong>, and <strong>relationship dynamics</strong>.
               Features intuitive visual interface for building intricate fanfiction scenarios
               across multiple fandoms with real-time validation and suggestions.
             </p>

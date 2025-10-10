@@ -108,7 +108,7 @@ graph TB
 **Versioned APIs (v1)**:
 - **Fandoms**: Manage story universes (Harry Potter, etc.)
 - **Tags**: Handle story descriptors and metadata
-- **Plot Blocks**: Manage story structure elements
+- **Tropes**: Manage story structure elements
 - **Tag Classes**: Organize and validate tag groups
 - **Validation**: Validate story pathway combinations
 
@@ -160,7 +160,7 @@ sequenceDiagram
 - **Fandom browsing**: Read-only content viewing
 
 **Admin Access** (Required for):
-- **Content creation**: Adding fandoms, tags, plot blocks
+- **Content creation**: Adding fandoms, tags, tropes
 - **Content modification**: Updating existing content
 - **Content deletion**: Removing content
 - **Validation rule management**: Defining business rules
@@ -260,7 +260,7 @@ graph TB
 **Core Resources (v1)**:
 - **Fandoms**: Manage story universes and their hierarchies
 - **Tags**: Handle story descriptors and metadata
-- **Plot Blocks**: Manage story structure elements
+- **Tropes**: Manage story structure elements
 - **Tag Classes**: Organize and validate tag groups
 
 **Operations (v1)**:
@@ -350,7 +350,7 @@ erDiagram
 **FANDOM Entity**:
 - **Primary Purpose**: Represents story universes (Harry Potter, Percy Jackson)
 - **Key Fields**: name (display), slug (URL), description (overview)
-- **Relationships**: Contains tags, tag classes, and plot blocks
+- **Relationships**: Contains tags, tag classes, and tropes
 - **Business Rules**: Must have unique slug, name within active fandoms
 
 **TAG Entity**:
@@ -372,9 +372,9 @@ erDiagram
 - **Business Rules**: Hierarchical validation, category restrictions
 
 **PLOT_CONDITION Entity**:
-- **Primary Purpose**: Rules governing plot block interactions
+- **Primary Purpose**: Rules governing trope interactions
 - **Key Fields**: condition_type (rule category), condition_value (parameters)
-- **Relationships**: Links plot blocks with business rules
+- **Relationships**: Links tropes with business rules
 - **Business Rules**: Defines when blocks can/cannot be combined
 
 ## 🔄 Request/Response Flow

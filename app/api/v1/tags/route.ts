@@ -98,7 +98,7 @@ export const POST = CommonMiddleware.admin(
 
     // Verify fandom exists
     const fandom = await db.query.fandoms.findFirst({
-      where: eq(fandoms.id, validatedData.fandom_id),
+      where: eq(fandoms.slug, validatedData.fandom_id),
     });
 
     if (!fandom) {
@@ -124,11 +124,17 @@ export const POST = CommonMiddleware.admin(
     const id = crypto.randomUUID();
 
     // Create tag
+    const tagSlug = validatedData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
     const [newTag] = await db
       .insert(tags)
       .values({
         id,
         name: validatedData.name,
+        slug: tagSlug,
         fandom_id: validatedData.fandom_id,
         description: validatedData.description,
         category: validatedData.category,

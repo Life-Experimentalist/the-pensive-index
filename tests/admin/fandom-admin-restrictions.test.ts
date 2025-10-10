@@ -129,7 +129,7 @@ describe('Fandom Admin Role Restrictions', () => {
       expect(hasPermission).toBe(true);
     });
 
-    it('should allow managing plot blocks in assigned fandom', async () => {
+    it('should allow managing tropes in assigned fandom', async () => {
       const permissionService = new AdminPermissionService();
 
       const hasPermission = await permissionService.checkPermission(
@@ -179,7 +179,7 @@ describe('Fandom Admin Role Restrictions', () => {
       expect(hasPermission).toBe(false);
     });
 
-    it('should NOT allow managing plot blocks in non-assigned fandom', async () => {
+    it('should NOT allow managing tropes in non-assigned fandom', async () => {
       const permissionService = new AdminPermissionService();
 
       const hasPermission = await permissionService.checkPermission(
@@ -317,7 +317,7 @@ describe('Fandom Admin Role Restrictions', () => {
       expect(tags.every(tag => tag.fandom_id === assignedFandomId)).toBe(true);
     });
 
-    it('should only see plot blocks from assigned fandom', async () => {
+    it('should only see tropes from assigned fandom', async () => {
       const contentService = new FandomContentService();
 
       const plotBlocks = await contentService.getPlotBlocks(fandomAdminUser.id);

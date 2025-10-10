@@ -19,7 +19,7 @@ export const pathwayTags = sqliteTable('pathway_tags', {
     .default(sql`(unixepoch())`),
 });
 
-// Junction table: Pathway Plot Blocks
+// Junction table: Pathway Tropes
 export const pathwayPlotBlocks = sqliteTable('pathway_plot_blocks', {
   pathway_id: text('pathway_id')
     .notNull()

@@ -170,7 +170,7 @@ describe('Testing Sandbox API Contract Tests', () => {
       expect(data.scenario.expectedResults.errors).toHaveLength(1);
     });
 
-    it('should validate input tags and plot blocks exist', async () => {
+    it('should validate input tags and tropes exist', async () => {
       // This test MUST FAIL initially
       const invalidScenarioData = {
         name: 'Invalid Scenario',
@@ -610,7 +610,7 @@ describe('Testing Sandbox API Contract Tests', () => {
       const maliciousRequest = {
         fandomId: mockFandomId,
         inputTags: Array.from({ length: 10000 }, (_, i) => `tag-${i}`), // Excessive tags
-        inputPlotBlocks: Array.from({ length: 5000 }, (_, i) => `plot-${i}`), // Excessive plot blocks
+        inputPlotBlocks: Array.from({ length: 5000 }, (_, i) => `plot-${i}`), // Excessive tropes
         options: {
           includeWarnings: true,
           includeSuggestions: true,

@@ -843,12 +843,12 @@ describe('Integration Tests - API Layer', () => {
     });
   });
 
-  describe('Plot Block Tree API', () => {
+  describe('Trope Tree API', () => {
     beforeEach(() => {
       apiClient.setAuthToken(adminToken);
     });
 
-    it('should retrieve plot block hierarchy', async () => {
+    it('should retrieve trope hierarchy', async () => {
       const response = await apiClient.get<PlotBlockResponse[]>('/plot-blocks');
 
       expect(response.status).toBe(200);
@@ -1081,7 +1081,7 @@ describe('Integration Tests - API Layer', () => {
       );
       expect(tagsResponse.status).toBe(200);
 
-      // 3. Get plot blocks
+      // 3. Get tropes
       const plotBlocksResponse = await apiClient.get<PlotBlockResponse[]>(
         '/plot-blocks'
       );

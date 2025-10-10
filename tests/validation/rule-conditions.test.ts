@@ -641,10 +641,10 @@ describe('Rule Conditions - Tag Class Validation', () => {
       ).toBe(true);
     });
 
-    it('should require specific plot blocks', () => {
+    it('should require specific tropes', () => {
       const context: ValidationContext = {
         fandomId: 'harry-potter',
-        applied_tags: ['time-turner'], // Temporal tag without required plot block
+        applied_tags: ['time-turner'], // Temporal tag without required trope
         all_tags: testTags,
         tag_classes: testTagClasses,
         metadata: {},
@@ -655,7 +655,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       expect(
         result.errors.some(
           error =>
-            error.message.toLowerCase().includes('plot block') ||
+            error.message.toLowerCase().includes('trope') ||
             error.message.toLowerCase().includes('required')
         )
       ).toBe(true);
@@ -923,4 +923,3 @@ describe('Rule Conditions - Tag Class Validation', () => {
     });
   });
 });
-

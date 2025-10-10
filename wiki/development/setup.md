@@ -240,7 +240,7 @@ export default defineConfig({
 git checkout -b 003-new-feature
 
 # Commit frequently with descriptive messages
-git commit -m "feat: add validation rule for plot block conflicts"
+git commit -m "feat: add validation rule for trope conflicts"
 
 # Push feature branches for collaboration
 git push origin 003-new-feature

@@ -67,10 +67,10 @@ describe('Content Tree Endpoint API Contract Tests', () => {
       testTagIds.push(created.id);
     }
 
-    // Create plot block hierarchy
+    // Create trope hierarchy
     testPlotBlockIds = [];
 
-    // Root level plot blocks
+    // Root level tropes
     const rootBlocks = [
       {
         name: 'Story Structure',
@@ -100,7 +100,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
       testPlotBlockIds.push(created.id);
     }
 
-    // Child plot blocks for Story Structure
+    // Child tropes for Story Structure
     const structureChildren = [
       { name: 'Act 1: Setup', slug: 'act-1-setup' },
       { name: 'Act 2: Confrontation', slug: 'act-2-confrontation' },
@@ -124,7 +124,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
       testPlotBlockIds.push(created.id);
     }
 
-    // Grandchild plot blocks for Act 1
+    // Grandchild tropes for Act 1
     const act1Children = [
       { name: 'Character Introduction', slug: 'character-introduction' },
       { name: 'Inciting Incident', slug: 'inciting-incident' },
@@ -236,7 +236,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
 
       const tree = await response.json();
 
-      // All plot blocks should be structure category or have structure ancestors
+      // All tropes should be structure category or have structure ancestors
       function checkCategory(blocks: any[]) {
         for (const block of blocks) {
           expect(['structure', 'character-development']).toContain(
@@ -339,7 +339,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
   });
 
   describe('GET /api/v1/content-tree/plot-block/:blockId', () => {
-    it('should retrieve tree starting from specific plot block', async () => {
+    it('should retrieve tree starting from specific trope', async () => {
       const rootBlockId = testPlotBlockIds[0]; // Story Structure
       const response = await fetch(
         `/api/v1/content-tree/plot-block/${rootBlockId}`
@@ -410,7 +410,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should return 404 for non-existent plot block', async () => {
+    it('should return 404 for non-existent trope', async () => {
       const response = await fetch(
         '/api/v1/content-tree/plot-block/non-existent-block'
       );
@@ -419,7 +419,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
   });
 
   describe('POST /api/v1/content-tree/move', () => {
-    it('should move plot block in tree structure', async () => {
+    it('should move trope in tree structure', async () => {
       const sourceBlockId = testPlotBlockIds[5]; // Character Introduction
       const targetParentId = testPlotBlockIds[3]; // Act 2: Confrontation
 
@@ -536,7 +536,7 @@ describe('Content Tree Endpoint API Contract Tests', () => {
     });
 
     it('should validate cross-fandom moves', async () => {
-      // Create another fandom and plot block
+      // Create another fandom and trope
       const fandom2Response = await fetch('/api/v1/fandoms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,7 +1,7 @@
 /**
  * Contract Test: GET /api/v1/discovery/fandoms/{id}/elements
  *
- * Purpose: Validate API contract for getting tags and plot blocks for pathway building
+ * Purpose: Validate API contract for getting tags and tropes for pathway building
  * Status: MUST FAIL - No implementation exists yet (TDD requirement)
  */
 
@@ -12,7 +12,7 @@ describe('GET /api/v1/discovery/fandoms/{id}/elements - Contract Test', () => {
   const testFandomId = 'test-fandom-uuid';
   const endpoint = `${baseURL}/api/v1/discovery/fandoms/${testFandomId}/elements`;
 
-  it('should return tags and plot blocks with correct schema', async () => {
+  it('should return tags and tropes with correct schema', async () => {
     // This test MUST fail initially - no endpoint exists yet
     const response = await fetch(endpoint);
 
@@ -43,7 +43,7 @@ describe('GET /api/v1/discovery/fandoms/{id}/elements - Contract Test', () => {
       expect(typeof tag.usageCount).toBe('number');
     }
 
-    // Validate plot block object schema
+    // Validate trope object schema
     if (data.plotBlocks.length > 0) {
       const plotBlock = data.plotBlocks[0];
       expect(plotBlock).toHaveProperty('id');

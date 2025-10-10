@@ -218,7 +218,7 @@ graph TB
 
 **Core Components**:
 - **DragDropContext**: Provides drag-and-drop functionality to child components
-- **DraggableItem**: Makes individual elements draggable (tags, plot blocks)
+- **DraggableItem**: Makes individual elements draggable (tags, tropes)
 - **DroppableZone**: Defines areas where draggable items can be dropped
 - **index.ts**: Exports all drag-drop components and utilities
 
@@ -230,7 +230,7 @@ graph TB
 **Application Usage**:
 - **Pathway Builder**: Main interface for creating story pathways
 - **Tag Selector**: Draggable tag selection interface
-- **Plot Builder**: Constructing plot block hierarchies
+- **Plot Builder**: Constructing trope hierarchies
 
 ### Interaction Flow
 

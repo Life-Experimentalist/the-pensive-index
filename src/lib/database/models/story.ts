@@ -197,7 +197,7 @@ export class StoryModel {
       .innerJoin(tags, eq(storyTags.tag_id, tags.id))
       .where(eq(storyTags.story_id, storyId));
 
-    // Get associated plot blocks
+    // Get associated tropes
     const storyPlotsData = await db
       .select({
         id: plotBlocks.id,
@@ -284,7 +284,7 @@ export class StoryModel {
       score += tagMatches.length * 10; // 10 points per tag match
     }
 
-    // Check plot block matches
+    // Check trope matches
     if (searchPlotBlocks.length > 0) {
       const plotMatches = await db
         .select({ name: plotBlocks.name })
@@ -301,7 +301,7 @@ export class StoryModel {
         );
 
       matchedPlotBlocks.push(...plotMatches.map(p => p.name));
-      score += plotMatches.length * 15; // 15 points per plot block match
+      score += plotMatches.length * 15; // 15 points per trope match
     }
 
     // Bonus for multiple matches

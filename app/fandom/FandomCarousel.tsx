@@ -4,18 +4,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface Fandom {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  storyCount?: number;
-  tagCount?: number;
-  plotBlockCount?: number;
-}
-
 interface FandomCarouselProps {
-  fandoms: Fandom[];
+  fandoms: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+    metadata: unknown;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+  }>;
 }
 
 /**
@@ -65,8 +64,7 @@ export default function FandomCarousel({ fandoms }: FandomCarouselProps) {
               <p className="text-white text-opacity-90 text-sm mb-4 line-clamp-2">
                 {fandom.description || 'Explore this fandom'}
               </p>
-              <div className="flex items-center justify-between text-sm">
-                <span>{fandom.storyCount || 0} stories</span>
+              <div className="flex items-center justify-end text-sm">
                 <span className="text-white text-opacity-75">→</span>
               </div>
             </Link>

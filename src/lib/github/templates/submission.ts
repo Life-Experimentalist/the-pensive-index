@@ -43,11 +43,11 @@ ${
     : 'No tags provided'
 }
 
-### Plot Blocks
+### Tropes
 ${
   submission.plotBlocks?.length > 0
     ? submission.plotBlocks.map((block: string) => `- **${block}**`).join('\n')
-    : 'No plot blocks identified'
+    : 'No tropes identified'
 }
 
 ### Summary
@@ -75,7 +75,7 @@ ${submission.additionalNotes || '*No additional notes*'}
 - [ ] Story URL is valid and accessible
 - [ ] Title and metadata are accurate
 - [ ] Tags follow community guidelines
-- [ ] Plot blocks are correctly identified
+- [ ] Tropes are correctly identified
 - [ ] Rating is appropriate
 - [ ] No duplicate submission exists
 - [ ] Content follows community standards

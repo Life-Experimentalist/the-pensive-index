@@ -238,7 +238,7 @@ export class PromptGenerationService {
       complexity += 20; // Mixed types increase complexity
     }
 
-    // Add complexity for plot block dependencies
+    // Add complexity for trope dependencies
     const pathwayPlotBlocks = pathway
       .filter(p => p.type === 'plot_block')
       .map(p => plotBlocks.find(pb => pb.id === p.id))
@@ -287,7 +287,7 @@ export class PromptGenerationService {
       potential += 10;
     }
 
-    // Factor in plot block appeal
+    // Factor in trope appeal
     const pathwayPlotBlocks = pathway
       .filter(p => p.type === 'plot_block')
       .map(p => plotBlocks.find(pb => pb.id === p.id))
@@ -507,7 +507,7 @@ export class PromptGenerationService {
         'Weave these elements together in a way that feels natural and serves your overall narrative arc.';
     }
 
-    // Add specific guidance for complex plot blocks
+    // Add specific guidance for complex tropes
     const complexElements = pathwayPlotBlocks.filter(
       pb => pb.dependencies && pb.dependencies.length > 0
     );
@@ -549,7 +549,7 @@ export class PromptGenerationService {
 
     worldBuilding += '. ';
 
-    // Add guidance based on plot blocks
+    // Add guidance based on tropes
     const auPlotBlocks = plotBlocks.filter(
       pb =>
         pathway.some(p => p.id === pb.id) &&
@@ -739,7 +739,7 @@ export class PromptGenerationService {
       });
     }
 
-    // Check plot blocks
+    // Check tropes
     const pathwayPlotBlocks = pathway
       .filter(p => p.type === 'plot_block')
       .map(p => plotBlocks.find(pb => pb.id === p.id))
@@ -806,7 +806,7 @@ export class PromptGenerationService {
   ): NoveltyHighlight[] {
     const highlights: NoveltyHighlight[] = [];
 
-    // Look for interesting tag + plot block combinations
+    // Look for interesting tag + trope combinations
     const characterTags = pathway
       .filter(p => p.type === 'tag')
       .map(p => tags.find(t => t.id === p.id))

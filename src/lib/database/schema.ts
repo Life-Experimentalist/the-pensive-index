@@ -93,7 +93,7 @@ export const tagClasses = sqliteTable('tag_classes', {
     .default(sql`(unixepoch())`),
 });
 
-// Plot blocks table
+// Tropes table
 export const plotBlocks = sqliteTable('plot_blocks', {
   id: text('id').primaryKey(),
   fandom_id: text('fandom_id')
@@ -113,7 +113,7 @@ export const plotBlocks = sqliteTable('plot_blocks', {
     .default(sql`(unixepoch())`),
 });
 
-// Plot block conditions table
+// Trope conditions table
 export const plotBlockConditions = sqliteTable('plot_block_conditions', {
   id: text('id').primaryKey(),
   plot_block_id: text('plot_block_id')
@@ -188,7 +188,7 @@ export const storyTags = sqliteTable('story_tags', {
     .default(sql`(unixepoch())`),
 });
 
-// Story plot blocks relationship table
+// Story tropes relationship table
 export const storyPlotBlocks = sqliteTable('story_plot_blocks', {
   story_id: text('story_id')
     .notNull()
@@ -293,7 +293,9 @@ export const adminUsers = sqliteTable('admin_users', {
     .notNull()
     .default(sql`(unixepoch())`),
   last_login_at: integer('last_login_at', { mode: 'timestamp' }),
-  preferences: text('preferences', { mode: 'json' }).$type<Record<string, any>>(),
+  preferences: text('preferences', { mode: 'json' }).$type<
+    Record<string, any>
+  >(),
 });
 
 // Define relationships
@@ -498,7 +500,9 @@ export const ruleConditions = sqliteTable('rule_conditions', {
   weight: real('weight').notNull().default(1.0),
   order_index: integer('order_index').notNull(),
   group_id: text('group_id'),
-  is_negated: integer('is_negated', { mode: 'boolean' }).notNull().default(false),
+  is_negated: integer('is_negated', { mode: 'boolean' })
+    .notNull()
+    .default(false),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -528,8 +532,12 @@ export const ruleTemplates = sqliteTable('rule_templates', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   category: text('category').notNull(),
-  fandom_id: text('fandom_id').references(() => fandoms.id, { onDelete: 'cascade' }),
-  template_data: text('template_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  fandom_id: text('fandom_id').references(() => fandoms.id, {
+    onDelete: 'cascade',
+  }),
+  template_data: text('template_data', { mode: 'json' })
+    .$type<Record<string, any>>()
+    .notNull(),
   is_public: integer('is_public', { mode: 'boolean' }).notNull().default(false),
   created_by: text('created_by').notNull(),
   created_at: integer('created_at', { mode: 'timestamp' })
@@ -550,10 +558,16 @@ export const ruleTests = sqliteTable('rule_tests', {
     .references(() => validationRules.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
-  test_data: text('test_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
-  expected_result: text('expected_result', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  test_data: text('test_data', { mode: 'json' })
+    .$type<Record<string, any>>()
+    .notNull(),
+  expected_result: text('expected_result', { mode: 'json' })
+    .$type<Record<string, any>>()
+    .notNull(),
   last_run_at: integer('last_run_at', { mode: 'timestamp' }),
-  last_run_result: text('last_run_result', { mode: 'json' }).$type<Record<string, any>>(),
+  last_run_result: text('last_run_result', { mode: 'json' }).$type<
+    Record<string, any>
+  >(),
   is_passing: integer('is_passing', { mode: 'boolean' }),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -563,7 +577,7 @@ export const ruleTests = sqliteTable('rule_tests', {
     .default(sql`(unixepoch())`),
 });
 
-// Plot Block Hierarchy table
+// Trope Hierarchy table
 export const plotBlockHierarchies = sqliteTable('plot_block_hierarchies', {
   id: text('id').primaryKey(),
   fandom_id: text('fandom_id')
@@ -571,9 +585,15 @@ export const plotBlockHierarchies = sqliteTable('plot_block_hierarchies', {
     .references(() => fandoms.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
-  root_blocks: text('root_blocks', { mode: 'json' }).$type<string[]>().notNull(),
-  hierarchy_rules: text('hierarchy_rules', { mode: 'json' }).$type<Record<string, any>[]>().notNull(),
-  conditional_branches: text('conditional_branches', { mode: 'json' }).$type<Record<string, any>[]>().notNull(),
+  root_blocks: text('root_blocks', { mode: 'json' })
+    .$type<string[]>()
+    .notNull(),
+  hierarchy_rules: text('hierarchy_rules', { mode: 'json' })
+    .$type<Record<string, any>[]>()
+    .notNull(),
+  conditional_branches: text('conditional_branches', { mode: 'json' })
+    .$type<Record<string, any>[]>()
+    .notNull(),
   created_by: text('created_by').notNull(),
   version: integer('version').notNull().default(1),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
@@ -594,12 +614,16 @@ export const testScenarios = sqliteTable('test_scenarios', {
   name: text('name').notNull(),
   description: text('description'),
   tags: text('tags', { mode: 'json' }).$type<string[]>().notNull(),
-  plot_blocks: text('plot_blocks', { mode: 'json' }).$type<string[]>().notNull(),
+  plot_blocks: text('plot_blocks', { mode: 'json' })
+    .$type<string[]>()
+    .notNull(),
   expected_valid: integer('expected_valid', { mode: 'boolean' }).notNull(),
   expected_errors: text('expected_errors', { mode: 'json' }).$type<string[]>(),
   created_by: text('created_by').notNull(),
   last_run_at: integer('last_run_at', { mode: 'timestamp' }),
-  last_run_result: text('last_run_result', { mode: 'json' }).$type<Record<string, any>>(),
+  last_run_result: text('last_run_result', { mode: 'json' }).$type<
+    Record<string, any>
+  >(),
   is_passing: integer('is_passing', { mode: 'boolean' }),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -618,8 +642,12 @@ export const ruleSetExports = sqliteTable('rule_set_exports', {
   name: text('name').notNull(),
   description: text('description'),
   rule_ids: text('rule_ids', { mode: 'json' }).$type<string[]>().notNull(),
-  template_ids: text('template_ids', { mode: 'json' }).$type<string[]>().notNull(),
-  export_data: text('export_data', { mode: 'json' }).$type<Record<string, any>>().notNull(),
+  template_ids: text('template_ids', { mode: 'json' })
+    .$type<string[]>()
+    .notNull(),
+  export_data: text('export_data', { mode: 'json' })
+    .$type<Record<string, any>>()
+    .notNull(),
   created_by: text('created_by').notNull(),
   export_format: text('export_format').notNull().default('json'),
   download_count: integer('download_count').notNull().default(0),

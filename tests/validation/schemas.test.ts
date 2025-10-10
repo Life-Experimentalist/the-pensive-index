@@ -207,7 +207,7 @@ describe('Zod Schema Validation Tests', () => {
   });
 
   describe('PlotBlock Schema Validation', () => {
-    it('should validate valid plot block data', () => {
+    it('should validate valid trope data', () => {
       const validPlotBlock = {
         name: 'Character Development Arc',
         slug: 'character-development-arc',
@@ -346,8 +346,8 @@ describe('Zod Schema Validation Tests', () => {
       expect(result.fandom_id).toBe(1);
     });
 
-    it('should validate plot block tag references', () => {
-      // Test that plot block references valid tags
+    it('should validate trope tag references', () => {
+      // Test that trope references valid tags
       const plotBlock = {
         name: 'Test Block',
         slug: 'test-block',
@@ -365,7 +365,7 @@ describe('Zod Schema Validation Tests', () => {
     });
 
     it('should validate condition block references', () => {
-      // Test that conditions reference valid plot blocks
+      // Test that conditions reference valid tropes
       const condition = {
         source_block_id: '123e4567-e89b-12d3-a456-426614174000',
         target_block_id: '123e4567-e89b-12d3-a456-426614174001',
@@ -512,7 +512,7 @@ describe('Zod Schema Validation Tests', () => {
       const startTime = performance.now();
 
       const complexPlotBlock = {
-        name: 'Complex Plot Block',
+        name: 'Complex Trope',
         slug: 'complex-plot-block',
         fandom_id: 1,
         category: 'structure',

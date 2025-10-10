@@ -13,7 +13,11 @@ import {
   count,
 } from 'drizzle-orm';
 import { Tag, PlotBlock, Story, TagClass } from '@/types';
-import { executeRawQuery, getCountValue, compatibleSelect } from './db-compatibility';
+import {
+  executeRawQuery,
+  getCountValue,
+  compatibleSelect,
+} from './db-compatibility';
 
 /**
  * Query builder utilities for The Pensieve Index database operations
@@ -80,7 +84,7 @@ export class QueryBuilder {
         conditions.push(sql`${schema.stories.word_count} <= ${maxWordCount}`);
       }
 
-      // Complex tag and plot block filtering would require JOINs
+      // Complex tag and trope filtering would require JOINs
       // For now, apply basic filters
       const results = await query
         .where(and(...conditions))
@@ -120,7 +124,7 @@ export class QueryBuilder {
     },
 
     /**
-     * Get story with its tags and plot blocks
+     * Get story with its tags and tropes
      */
     findWithRelations: async (storyId: string) => {
       // Main story query
@@ -155,7 +159,7 @@ export class QueryBuilder {
 
       const storyTags = await executeRawQuery(this.db, query);
 
-      // Get story plot blocks
+      // Get story tropes
       const plotBlocksQuery = sql`
         SELECT
           pb.id as "plot_block.id",
@@ -363,11 +367,11 @@ export class QueryBuilder {
   };
 
   /**
-   * Plot block queries
+   * Trope queries
    */
   public readonly plotBlocks = {
     /**
-     * Find plot blocks by fandom and category
+     * Find tropes by fandom and category
      */
     findByFandom: async (
       fandomId: string,
@@ -406,7 +410,7 @@ export class QueryBuilder {
     },
 
     /**
-     * Get plot block with its conditions
+     * Get trope with its conditions
      */
     findWithConditions: async (plotBlockId: string) => {
       const plotBlock = await this.db.query.plotBlocks.findFirst({
@@ -428,7 +432,7 @@ export class QueryBuilder {
     },
 
     /**
-     * Find plot blocks with usage statistics
+     * Find tropes with usage statistics
      */
     findWithUsageCount: async (fandomId: string, limit: number = 30) => {
       const query = sql`
@@ -558,7 +562,7 @@ export class QueryBuilder {
         .where(isNull(schema.fandoms.id))
         .limit(100);
 
-      // Plot blocks without valid fandom
+      // Tropes without valid fandom
       const orphanedPlotBlocks = await this.db
         .select()
         .from(schema.plotBlocks)

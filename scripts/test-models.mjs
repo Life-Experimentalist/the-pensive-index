@@ -22,7 +22,7 @@ async function testModels() {
       console.log(`   First tag: ${tags[0].name}`);
     }
 
-    // Get plot blocks for Harry Potter
+    // Get tropes for Harry Potter
     console.log('\n3. Getting tropes for Harry Potter...');
     const tropes = await PlotBlockModel.getRootBlocks(fandom.id);
     console.log(`   Found: ${tropes.length} tropes`);

@@ -196,7 +196,7 @@ try {
     console.log(`  ✓ ${tag.name}`);
   }
 
-  // Insert tropes (plot blocks)
+  // Insert tropes (tropes)
   console.log('\nInserting tropes...');
   const insertTrope = db.prepare(`
     INSERT OR IGNORE INTO plot_blocks (id, name, slug, description, fandom_id)

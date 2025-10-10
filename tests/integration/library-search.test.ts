@@ -176,7 +176,7 @@ describe('Library Search Integration Test (T014)', () => {
       const tagScore =
         pathwayTags.length > 0 ? (tagMatches / pathwayTags.length) * 0.6 : 0;
 
-      // Plot block matching (40% weight)
+      // Trope matching (40% weight)
       const pathwayPlotBlocks = pathway.elements.filter(
         el => el.type === 'plotBlock'
       );

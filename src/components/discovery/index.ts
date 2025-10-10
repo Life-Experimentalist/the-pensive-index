@@ -15,7 +15,7 @@ export { ValidationDisplay } from './validation-display';
 export { FilterControls } from './filter-controls';
 
 // Type exports for external usage
-export type { Fandom } from './fandom-selector';
+export type { Fandom } from '@/types'; // Import from central types instead of fandom-selector
 export type { PathwayItem } from './pathway-builder';
 export type { Tag, TagCategory } from './tag-list';
 export type { PlotBlock } from './plot-block-tree';

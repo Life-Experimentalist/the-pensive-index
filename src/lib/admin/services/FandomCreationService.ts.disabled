@@ -247,7 +247,7 @@ export class FandomCreationService {
       }
     }
 
-    // Create plot blocks
+    // Create tropes
     if (initialContent.plotBlocks) {
       for (const plotBlock of initialContent.plotBlocks) {
         const contentItem = await this.contentQueries.createContentItem({
@@ -415,7 +415,7 @@ export class FandomCreationService {
         options.initial_content.plotBlocks &&
         !Array.isArray(options.initial_content.plotBlocks)
       ) {
-        errors.push('Initial content plot blocks must be an array');
+        errors.push('Initial content tropes must be an array');
       }
       if (
         options.initial_content.characters &&

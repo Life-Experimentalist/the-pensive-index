@@ -4,10 +4,10 @@ import { tags } from '@/lib/database/schema';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { fandom: string } }
+  { params }: { params: Promise<{ fandom: string }> }
 ) {
   try {
-    const fandomId = params.fandom;
+    const { fandom: fandomId } = await params;
 
     if (!fandomId) {
       return NextResponse.json(

@@ -22,7 +22,7 @@ import { fandoms } from './fandom';
  * Fandom Content Items Table Schema
  *
  * Generic container for all types of content within a fandom:
- * tags, plot blocks, characters, validation rules, etc.
+ * tags, tropes, characters, validation rules, etc.
  */
 export const fandomContentItems = sqliteTable(
   'fandom_content_items',

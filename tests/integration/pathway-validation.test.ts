@@ -148,7 +148,7 @@ const mockValidationResponse = {
         {
           action: 'add',
           elementId: 'goblin-inheritance',
-          description: 'Add goblin inheritance plot block',
+          description: 'Add goblin inheritance trope',
         },
       ],
     },
@@ -259,8 +259,8 @@ describe('Pathway Validation Integration Test (T016)', () => {
     expect(tagConflicts[0].rule.severity).toBe('error');
   });
 
-  it('should detect plot block conflicts correctly', () => {
-    // Test plot block conflict detection
+  it('should detect trope conflicts correctly', () => {
+    // Test trope conflict detection
     const detectPlotBlockConflicts = (
       pathway: typeof mockConflictedPathway,
       rules: typeof mockValidationRules

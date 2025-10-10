@@ -164,7 +164,7 @@ export default async function FandomLibraryPage() {
                           --
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Plot Blocks
+                          tropes
                         </div>
                       </div>
                     </div>

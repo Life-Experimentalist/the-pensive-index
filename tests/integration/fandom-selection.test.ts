@@ -2,7 +2,7 @@
  * Integration Test: Fandom Selection User Story (T011)
  *
  * User Story: "As a user, I want to select a fandom from a dropdown
- * and have available tags and plot blocks load dynamically so I can
+ * and have available tags and tropes load dynamically so I can
  * build my story pathway efficiently."
  *
  * This test validates the complete user workflow for fandom selection
@@ -187,7 +187,7 @@ describe('Fandom Selection Integration Test (T011)', () => {
     // expect(mockFetch).toHaveBeenCalledWith('/api/v1/discovery/fandoms/harry-potter/elements');
   });
 
-  it('should display loaded tags and plot blocks after fandom selection', async () => {
+  it('should display loaded tags and tropes after fandom selection', async () => {
     // This test MUST fail initially - components don't exist yet
     expect(() => {
       const mockOnSelect = vi.fn();
@@ -217,7 +217,7 @@ describe('Fandom Selection Integration Test (T011)', () => {
     // expect(screen.getByText('harry/hermione')).toBeInTheDocument();
     // expect(screen.getByText('alternate-universe')).toBeInTheDocument();
     //
-    // // Verify plot blocks are displayed
+    // // Verify tropes are displayed
     // expect(screen.getByText('Goblin Inheritance')).toBeInTheDocument();
     // expect(screen.getByText('Black Lordship')).toBeInTheDocument();
   });

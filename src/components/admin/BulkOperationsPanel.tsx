@@ -148,7 +148,7 @@ export function BulkOperationsPanel({
 
     try {
       const request: BulkOperationRequest = {
-        fandom_id: fandom.id,
+        fandom_id: fandom.slug, // Use slug instead of numeric id
         operation_type: operationForm.operation_type,
         target_ids: Array.from(selectedItems),
         operation_data: operationForm.operation_data,
@@ -225,7 +225,7 @@ export function BulkOperationsPanel({
 
     try {
       const request: BulkOperationRequest = {
-        fandom_id: fandom.id,
+        fandom_id: fandom.slug, // Use slug instead of numeric id
         operation_type: 'import',
         target_ids: [],
         operation_data: {

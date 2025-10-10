@@ -1037,14 +1037,17 @@ export class AdminQueries {
           const aValue = a[sortBy as keyof typeof a];
           const bValue = b[sortBy as keyof typeof b];
 
-          // Handle null values
-          if (aValue === null && bValue === null) {
+          // Handle null/undefined values
+          if (
+            (aValue === null || aValue === undefined) &&
+            (bValue === null || bValue === undefined)
+          ) {
             return 0;
           }
-          if (aValue === null) {
+          if (aValue === null || aValue === undefined) {
             return sortOrder === 'desc' ? 1 : -1;
           }
-          if (bValue === null) {
+          if (bValue === null || bValue === undefined) {
             return sortOrder === 'desc' ? -1 : 1;
           }
 
@@ -1100,6 +1103,21 @@ export class AdminQueries {
       const sortedData = allData.sort((a, b) => {
         const aVal = a[sortBy as keyof typeof a];
         const bVal = b[sortBy as keyof typeof b];
+
+        // Handle null/undefined values
+        if (
+          (aVal === null || aVal === undefined) &&
+          (bVal === null || bVal === undefined)
+        ) {
+          return 0;
+        }
+        if (aVal === null || aVal === undefined) {
+          return sortOrder === 'desc' ? 1 : -1;
+        }
+        if (bVal === null || bVal === undefined) {
+          return sortOrder === 'desc' ? -1 : 1;
+        }
+
         const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
         return sortOrder === 'desc' ? -comparison : comparison;
       });
@@ -1138,6 +1156,7 @@ export class AdminQueries {
       const id = `tagclass-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`;
+      const slug = tagClassData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const now = new Date();
 
       const [newTagClass] = await this.db
@@ -1145,6 +1164,7 @@ export class AdminQueries {
         .values({
           id,
           name: tagClassData.name,
+          slug,
           description: tagClassData.description || '',
           fandom_id: tagClassData.fandomId,
           validation_rules: {},

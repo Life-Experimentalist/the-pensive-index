@@ -462,7 +462,7 @@ function PathwayDropZone({ pathway, onRemove }: {
 
         {pathway.plotBlocks.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Plot Blocks</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Tropes</h4>
             <div className="flex flex-wrap gap-2">
               {pathway.plotBlocks.map(blockId => (
                 <PathwayItem
@@ -478,7 +478,7 @@ function PathwayDropZone({ pathway, onRemove }: {
 
         {pathway.tags.length === 0 && pathway.plotBlocks.length === 0 && (
           <div className="text-gray-500 text-center py-8">
-            Drag tags and plot blocks here to build your story pathway
+            Drag tags and tropes here to build your story pathway
           </div>
         )}
       </div>
@@ -554,7 +554,7 @@ function MobilePathwayBuilder({ fandomData, onPathwayChange }: MobilePathwayBuil
           }`}
           onClick={() => setActiveTab('plotBlocks')}
         >
-          Plot Blocks
+          Tropes
           {pathway.plotBlocks.length > 0 && (
             <span className="ml-1 bg-blue-100 text-blue-800 text-xs rounded-full px-2 py-1">
               {pathway.plotBlocks.length}

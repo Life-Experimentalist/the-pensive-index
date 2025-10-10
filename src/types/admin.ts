@@ -172,7 +172,8 @@ export const ADMIN_PERMISSIONS = {
 } as const;
 
 export type AdminPermissionKey = keyof typeof ADMIN_PERMISSIONS;
-export type AdminPermissionValue = typeof ADMIN_PERMISSIONS[AdminPermissionKey];
+export type AdminPermissionValue =
+  (typeof ADMIN_PERMISSIONS)[AdminPermissionKey];
 
 // ============================================================================
 // RULE TEMPLATES
@@ -286,7 +287,7 @@ export interface Condition {
 
 export interface Action {
   type: ActionType;
-  target: string; // Tag ID, Plot Block ID, or Tag Class name
+  target: string; // Tag ID, Trope ID, or Tag Class name
   message: string;
 }
 
@@ -328,7 +329,7 @@ export interface TagClassConstraint {
 }
 
 // ============================================================================
-// PLOT BLOCK HIERARCHIES
+// TROPE HIERARCHIES
 // ============================================================================
 
 export type HierarchyRuleType =
@@ -474,7 +475,7 @@ export interface ValidationError {
   severity: MessageSeverity;
   message: string;
   suggestedFix?: string;
-  affectedElements: string[]; // Tag IDs, Plot Block IDs, etc.
+  affectedElements: string[]; // Tag IDs, Trope IDs, etc.
 }
 
 export interface ValidationWarning {

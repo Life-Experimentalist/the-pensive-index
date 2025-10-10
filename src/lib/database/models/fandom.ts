@@ -1,7 +1,7 @@
 /**
  * Fandom Model - T018
  *
- * Represents a fictional universe containing tags and plot blocks for story discovery.
+ * Represents a fictional universe containing tags and tropes for story discovery.
  * Extends existing Drizzle schema with discovery interface requirements.
  */
 

@@ -424,7 +424,7 @@ export class DatabaseSeeder {
       // Seed test tags
       await this.seedTestTags(db);
 
-      // Seed test plot blocks
+      // Seed test tropes
       await this.seedTestPlotBlocks(db);
 
       // Seed test stories
@@ -502,7 +502,7 @@ export class DatabaseSeeder {
         description: 'Science fiction franchise created by Gene Roddenberry',
         slug: 'star-trek',
         is_active: true,
-      }
+      },
     ];
     await db.insert(schema.fandoms).values(testFandoms).onConflictDoNothing();
   }
@@ -517,7 +517,7 @@ export class DatabaseSeeder {
         description: 'Test tag for development',
         category: 'test',
         is_active: true,
-      }
+      },
     ];
     await db.insert(schema.tags).values(testTags).onConflictDoNothing();
   }
@@ -527,14 +527,17 @@ export class DatabaseSeeder {
     const testPlotBlocks = [
       {
         id: 'test-plot-block-1',
-        name: 'Test Plot Block 1',
+        name: 'Test Trope 1',
         fandom_id: 'star-trek',
-        description: 'Test plot block for development',
+        description: 'Test trope for development',
         category: 'test',
         is_active: true,
-      }
+      },
     ];
-    await db.insert(schema.plotBlocks).values(testPlotBlocks).onConflictDoNothing();
+    await db
+      .insert(schema.plotBlocks)
+      .values(testPlotBlocks)
+      .onConflictDoNothing();
   }
 
   private async seedTestStories(db: DatabaseConnection): Promise<void> {
@@ -553,7 +556,7 @@ export class DatabaseSeeder {
         rating: 'G',
         warnings: ['none'],
         is_active: true,
-      }
+      },
     ];
     await db.insert(schema.stories).values(testStories).onConflictDoNothing();
   }

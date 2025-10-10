@@ -251,7 +251,7 @@
                     "script": {
                         "type": "text/javascript",
                         "exec": [
-                            "// Create a complex pathway with many tags and plot blocks",
+                            "// Create a complex pathway with many tags and tropes",
                             "const complexTags = [",
                             "    'harry-hermione', 'time-travel', 'soul-bond', 'independent-harry',",
                             "    'manipulative-dumbledore', 'dark-harry', 'powerful-harry',",

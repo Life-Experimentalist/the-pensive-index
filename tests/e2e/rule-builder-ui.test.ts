@@ -505,7 +505,7 @@ class MockRuleBuilderComponent {
         </div>
       </div>
       <div class="palette-section">
-        <h3>Plot Blocks</h3>
+        <h3>Tropes</h3>
         <div class="palette-items">
           <div class="palette-item" data-type="plot-block" data-value="goblin-inheritance">Goblin Inheritance</div>
           <div class="palette-item" data-type="plot-block" data-value="wrong-boy-who-lived">Wrong Boy Who Lived</div>
@@ -872,7 +872,7 @@ class MockRuleBuilderComponent {
       });
     }
 
-    // Suggest specific tags based on plot blocks
+    // Suggest specific tags based on tropes
     if (this.rules.some(r => r.value === 'goblin-inheritance')) {
       suggestions.push({
         id: 'suggestion_goblin_combo',

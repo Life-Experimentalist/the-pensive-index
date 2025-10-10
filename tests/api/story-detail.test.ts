@@ -75,7 +75,7 @@ describe('GET /api/v1/discovery/stories/{id} - Contract Test', () => {
     }
   });
 
-  it('should include tag and plot block details', async () => {
+  it('should include tag and trope details', async () => {
     const response = await fetch(endpoint);
 
     const data = await response.json();
@@ -90,7 +90,7 @@ describe('GET /api/v1/discovery/stories/{id} - Contract Test', () => {
         expect(tag).toHaveProperty('description');
       }
 
-      // Plot block details with hierarchy
+      // Trope details with hierarchy
       if (data.story.plotBlocks.length > 0) {
         const plotBlock = data.story.plotBlocks[0];
         expect(plotBlock).toHaveProperty('id');

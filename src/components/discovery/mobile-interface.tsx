@@ -190,10 +190,10 @@ export function MobileInterface({
                 <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">
                   2
                 </span>
-                Select Plot Blocks
+                Select Tropes
               </h2>
               <div className="text-sm text-gray-500">
-                Plot blocks interface placeholder
+                Tropes interface placeholder
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ export function MobileInterface({
                 Your Story Pathway
               </h2>
               <p className="text-sm text-gray-600">
-                Build your story by selecting tags and plot blocks. Tap items to
+                Build your story by selecting tags and tropes. Tap items to
                 remove them.
               </p>
             </div>

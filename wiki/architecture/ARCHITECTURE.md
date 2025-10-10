@@ -278,7 +278,7 @@ graph TB
 
 **Drag-Drop Components**:
 - **DragDropContext**: Provides drag-and-drop functionality using dnd-kit
-- **DraggableItem**: Individual draggable elements (tags, plot blocks)
+- **DraggableItem**: Individual draggable elements (tags, tropes)
 - **DroppableZone**: Areas where items can be dropped
 
 **Application Pages**:
@@ -367,13 +367,13 @@ erDiagram
 - **TAGS**: Story attributes and descriptors (angst, fluff, harry/hermione)
 - **TAG_CLASSES**: Validation groups for tags (shipping, genres)
 - **PLOT_BLOCKS**: Story structure elements (Goblin Inheritance, Time Travel)
-- **PLOT_BLOCK_CONDITIONS**: Rules for plot block combinations
+- **PLOT_BLOCK_CONDITIONS**: Rules for trope combinations
 
 **Relationships**:
-- Each fandom contains multiple tags, tag classes, and plot blocks
+- Each fandom contains multiple tags, tag classes, and tropes
 - Tag classes categorize and validate tag selections
-- Plot blocks can have parent-child hierarchies
-- Plot block conditions define interaction rules
+- Tropes can have parent-child hierarchies
+- Trope conditions define interaction rules
 
 ## ✅ Validation System
 

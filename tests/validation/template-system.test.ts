@@ -418,9 +418,9 @@ describe('Template System - Parameter Validation', () => {
 
   const plotDependencyTemplate: RuleTemplate = {
     id: 'plot-dependency-template',
-    name: 'Plot Block Dependency Rule',
+    name: 'Trope Dependency Rule',
     category: 'plot_rules',
-    description: 'Template for creating plot block dependency validation rules',
+    description: 'Template for creating trope dependency validation rules',
     parameters: [
       {
         name: 'target_plot_block',
@@ -460,7 +460,7 @@ describe('Template System - Parameter Validation', () => {
         if (presentTags.length < {{minimum_required}}) {
           return {
             type: 'warning',
-            message: 'Plot block {{target_plot_block}} requires at least {{minimum_required}} of: ' + requiredTags.join(', '),
+            message: 'Trope {{target_plot_block}} requires at least {{minimum_required}} of: ' + requiredTags.join(', '),
             missing: requiredTags.filter(tag => !pathway.tags.includes(tag))
           };
         }

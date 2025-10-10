@@ -5,22 +5,18 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
+import type { Fandom } from '@/types';
 
-export interface Fandom {
-  id: number; // Changed from string to match database INTEGER type
-  name: string;
-  slug: string;
-  description: string;
+export interface FandomExtended extends Fandom {
   storyCount: number;
   tagCount: number;
   plotBlockCount: number;
-  isActive: boolean;
   lastUpdated: string;
 }
 
 interface FandomSelectorProps {
   selectedFandomId?: number | string; // Allow both for backward compatibility
-  onFandomSelect: (fandom: Fandom) => void;
+  onFandomSelect: (fandom: FandomExtended) => void;
   className?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -33,7 +29,7 @@ export function FandomSelector({
   placeholder = 'Select a fandom to explore...',
   disabled = false,
 }: FandomSelectorProps) {
-  const [fandoms, setFandoms] = useState<Fandom[]>([]);
+  const [fandoms, setFandoms] = useState<FandomExtended[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,13 +74,16 @@ export function FandomSelector({
       fandom.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleFandomClick = (fandom: Fandom) => {
+  const handleFandomClick = (fandom: FandomExtended) => {
     onFandomSelect(fandom);
     setIsOpen(false);
     setSearchTerm('');
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent, fandom?: Fandom) => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent,
+    fandom?: FandomExtended
+  ) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       if (fandom) {

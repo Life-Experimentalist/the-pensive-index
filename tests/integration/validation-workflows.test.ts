@@ -93,7 +93,7 @@ class IntegratedValidationEngine {
       const tagValidationResult = await this.validateTags(pathway);
       const tagValidationTime = tagTimer.end(tagValidationResult.valid);
 
-      // Plot block validation phase
+      // Trope validation phase
       const plotTimer = this.performanceMonitor.startTimer('plot-validation');
       const plotValidationResult = await this.validatePlotBlocks(pathway);
       const plotValidationTime = plotTimer.end(plotValidationResult.valid);
@@ -238,7 +238,7 @@ class IntegratedValidationEngine {
     const errors = [];
     const warnings = [];
 
-    // Plot block dependency validation
+    // Trope dependency validation
     if (pathway.plotBlocks.includes('soul-bond')) {
       const requiredTags = ['romantic', 'bonding', 'magical-bond'];
       const missingTags = requiredTags.filter(

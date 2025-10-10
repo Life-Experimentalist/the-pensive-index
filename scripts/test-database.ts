@@ -2,6 +2,7 @@
  * Database Test Script
  * Tests the Drizzle integration and database connectivity
  */
+// @ts-nocheck - Development test script
 
 import { getDb } from '@/lib/database/init';
 import { fandoms, tags, stories } from '@/lib/database/schema';

@@ -50,7 +50,7 @@ describe('Validation Endpoint API Contract Tests', () => {
     const tagClass = await tagClassResponse.json();
     testTagClassId = tagClass.id;
 
-    // Create test tags and plot blocks for testing
+    // Create test tags and tropes for testing
     testTagIds = [];
     testPlotBlockIds = [];
   });
@@ -134,7 +134,7 @@ describe('Validation Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should validate valid plot block data', async () => {
+    it('should validate valid trope data', async () => {
       const validPlotBlockData = {
         entity_type: 'plot_block',
         data: {
@@ -400,7 +400,7 @@ describe('Validation Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should validate plot block hierarchy rules', async () => {
+    it('should validate trope hierarchy rules', async () => {
       const ruleValidationData = {
         rule_type: 'plot_block_hierarchy',
         context: {
@@ -488,7 +488,7 @@ describe('Validation Endpoint API Contract Tests', () => {
 
   describe('POST /api/v1/validate/relationships', () => {
     beforeEach(async () => {
-      // Create test plot blocks for relationship validation
+      // Create test tropes for relationship validation
       const block1Response = await fetch('/api/v1/plot-blocks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -599,7 +599,7 @@ describe('Validation Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should validate tag-plot block associations', async () => {
+    it('should validate tag-trope associations', async () => {
       const relationshipData = {
         relationship_type: 'tag_plot_block_association',
         context: {
@@ -627,7 +627,7 @@ describe('Validation Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should detect invalid tag-plot block category mismatches', async () => {
+    it('should detect invalid tag-trope category mismatches', async () => {
       const relationshipData = {
         relationship_type: 'tag_plot_block_association',
         context: {
@@ -635,7 +635,7 @@ describe('Validation Endpoint API Contract Tests', () => {
           plot_block_id: testPlotBlockIds[0],
           tag_class_rules: {
             applicable_categories: ['relationship'],
-            excluded_categories: ['character-development'], // Plot block is character-development
+            excluded_categories: ['character-development'], // Trope is character-development
           },
         },
       };
@@ -662,7 +662,7 @@ describe('Validation Endpoint API Contract Tests', () => {
       });
     });
 
-    it('should validate plot block condition relationships', async () => {
+    it('should validate trope condition relationships', async () => {
       const relationshipData = {
         relationship_type: 'plot_block_condition',
         context: {

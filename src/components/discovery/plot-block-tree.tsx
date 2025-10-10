@@ -158,7 +158,7 @@ function PlotBlockNode({
           onKeyDown={handleKeyDown}
           disabled={isDisabled}
           className="flex-1 text-left focus:outline-none"
-          aria-label={`${isSelected ? 'Deselect' : 'Select'} plot block: ${
+          aria-label={`${isSelected ? 'Deselect' : 'Select'} trope: ${
             plotBlock.name
           }`}
         >
@@ -308,7 +308,7 @@ export function PlotBlockTree({
     return flattened;
   }, []);
 
-  // Filter plot blocks based on search
+  // Filter tropes based on search
   const filteredPlotBlocks = useMemo(() => {
     if (!searchTerm) {
       return plotBlocks;
@@ -399,7 +399,7 @@ export function PlotBlockTree({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Plot Blocks</h3>
+            <h3 className="text-lg font-medium text-gray-900">Tropes</h3>
             <p className="text-sm text-gray-500">
               {selectedCount} of {maxSelections} selected • {totalBlocks}{' '}
               available
@@ -436,7 +436,7 @@ export function PlotBlockTree({
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search plot blocks..."
+            placeholder="Search tropes..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
@@ -449,23 +449,23 @@ export function PlotBlockTree({
         <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
           <p className="text-sm text-orange-800">
             <span className="font-medium">Selection limit reached.</span>{' '}
-            Deselect some plot blocks to add new ones.
+            Deselect some tropes to add new ones.
           </p>
         </div>
       )}
 
-      {/* Plot block tree */}
+      {/* Trope tree */}
       <div className="border border-gray-200 rounded-lg bg-white">
         {filteredPlotBlocks.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-gray-400 mb-2">
               <MagnifyingGlassIcon className="w-12 h-12 mx-auto" />
             </div>
-            <p className="text-gray-500 font-medium">No plot blocks found</p>
+            <p className="text-gray-500 font-medium">No tropes found</p>
             <p className="text-sm text-gray-400 mt-1">
               {searchTerm
                 ? 'Try adjusting your search terms'
-                : 'No plot blocks available for this fandom'}
+                : 'No tropes available for this fandom'}
             </p>
           </div>
         ) : (

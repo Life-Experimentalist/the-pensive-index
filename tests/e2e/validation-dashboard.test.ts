@@ -453,7 +453,7 @@ class MockValidationDashboard {
       });
     }
 
-    // Suggest specific tags based on plot blocks
+    // Suggest specific tags based on tropes
     if (this.rules.some(r => r.value === 'goblin-inheritance')) {
       suggestions.push({
         id: 'suggestion_goblin_combo',

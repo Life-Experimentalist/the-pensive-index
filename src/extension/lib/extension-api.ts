@@ -3,8 +3,11 @@
  * Handles communication between extension components and backend API
  */
 
-import { StorySubmission, StoryMetadata } from '../../types/submissions';
-import { FandomData } from '../../types/fandoms';
+import { CreateSubmissionRequest, StoryMetadata } from '../../types/submission';
+import type { Fandom } from '../../types';
+
+// Type alias for backward compatibility
+type FandomData = Fandom;
 
 interface UserPreferences {
   email?: string;
@@ -14,7 +17,7 @@ interface UserPreferences {
 
 interface SubmissionResult {
   submissionId: string;
-  githubIssueNumber?: number;
+  githubIssueNumber?: string;
   estimatedReviewTime: string;
 }
 
@@ -152,7 +155,8 @@ export class ExtensionAPI {
       throw new Error('No active tab found');
     }
 
-    const parser = this.siteParsers.find(p => p.isSupported(tab.url!));
+    const tabUrl = tab.url; // Guaranteed to be string at this point
+    const parser = this.siteParsers.find(p => p.isSupported(tabUrl));
     if (!parser) {
       throw new Error('Unsupported site');
     }
@@ -160,13 +164,8 @@ export class ExtensionAPI {
     try {
       const storyData = await parser.parseStoryData(tabId);
 
-      // Add common metadata
-      return {
-        ...storyData,
-        submissionSource: 'browser_extension',
-        parsedAt: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-      };
+      // Return parsed story data (metadata about submission source is handled by the backend)
+      return storyData;
     } catch (error) {
       console.error('Parse error:', error);
       throw new Error('Failed to parse story data from page');
@@ -209,7 +208,7 @@ export class ExtensionAPI {
 
   // Submit story to API
   async submitStory(
-    submissionData: Omit<StorySubmission, 'id' | 'submissionDate'>
+    submissionData: CreateSubmissionRequest
   ): Promise<SubmissionResult> {
     try {
       const response = await fetch(`${this.baseURL}/api/v1/submissions`, {
@@ -218,10 +217,7 @@ export class ExtensionAPI {
           'Content-Type': 'application/json',
           'X-Extension-Version': chrome.runtime.getManifest().version,
         },
-        body: JSON.stringify({
-          ...submissionData,
-          submissionDate: new Date().toISOString(),
-        }),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) {

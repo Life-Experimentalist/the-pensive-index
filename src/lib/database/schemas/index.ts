@@ -372,7 +372,7 @@ function createTablesIfNotExist(database: Database.Database) {
       description TEXT,
       base_templates TEXT, -- JSON array of template IDs
       default_tags TEXT, -- JSON array of template tags
-      default_plot_blocks TEXT, -- JSON array of template plot blocks
+      default_plot_blocks TEXT, -- JSON array of template tropes
       validation_rules TEXT, -- JSON array of validation rules
       metadata TEXT, -- JSON object for flexible metadata
       is_active INTEGER DEFAULT 1 NOT NULL,

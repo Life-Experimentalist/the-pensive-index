@@ -23,7 +23,7 @@ describe('ValidationIndicator Component', () => {
     warnings: [
       {
         type: 'INCOMPLETE_PATHWAY',
-        message: 'Consider adding more plot blocks for a complete story',
+        message: 'Consider adding more tropes for a complete story',
       },
     ],
     suggestions: [
@@ -72,7 +72,7 @@ describe('ValidationIndicator Component', () => {
       render(<ValidationIndicator validationResult={mockValidationResult} />);
 
       expect(
-        screen.getByText(/Consider adding more plot blocks/i)
+        screen.getByText(/Consider adding more tropes/i)
       ).toBeInTheDocument();
     });
 

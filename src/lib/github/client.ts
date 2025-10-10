@@ -357,10 +357,10 @@ export class GitHubClient {
 ### Tags
 ${submission.tags?.map((tag: string) => `- ${tag}`).join('\n') || 'No tags'}
 
-### Plot Blocks
+### Tropes
 ${
   submission.plotBlocks?.map((block: string) => `- ${block}`).join('\n') ||
-  'No plot blocks'
+  'No tropes'
 }
 
 ### Summary
@@ -377,7 +377,7 @@ ${submission.additionalNotes || 'No additional notes'}
 ### Moderation Checklist
 - [ ] Story URL is valid and accessible
 - [ ] Tags are appropriate and follow guidelines
-- [ ] Plot blocks are correctly identified
+- [ ] Tropes are correctly identified
 - [ ] No duplicate submission exists
 - [ ] Content is suitable for the platform
 

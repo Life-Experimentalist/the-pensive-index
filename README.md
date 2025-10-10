@@ -97,9 +97,11 @@ Fandom (Harry Potter, Percy Jackson)
 - **Styling**: Tailwind CSS for responsive design
 - **Interactions**: dnd-kit for drag-and-drop functionality
 - **Authentication**: NextAuth.js with role-based permissions
-- **Database**: Cloudflare D1 (SQLite) for data persistence
-- **Deployment**: Cloudflare Pages with edge functions
-- **Testing**: React Testing Library, Playwright E2E
+- **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
+- **Cache**: Cloudflare KV for performance optimization
+- **Deployment**: Cloudflare Pages + Workers (Edge Functions)
+- **Testing**: Vitest, React Testing Library, Playwright E2E
+- **CI/CD**: GitHub Actions with automatic deployments
 
 ## 📱 User Interface
 
@@ -202,13 +204,48 @@ This project uses [Spec-Kit](https://github.com/speckit.specify-dev) for structu
 
 ### Development Commands
 ```powershell
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run test         # Run all tests
-npm run test:watch   # Run tests in watch mode
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript checks
+# Development
+npm run dev              # Start development server
+npm run build            # Build for production + docs
+npm run build:nextjs     # Build Next.js only
+npm run lint             # Run ESLint
+npm run type-check       # Run TypeScript checks
+
+# Testing
+npm run test             # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:e2e         # Run Playwright E2E tests
+npm run test:coverage    # Generate coverage reports
+
+# Database (Local Development)
+npm run db:setup         # Initialize local SQLite database
+npm run db:migrate       # Run database migrations
+npm run db:seed          # Seed with sample data
+
+# Cloudflare Deployment
+npm run deploy:worker    # Deploy Cloudflare Worker
+npm run dev:worker       # Test worker locally
+npm run preview:worker   # Preview worker deployment
+wrangler deploy          # Full deployment (Pages + Worker)
+
+# D1 Database (Production)
+wrangler d1 migrations apply pensive-index --remote
+wrangler d1 execute pensive-index --command="SELECT * FROM fandoms"
+
+# KV Cache Management
+wrangler kv:key list --binding=CACHE
+wrangler kv:key put --binding=CACHE <key> <value>
 ```
+
+### Deployment
+See [CLOUDFLARE_DEPLOYMENT.md](./CLOUDFLARE_DEPLOYMENT.md) for complete deployment guide:
+- Cloudflare Pages setup
+- D1 database configuration
+- KV cache setup
+- GitHub Actions CI/CD
+- Environment variables
+
+Quick deploy checklist: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
 
 ## 📋 Project Status
 

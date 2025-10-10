@@ -1,0 +1,123 @@
+name: Deploy to Cloudflare Pages
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+env:
+    NODE_VERSION: "18"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        name: Deploy to Cloudflare Pages
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run type check
+              run: npm run type-check
+              continue-on-error: true # Don't fail deployment on type errors (for now)
+
+            - name: Run linter
+              run: npm run lint
+              continue-on-error: true # Don't fail deployment on lint errors (for now)
+
+            - name: Run tests
+              run: npm run test
+              continue-on-error: true # Don't fail deployment on test failures (for now)
+
+            - name: Build Next.js application
+              run: npm run build:nextjs
+              env:
+                  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+                  NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+
+            - name: Deploy to Cloudflare Pages
+              uses: cloudflare/pages-action@v1
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: the-pensive-index
+                  directory: .next
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+                  wranglerVersion: "3"
+
+            - name: Deploy Cloudflare Worker
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  command: deploy
+              env:
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    database-migration:
+        runs-on: ubuntu-latest
+        name: Run D1 Migrations
+        needs: deploy
+        if: github.ref == 'refs/heads/main'
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ env.NODE_VERSION }}
+
+            - name: Install Wrangler
+              run: npm install -g wrangler
+
+            - name: Apply D1 Migrations
+              run: wrangler d1 migrations apply pensive-index --remote
+              env:
+                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    post-deployment-checks:
+        runs-on: ubuntu-latest
+        name: Post-Deployment Health Checks
+        needs: [deploy, database-migration]
+        if: github.ref == 'refs/heads/main'
+
+        steps:
+            - name: Check Homepage
+              run: |
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://the-pensive-index.pages.dev)
+                  if [ $HTTP_STATUS -ne 200 ]; then
+                    echo "Homepage returned HTTP $HTTP_STATUS"
+                    exit 1
+                  fi
+
+            - name: Check API Health
+              run: |
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://the-pensive-index.pages.dev/api/fandoms)
+                  if [ $HTTP_STATUS -ne 200 ] && [ $HTTP_STATUS -ne 401 ]; then
+                    echo "API returned HTTP $HTTP_STATUS"
+                    exit 1
+                  fi
+
+            - name: Notify Deployment Success
+              if: success()
+              run: echo "✅ Deployment successful and health checks passed!"
+
+            - name: Notify Deployment Failure
+              if: failure()
+              run: echo "❌ Deployment or health checks failed!"

@@ -170,14 +170,9 @@ export default function UnifiedAdminLayout({
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Main content area - Always accounts for collapsed sidebar */}
-      <main
-        className={cn(
-          'pt-16 min-h-screen transition-all duration-300',
-          className
-        )}
-      >
-        <div className="p-4 md:p-6 md:pl-20">
+      {/* Main content area - Full width, sidebar floats above */}
+      <main className={cn('pt-16 min-h-screen w-full', className)}>
+        <div className="p-4 md:p-6">
           {/* Page title (if not shown in top bar) */}
           {title && (
             <div className="mb-6 lg:hidden">

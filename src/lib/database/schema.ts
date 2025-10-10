@@ -9,28 +9,32 @@ import { relations, sql } from 'drizzle-orm';
 
 // Fandoms table
 export const fandoms = sqliteTable('fandoms', {
-  id: text('id').primaryKey(),
+  id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
-  description: text('description').notNull(),
   slug: text('slug').notNull().unique(),
+  description: text('description').notNull(),
+  metadata: text('metadata', { mode: 'json' }),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
-  created_at: integer('created_at', { mode: 'timestamp' })
+  created_at: text('created_at')
     .notNull()
-    .default(sql`(unixepoch())`),
-  updated_at: integer('updated_at', { mode: 'timestamp' })
+    .default(sql`(datetime('now'))`),
+  updated_at: text('updated_at')
     .notNull()
-    .default(sql`(unixepoch())`),
+    .default(sql`(datetime('now'))`),
 });
 
 // Tags table
 export const tags = sqliteTable('tags', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  description: text('description'),
   fandom_id: text('fandom_id')
     .notNull()
     .references(() => fandoms.id, { onDelete: 'cascade' }),
-  description: text('description'),
-  category: text('category'),
+  tag_class_id: text('tag_class_id'),
+  parent_id: text('parent_id'),
+  metadata: text('metadata', { mode: 'json' }),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -38,19 +42,20 @@ export const tags = sqliteTable('tags', {
   updated_at: integer('updated_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
+  category: text('category'),
   requires: text('requires', { mode: 'json' }).$type<string[]>(),
   enhances: text('enhances', { mode: 'json' }).$type<string[]>(),
-  tag_class_id: text('tag_class_id'),
 });
 
 // Tag classes table
 export const tagClasses = sqliteTable('tag_classes', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  description: text('description').notNull(),
   fandom_id: text('fandom_id')
     .notNull()
     .references(() => fandoms.id, { onDelete: 'cascade' }),
-  description: text('description').notNull(),
   validation_rules: text('validation_rules', { mode: 'json' }).notNull().$type<{
     mutual_exclusion?: {
       within_class: boolean;
@@ -78,6 +83,7 @@ export const tagClasses = sqliteTable('tag_classes', {
       enables?: string[];
     };
   }>(),
+  metadata: text('metadata', { mode: 'json' }),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -90,12 +96,14 @@ export const tagClasses = sqliteTable('tag_classes', {
 // Plot blocks table
 export const plotBlocks = sqliteTable('plot_blocks', {
   id: text('id').primaryKey(),
-  name: text('name').notNull(),
   fandom_id: text('fandom_id')
     .notNull()
     .references(() => fandoms.id, { onDelete: 'cascade' }),
-  category: text('category').notNull(),
+  parent_id: text('parent_id'),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
   description: text('description').notNull(),
+  display_order: integer('display_order').notNull().default(0),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -103,17 +111,6 @@ export const plotBlocks = sqliteTable('plot_blocks', {
   updated_at: integer('updated_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
-  conflicts_with: text('conflicts_with', { mode: 'json' }).$type<string[]>(),
-  requires: text('requires', { mode: 'json' }).$type<string[]>(),
-  soft_requires: text('soft_requires', { mode: 'json' }).$type<string[]>(),
-  enhances: text('enhances', { mode: 'json' }).$type<string[]>(),
-  enabled_by: text('enabled_by', { mode: 'json' }).$type<string[]>(),
-  excludes_categories: text('excludes_categories', { mode: 'json' }).$type<
-    string[]
-  >(),
-  max_instances: integer('max_instances'),
-  parent_id: text('parent_id'),
-  children: text('children', { mode: 'json' }).$type<string[]>(),
 });
 
 // Plot block conditions table
@@ -156,6 +153,15 @@ export const stories = sqliteTable('stories', {
     .$type<'complete' | 'incomplete' | 'abandoned' | 'hiatus'>(),
   rating: text('rating').notNull(),
   warnings: text('warnings', { mode: 'json' }).$type<string[]>(),
+  source: text('source')
+    .$type<'extension' | 'manual' | 'import'>()
+    .default('manual'), // How story was added
+  submitted_by: text('submitted_by'), // User ID who submitted (nullable)
+  vote_count: integer('vote_count').notNull().default(0), // Crowd-polling votes
+  poll_status: text('poll_status')
+    .notNull()
+    .$type<'pending' | 'approved' | 'rejected'>()
+    .default('approved'), // Default approved for manual additions
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
@@ -229,7 +235,7 @@ export const storySubmissions = sqliteTable('story_submissions', {
 // Pathways table - User-created story pathways
 export const pathways = sqliteTable('pathways', {
   id: text('id').primaryKey(), // UUID
-  user_id: text('user_id').notNull(), // Clerk user ID
+  user_id: text('user_id'), // Clerk user ID (nullable for anonymous pathways)
   fandom_id: text('fandom_id')
     .notNull()
     .references(() => fandoms.id, { onDelete: 'cascade' }),
@@ -243,7 +249,17 @@ export const pathways = sqliteTable('pathways', {
     .notNull()
     .$type<string[]>()
     .default(sql`'[]'`),
-  is_public: integer('is_public', { mode: 'boolean' }).notNull().default(false),
+  is_public: integer('is_public', { mode: 'boolean' }).notNull().default(true),
+  is_persisted: integer('is_persisted', { mode: 'boolean' })
+    .notNull()
+    .default(false), // Session-only (false) or saved (true)
+  vote_count: integer('vote_count').notNull().default(0), // Crowd-polling votes
+  poll_status: text('poll_status')
+    .notNull()
+    .$type<'pending' | 'approved' | 'rejected'>()
+    .default('pending'), // Moderation status
+  version: integer('version').notNull().default(1), // Optimistic locking
+  last_edited_by: text('last_edited_by'), // User ID for concurrency tracking
   view_count: integer('view_count').notNull().default(0),
   match_count: integer('match_count').notNull().default(0), // Number of matching stories
   created_at: integer('created_at', { mode: 'timestamp' })

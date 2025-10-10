@@ -35,7 +35,7 @@ Describe any alternative solutions or features you've considered.
 ## Constitutional Alignment
 Check that this feature aligns with our core principles:
 - [ ] Prioritizes existing story discovery over prompt generation
-- [ ] Supports hierarchical tagging and plot blocks
+- [ ] Supports hierarchical tagging and tropes
 - [ ] Works on both desktop (drag-drop) and mobile (tap-select)
 - [ ] Enables community-driven content growth
 

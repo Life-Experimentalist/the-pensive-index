@@ -31,11 +31,11 @@ Please build the story pathway using our tagging system:
 - [ ] Tag 3
 (Add more as needed)
 
-### Plot Blocks Selected
-- [ ] Plot Block 1
+### tropes Selected
+- [ ] trope 1
   - [ ] Condition A
   - [ ] Condition B
-- [ ] Plot Block 2
+- [ ] trope 2
   - [ ] Condition A
 (Add more as needed)
 

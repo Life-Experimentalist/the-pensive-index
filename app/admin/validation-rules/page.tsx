@@ -75,7 +75,7 @@ const mockRules: ValidationRule[] = [
   {
     id: '2',
     name: 'Time Travel Consistency Check',
-    description: 'Ensures time travel plot blocks are logically consistent',
+    description: 'Ensures time travel tropes are logically consistent',
     fandomId: 'hp',
     fandomName: 'Harry Potter',
     category: 'plot-consistency',
@@ -213,7 +213,9 @@ export default function ValidationRulesList() {
   };
 
   const getUniqueCategories = (): string[] => {
-    return Array.from(new Set(rules.map((rule: ValidationRule) => rule.category)));
+    return Array.from(
+      new Set(rules.map((rule: ValidationRule) => rule.category))
+    );
   };
 
   if (loading) {
@@ -239,9 +241,7 @@ export default function ValidationRulesList() {
       {/* Header */}
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Validation Rules
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Validation Rules</h1>
           <p className="mt-2 text-sm text-gray-700">
             Manage validation rules for your fandoms. Rules help ensure story
             pathways are logically consistent.
@@ -275,8 +275,8 @@ export default function ValidationRulesList() {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="Search rules..."
                 value={filters.search}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, search: e.target.value }))
+                onChange={e =>
+                  setFilters(prev => ({ ...prev, search: e.target.value }))
                 }
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -299,8 +299,8 @@ export default function ValidationRulesList() {
               id="fandom"
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
               value={filters.fandom}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, fandom: e.target.value }))
+              onChange={e =>
+                setFilters(prev => ({ ...prev, fandom: e.target.value }))
               }
             >
               <option value="">All Fandoms</option>
@@ -323,8 +323,8 @@ export default function ValidationRulesList() {
               id="category"
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
               value={filters.category}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, category: e.target.value }))
+              onChange={e =>
+                setFilters(prev => ({ ...prev, category: e.target.value }))
               }
             >
               <option value="">All Categories</option>
@@ -347,8 +347,8 @@ export default function ValidationRulesList() {
               id="status"
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
               value={filters.status}
-              onChange={(e) =>
-                setFilters((prev) => ({
+              onChange={e =>
+                setFilters(prev => ({
                   ...prev,
                   status: e.target.value as FilterState['status'],
                 }))
@@ -371,9 +371,9 @@ export default function ValidationRulesList() {
               id="sortBy"
               className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
               value={`${filters.sortBy}-${filters.sortOrder}`}
-              onChange={(e) => {
+              onChange={e => {
                 const [sortBy, sortOrder] = e.target.value.split('-');
-                setFilters((prev) => ({
+                setFilters(prev => ({
                   ...prev,
                   sortBy: sortBy as FilterState['sortBy'],
                   sortOrder: sortOrder as FilterState['sortOrder'],

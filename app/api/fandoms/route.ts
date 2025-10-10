@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DatabaseManager } from '@/lib/database';
-import { apiResponseSchema } from '@/lib/validation/schemas';
+import { getDatabase } from '@/lib/database/config';
+import { fandoms } from '@/lib/database/schema';
+import { eq, asc, like, and } from 'drizzle-orm';
 import { z } from 'zod';
 
 /**
@@ -9,36 +10,50 @@ import { z } from 'zod';
  */
 export async function GET(request: NextRequest) {
   try {
-    const dbManager = DatabaseManager.getInstance();
-    const db = dbManager.getConnection();
+    const db = getDatabase();
 
     // Get query parameters for pagination and filtering
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
     const search = searchParams.get('search') || '';
+    const activeOnly = searchParams.get('activeOnly') === 'true';
 
     // Calculate offset
     const offset = (page - 1) * limit;
 
-    // Build query with search filter if provided
-    let query = db.query.fandoms.findMany({
-      limit,
-      offset,
-      orderBy: (fandoms, { asc }) => [asc(fandoms.name)],
-    });
+    // Build WHERE conditions
+    const conditions = [];
+    if (activeOnly) {
+      conditions.push(eq(fandoms.is_active, true));
+    }
+    if (search) {
+      conditions.push(like(fandoms.name, `%${search}%`));
+    }
 
-    // If search term provided, add filtering logic here
-    // (This would need to be implemented based on your specific search requirements)
+    // Execute query with pagination
+    const whereClause =
+      conditions.length > 0
+        ? conditions.length === 1
+          ? conditions[0]
+          : and(...conditions)
+        : undefined;
 
-    const fandoms = await query;
+    const fandomsData = await db
+      .select()
+      .from(fandoms)
+      .where(whereClause)
+      .orderBy(asc(fandoms.name))
+      .limit(limit)
+      .offset(offset);
 
     // Get total count for pagination
-    const totalCount = await db.query.fandoms.findMany();
+    const totalCount = await db.select().from(fandoms).where(whereClause);
+
     const total = totalCount.length;
 
     const response = {
-      data: fandoms,
+      fandoms: fandomsData,
       pagination: {
         page,
         limit,
@@ -47,10 +62,7 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Validate response against schema
-    const validatedResponse = apiResponseSchema.parse(response);
-
-    return NextResponse.json(validatedResponse);
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching fandoms:', error);
 
@@ -62,7 +74,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: error instanceof Error ? error.message : 'Internal server error',
+      },
       { status: 500 }
     );
   }

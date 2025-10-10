@@ -10,6 +10,18 @@ import { getDatabase } from '../config';
 import { tags, tagClasses } from '../schema';
 import type { Tag, NewTag } from '../schema';
 
+/**
+ * Generate a URL-friendly slug from a string
+ */
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/--+/g, '-') // Replace multiple dashes with single dash
+    .trim();
+}
+
 // Extended types for discovery interface
 export interface TagWithMetadata extends Tag {
   usageCount: number;
@@ -53,13 +65,18 @@ export class TagModel {
   /**
    * Get all active tags for a fandom
    */
-  static async getByFandom(fandomId: string): Promise<Tag[]> {
+  static async getByFandom(fandomId: string | number): Promise<Tag[]> {
     const db = getDatabase();
-    return db
+    // Convert fandomId to string since tags.fandom_id is TEXT
+    const fandomIdStr = String(fandomId);
+
+    const allTags = await db
       .select()
       .from(tags)
-      .where(and(eq(tags.fandom_id, fandomId), eq(tags.is_active, true)))
-      .orderBy(desc(tags.name));
+      .where(eq(tags.is_active, true));
+
+    // Filter by fandom_id manually to handle type mismatch
+    return allTags.filter(tag => tag.fandom_id === fandomIdStr);
   }
 
   /**
@@ -100,6 +117,7 @@ export class TagModel {
     const tagData = {
       id: data.id || crypto.randomUUID(),
       name: data.name,
+      slug: generateSlug(data.name), // Generate slug from name
       fandom_id: data.fandomId,
       description: data.description,
       category: data.category,

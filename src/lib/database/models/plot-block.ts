@@ -10,6 +10,18 @@ import { getDatabase } from '../config';
 import { plotBlocks, plotBlockConditions } from '../schema';
 import type { PlotBlock, NewPlotBlock } from '../schema';
 
+/**
+ * Generate a URL-friendly slug from a string
+ */
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/--+/g, '-') // Replace multiple dashes with single dash
+    .trim();
+}
+
 // Extended types for discovery interface
 export interface PlotBlockWithChildren extends PlotBlock {
   childBlocks?: PlotBlockWithChildren[];
@@ -65,19 +77,18 @@ export class PlotBlockModel {
   /**
    * Get all root plot blocks for a fandom (no parent)
    */
-  static async getRootBlocks(fandomId: string): Promise<PlotBlock[]> {
+  static async getRootBlocks(fandomId: string | number): Promise<PlotBlock[]> {
     const db = getDatabase();
-    return db
+    // Convert fandomId to string since plotBlocks.fandom_id is TEXT
+    const fandomIdStr = String(fandomId);
+
+    const allBlocks = await db
       .select()
       .from(plotBlocks)
-      .where(
-        and(
-          eq(plotBlocks.fandom_id, fandomId),
-          eq(plotBlocks.is_active, true),
-          isNull(plotBlocks.parent_id)
-        )
-      )
-      .orderBy(desc(plotBlocks.name));
+      .where(and(eq(plotBlocks.is_active, true), isNull(plotBlocks.parent_id)));
+
+    // Filter by fandom_id manually to handle type mismatch
+    return allBlocks.filter(block => block.fandom_id === fandomIdStr);
   }
 
   /**
@@ -183,19 +194,12 @@ export class PlotBlockModel {
     const plotBlockData = {
       id: data.id || crypto.randomUUID(),
       name: data.name,
+      slug: generateSlug(data.name), // Generate slug from name
       fandom_id: data.fandomId,
-      category: data.category,
       description: data.description,
       is_active: data.isActive ?? true,
-      conflicts_with: data.conflictsWith,
-      requires: data.requires,
-      soft_requires: data.softRequires,
-      enhances: data.enhances,
-      enabled_by: data.enabledBy,
-      excludes_categories: data.excludesCategories,
-      max_instances: data.maxInstances,
-      parent_id: data.parentId,
-      children: data.children,
+      parent_id: data.parentId || null,
+      display_order: 0, // Default display order
     };
 
     const db = getDatabase();

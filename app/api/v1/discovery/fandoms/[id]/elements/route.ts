@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/v1/discovery/fandoms/[id]/elements
  *
- * Returns all tags and plot blocks for a specific fandom.
+ * Returns all tags and tropes for a specific fandom.
  * Used by the discovery interface for pathway building.
  *
  * Performance target: <200ms response time
@@ -29,10 +29,10 @@ export async function GET(
     const tags = await TagModel.getByFandom(fandomSlug);
     const tagCategories = await TagModel.getCategoriesByFandom(fandomSlug);
 
-    // Get plot blocks with hierarchy
+    // Get tropes with hierarchy
     const rootPlotBlocks = await PlotBlockModel.getRootBlocks(fandomSlug);
 
-    // Build hierarchical plot block tree
+    // Build hierarchical trope tree
     const plotBlockTree = await Promise.all(
       rootPlotBlocks.map(async block => {
         const children = await PlotBlockModel.getChildBlocks(block.id);
@@ -119,7 +119,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: 'Failed to fetch fandom elements',
-        message: 'An error occurred while retrieving tags and plot blocks',
+        message: 'An error occurred while retrieving tags and tropes',
         fandom: fandomSlug,
         timestamp: new Date().toISOString(),
       },

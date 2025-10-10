@@ -3,6 +3,7 @@
 ## Core Principles
 
 a. No creating of temporary reports and such markdown files in the project root but they are to be created in the `.project/` folder.
+b. Never start a `npm run dev` since when ever you give next command it will send the server and then you will detect that the server is not running and you will give the command again and again. Thus do now start the dev server but tell me and i will do it for you.
 
 ### I. Story Library First
 Every feature prioritizes existing story discovery before prompt generation:

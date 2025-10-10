@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 
 // Import our discovery components
-import { FandomSelector } from './fandom-selector';
+import { FandomSelector, type Fandom } from './fandom-selector';
 import { PathwayBuilder } from './pathway-builder';
 import { TagList } from './tag-list';
 import { PlotBlockTree } from './plot-block-tree';
@@ -44,6 +44,31 @@ export function DesktopInterface({
   selectedFandomSlug,
   className = '',
 }: DesktopInterfaceProps) {
+  const [selectedFandom, setSelectedFandom] = useState<Fandom | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedPlotBlocks, setSelectedPlotBlocks] = useState<string[]>([]);
+
+  const handleFandomSelect = useCallback((fandom: Fandom) => {
+    setSelectedFandom(fandom);
+    // Reset selections when fandom changes
+    setSelectedTags([]);
+    setSelectedPlotBlocks([]);
+  }, []);
+
+  const handleTagToggle = useCallback((tagId: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    );
+  }, []);
+
+  const handlePlotBlockToggle = useCallback((blockId: string) => {
+    setSelectedPlotBlocks(prev =>
+      prev.includes(blockId)
+        ? prev.filter(id => id !== blockId)
+        : [...prev, blockId]
+    );
+  }, []);
+
   return (
     <div className={`desktop-interface h-screen hidden lg:flex ${className}`}>
       {/* Left Panel: Selection */}
@@ -52,27 +77,54 @@ export function DesktopInterface({
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Build Your Story
           </h2>
-          <div className="text-sm text-gray-500">
-            Fandom selector placeholder
-          </div>
+          <FandomSelector
+            selectedFandomId={selectedFandom?.id}
+            onFandomSelect={handleFandomSelect}
+          />
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6 space-y-8">
             <div>
               <h3 className="text-md font-medium text-gray-900 mb-4">Tags</h3>
-              <div className="text-sm text-gray-500">
-                Tags interface placeholder
-              </div>
+              {selectedFandom ? (
+                <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-md border border-blue-200">
+                  <p className="font-medium text-blue-900 mb-2">
+                    ✨ Tag Selection Coming Soon
+                  </p>
+                  <p className="text-blue-700">
+                    Interactive tag selection with filtering and search is being
+                    implemented. The TagList component will be fully functional
+                    soon!
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 italic">
+                  Select a fandom to view tags
+                </p>
+              )}
             </div>
 
             <div>
               <h3 className="text-md font-medium text-gray-900 mb-4">
                 Plot Blocks
               </h3>
-              <div className="text-sm text-gray-500">
-                Plot blocks interface placeholder
-              </div>
+              {selectedFandom ? (
+                <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-md border border-blue-200">
+                  <p className="font-medium text-blue-900 mb-2">
+                    ✨ Plot Block Tree Coming Soon
+                  </p>
+                  <p className="text-blue-700">
+                    Expandable plot block tree with dependencies and conflicts
+                    is being implemented. The PlotBlockTree component will be
+                    fully functional soon!
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 italic">
+                  Select a fandom to view plot blocks
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -83,15 +135,28 @@ export function DesktopInterface({
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Your Pathway</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Drag elements here or use the selection tools
+            Selected elements will appear here
           </p>
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden">
           <div className="p-6 h-full">
-            <div className="text-sm text-gray-500">
-              Pathway builder placeholder
-            </div>
+            {selectedFandom ? (
+              <div className="text-sm text-gray-600 bg-green-50 p-4 rounded-md border border-green-200">
+                <p className="font-medium text-green-900 mb-2">
+                  ✨ Pathway Builder Coming Soon
+                </p>
+                <p className="text-green-700">
+                  Drag-and-drop pathway building with visual feedback and
+                  validation is being implemented. The PathwayBuilder component
+                  will be fully functional soon!
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic text-center mt-8">
+                Select a fandom and tags/plot blocks to build your pathway
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -109,9 +174,22 @@ export function DesktopInterface({
 
         <div className="flex-1 min-h-0 overflow-hidden">
           <div className="p-6 h-full">
-            <div className="text-sm text-gray-500">
-              Story results placeholder
-            </div>
+            {selectedFandom ? (
+              <div className="text-sm text-gray-600 bg-purple-50 p-4 rounded-md border border-purple-200">
+                <p className="font-medium text-purple-900 mb-2">
+                  ✨ Story Results Coming Soon
+                </p>
+                <p className="text-purple-700">
+                  Story search with relevance scoring and prompt generation is
+                  being implemented. The StoryResults component will be fully
+                  functional soon!
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic text-center mt-8">
+                Build a pathway to discover matching stories
+              </p>
+            )}
           </div>
         </div>
       </div>

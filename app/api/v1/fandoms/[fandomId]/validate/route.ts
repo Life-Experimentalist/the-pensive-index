@@ -64,7 +64,7 @@ export const POST = CommonMiddleware.public(
         ),
       });
 
-      // Load plot blocks for this fandom
+      // Load tropes for this fandom
       const fandomPlotBlocks = await db.query.plotBlocks.findMany({
         where: and(
           eq(plotBlocks.fandom_id, fandomId),
@@ -92,7 +92,7 @@ export const POST = CommonMiddleware.public(
         }
       }
 
-      // Verify all provided plot block IDs exist in this fandom
+      // Verify all provided trope IDs exist in this fandom
       if (validatedData.plot_blocks.length > 0) {
         const validPlotBlockIdSet = new Set(fandomPlotBlocks.map(pb => pb.id));
         const invalidPlotBlocks = validatedData.plot_blocks.filter(
@@ -102,7 +102,7 @@ export const POST = CommonMiddleware.public(
         if (invalidPlotBlocks.length > 0) {
           throw ErrorFactory.businessRule(
             'invalid_plot_blocks',
-            `Invalid plot block IDs for fandom ${fandomId}: ${invalidPlotBlocks.join(
+            `Invalid trope IDs for fandom ${fandomId}: ${invalidPlotBlocks.join(
               ', '
             )}`
           );

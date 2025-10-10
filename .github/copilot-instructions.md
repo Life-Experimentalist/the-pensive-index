@@ -1,4 +1,4 @@
-# The Pensieve Index Development Guidelines
+﻿# The Pensieve Index Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-09-18
 
@@ -14,13 +14,19 @@ matching stories and writers to discover gaps for new content.
 2. **Library Search**: System searches existing tagged stories with relevance scoring
 3. **Dual Output**: Shows matching stories + "Create New Story" prompt with novelty highlights
 4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
-4. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
+5. **Story Submission**: Community tags new stories via browser extension → GitHub issues → Admin review
 
 ## Active Technologies
-- TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM, @octokit/rest, browser extension APIs (002-implement-the-community)
+
+- TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM, @octokit/rest, browser extension APIs
+  (002-implement-the-community)
 - SQLite via Drizzle ORM (existing), GitHub Issues API for submission workflow (002-implement-the-community)
-- TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Drizzle ORM 0.44+, Cloudflare Workers SDK (003-optimize-the-platform)
+- TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Drizzle ORM 0.44+, Cloudflare Workers SDK
+  (003-optimize-the-platform)
 - Cloudflare D1 (SQLite) with KV for caching, Durable Objects for rate limiting state (003-optimize-the-platform)
+- TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Tailwind CSS 3.4+, @dnd-kit/core 6.1+,
+  Drizzle ORM 0.44+, @octokit/rest, NextAuth.js 4.24+ (004-integrate-the-pathway)
+- Cloudflare D1 (SQLite) with Cloudflare KV for caching (004-integrate-the-pathway)
 
 - TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+,
   dnd-kit 6.1+ (005-create-a-modular)
@@ -83,12 +89,12 @@ tests/
 
 - **Fandoms** (top-level): Harry Potter, Percy Jackson, etc.
 - **Tags** (simple labels): angst, fluff, time-travel, harry/hermione
-- **Plot Blocks** (structured tropes): Goblin Inheritance, Wrong-Boy-Who-Lived
+- **tropes** (structured tropes): Goblin Inheritance, Wrong-Boy-Who-Lived
 - **Tag Classes** (validation logic): harry-shipping, hermione-shipping
 
-### Plot Block Tree Structure
+### trope Tree Structure
 
-Plot Blocks support conditional branching with tree dependencies:
+tropes support conditional branching with tree dependencies:
 
 ```
 Goblin Inheritance
@@ -209,10 +215,13 @@ dont use timeout command since it is useless and not suitable for our work
 - Keyboard navigation support
 
 ## Recent Changes
-- 003-optimize-the-platform: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Drizzle ORM 0.44+, Cloudflare Workers SDK
-- 002-implement-the-community: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM, @octokit/rest, browser extension APIs
-- 005-create-a-modular: Added TypeScript 5.x with Next.js 14+ (App Router) + React 18+, Drizzle ORM 0.44+, NextAuth.js 4.24+, Tailwind CSS 3.4+, dnd-kit 6.1+
 
+- 004-integrate-the-pathway: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Tailwind CSS
+  3.4+, @dnd-kit/core 6.1+, Drizzle ORM 0.44+, @octokit/rest, NextAuth.js 4.24+
+- 003-optimize-the-platform: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+ (App Router), React 18+, Drizzle ORM
+  0.44+, Cloudflare Workers SDK
+- 002-implement-the-community: Added TypeScript 5.x, JavaScript ES2022 + Next.js 14+, React 18+, Drizzle ORM,
+  @octokit/rest, browser extension APIs
 
 <!-- MANUAL ADDITIONS START -->
 <!-- Add project-specific guidelines, coding standards, or team preferences here -->

@@ -8,7 +8,7 @@ import { fandoms, tags, plotBlocks, tagClasses } from '@/lib/database/schema';
 
 /**
  * GET /api/v1/fandoms/[fandomId]/tree
- * Get the complete content tree for a fandom (tags, plot blocks, hierarchies)
+ * Get the complete content tree for a fandom (tags, tropes, hierarchies)
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(
@@ -59,7 +59,7 @@ export const GET = CommonMiddleware.public(
         orderBy: [tags.category, tags.name],
       });
 
-      // Get all plot blocks for this fandom
+      // Get all tropes for this fandom
       const fandomPlotBlocks = await db.query.plotBlocks.findMany({
         where: plotBlockActiveFilter
           ? and(eq(plotBlocks.fandom_id, fandomId), plotBlockActiveFilter)
@@ -82,10 +82,10 @@ export const GET = CommonMiddleware.public(
         }
       }
 
-      // Build plot block tree structure
+      // Build trope tree structure
       const plotBlockTree = buildPlotBlockTree(fandomPlotBlocks);
 
-      // Group plot blocks by category
+      // Group tropes by category
       const plotBlocksByCategory = new Map<string, typeof fandomPlotBlocks>();
       for (const plotBlock of fandomPlotBlocks) {
         if (!plotBlocksByCategory.has(plotBlock.category)) {
@@ -134,7 +134,7 @@ export const GET = CommonMiddleware.public(
 );
 
 /**
- * Build hierarchical tree structure from plot blocks
+ * Build hierarchical tree structure from tropes
  */
 function buildPlotBlockTree(plotBlocks: any[]): any[] {
   const plotBlockMap = new Map(

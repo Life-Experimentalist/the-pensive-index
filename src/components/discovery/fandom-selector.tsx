@@ -7,7 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export interface Fandom {
-  id: string;
+  id: number; // Changed from string to match database INTEGER type
   name: string;
   slug: string;
   description: string;
@@ -19,7 +19,7 @@ export interface Fandom {
 }
 
 interface FandomSelectorProps {
-  selectedFandomId?: string;
+  selectedFandomId?: number | string; // Allow both for backward compatibility
   onFandomSelect: (fandom: Fandom) => void;
   className?: string;
   placeholder?: string;
@@ -39,7 +39,9 @@ export function FandomSelector({
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const selectedFandom = fandoms.find(f => f.id === selectedFandomId);
+  const selectedFandom = fandoms.find(
+    f => f.id === selectedFandomId || f.id.toString() === selectedFandomId
+  );
 
   // Fetch fandoms on mount
   useEffect(() => {
@@ -198,45 +200,51 @@ export function FandomSelector({
               </div>
             ) : (
               <div role="listbox" aria-label="Available fandoms">
-                {filteredFandoms.map(fandom => (
-                  <button
-                    key={fandom.id}
-                    type="button"
-                    role="option"
-                    aria-selected={fandom.id === selectedFandomId}
-                    className={`
-                      w-full px-3 py-3 text-left hover:bg-gray-50 focus:bg-gray-50
-                      focus:outline-none transition-colors duration-150
-                      ${
-                        fandom.id === selectedFandomId
-                          ? 'bg-blue-50 border-r-2 border-blue-500'
-                          : ''
-                      }
-                    `}
-                    onClick={() => handleFandomClick(fandom)}
-                    onKeyDown={e => handleKeyDown(e, fandom)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">
-                          {fandom.name}
-                        </div>
-                        <div className="text-xs text-gray-500 truncate mt-1">
-                          {fandom.description}
-                        </div>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-gray-400">
-                          <span>
-                            {fandom.storyCount.toLocaleString()} stories
-                          </span>
-                          <span>{fandom.tagCount.toLocaleString()} tags</span>
-                          <span>
-                            {fandom.plotBlockCount.toLocaleString()} plot blocks
-                          </span>
+                {filteredFandoms.map(fandom => {
+                  const isSelected =
+                    fandom.id === selectedFandomId ||
+                    fandom.id.toString() === selectedFandomId;
+                  return (
+                    <button
+                      key={fandom.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      className={`
+                        w-full px-3 py-3 text-left hover:bg-gray-50 focus:bg-gray-50
+                        focus:outline-none transition-colors duration-150
+                        ${
+                          isSelected
+                            ? 'bg-blue-50 border-r-2 border-blue-500'
+                            : ''
+                        }
+                      `}
+                      onClick={() => handleFandomClick(fandom)}
+                      onKeyDown={e => handleKeyDown(e, fandom)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">
+                            {fandom.name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate mt-1">
+                            {fandom.description}
+                          </div>
+                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-400">
+                            <span>
+                              {fandom.storyCount.toLocaleString()} stories
+                            </span>
+                            <span>{fandom.tagCount.toLocaleString()} tags</span>
+                            <span>
+                              {fandom.plotBlockCount.toLocaleString()} plot
+                              blocks
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

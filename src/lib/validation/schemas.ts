@@ -378,8 +378,8 @@ export const storySearchFiltersSchema = z
     {
       message: 'max_word_count must be greater than or equal to min_word_count',
     }
-  )
-  .strict();
+  );
+//   .strict(); // Removed: .strict() not supported after .refine() in this Zod version
 
 export const storySearchContextSchema = z
   .object({
@@ -592,8 +592,8 @@ export const bulkDeleteSchema = z
   })
   .refine(data => !data.cascade || data.confirm_cascade, {
     message: 'Cascade deletion must be confirmed',
-  })
-  .strict();
+  });
+//   .strict(); // Removed: .strict() not supported after .refine() in this Zod version
 
 // Configuration validation schema
 export const appConfigSchema = z

@@ -13,7 +13,7 @@ import crypto from 'crypto';
 
 /**
  * GET /api/v1/plot-blocks
- * List plot blocks with filtering and pagination
+ * List tropes with filtering and pagination
  */
 export const GET = CommonMiddleware.public(
   withErrorHandling(async (request: NextRequest) => {
@@ -43,12 +43,12 @@ export const GET = CommonMiddleware.public(
       conditions.push(ilike(plotBlocks.name, `%${name}%`));
     }
 
-    // Always filter to active plot blocks
+    // Always filter to active tropes
     conditions.push(eq(plotBlocks.is_active, true));
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    // Get plot blocks with fandom information
+    // Get tropes with fandom information
     const plotBlockList = await db.query.plotBlocks.findMany({
       where: whereClause,
       limit,
@@ -81,7 +81,7 @@ export const GET = CommonMiddleware.public(
 
 /**
  * POST /api/v1/plot-blocks
- * Create a new plot block (Admin only)
+ * Create a new trope (Admin only)
  */
 export const POST = CommonMiddleware.admin(
   withErrorHandling(async (request: NextRequest, authContext: any) => {
@@ -105,7 +105,7 @@ export const POST = CommonMiddleware.admin(
       throw ErrorFactory.notFound('Fandom', validatedData.fandom_id);
     }
 
-    // Check for duplicate plot block name within fandom
+    // Check for duplicate trope name within fandom
     const existingPlotBlock = await db.query.plotBlocks.findFirst({
       where: and(
         eq(plotBlocks.fandom_id, validatedData.fandom_id),
@@ -116,11 +116,11 @@ export const POST = CommonMiddleware.admin(
     if (existingPlotBlock) {
       throw ErrorFactory.businessRule(
         'duplicate_plot_block_name',
-        `Plot block with name "${validatedData.name}" already exists in this fandom`
+        `trope with name "${validatedData.name}" already exists in this fandom`
       );
     }
 
-    // Create plot block
+    // Create trope
     const [newPlotBlock] = await db
       .insert(plotBlocks)
       .values({
@@ -142,7 +142,7 @@ export const POST = CommonMiddleware.admin(
       })
       .returning();
 
-    // Return plot block with fandom information
+    // Return trope with fandom information
     const plotBlockWithFandom = await db.query.plotBlocks.findFirst({
       where: eq(plotBlocks.id, newPlotBlock.id),
       with: {

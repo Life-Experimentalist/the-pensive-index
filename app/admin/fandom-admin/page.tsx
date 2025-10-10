@@ -83,8 +83,8 @@ export default function FandomAdminDashboard() {
               <span>Fandom Content Management</span>
             </CardTitle>
             <p className="text-sm text-gray-500">
-              Manage tags, plot blocks, validation rules, and story submissions
-              for your assigned fandoms
+              Manage tags, tropes, validation rules, and story submissions for
+              your assigned fandoms
             </p>
           </CardHeader>
           <CardContent>
@@ -131,10 +131,8 @@ export default function FandomAdminDashboard() {
               </div>
               <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                 <FileText className="h-6 w-6 text-green-600 mb-2" />
-                <h4 className="font-medium text-sm">Plot Blocks</h4>
-                <p className="text-xs text-gray-500">
-                  Manage plot block library
-                </p>
+                <h4 className="font-medium text-sm">tropes</h4>
+                <p className="text-xs text-gray-500">Manage trope library</p>
               </div>
               <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                 <Shield className="h-6 w-6 text-purple-600 mb-2" />

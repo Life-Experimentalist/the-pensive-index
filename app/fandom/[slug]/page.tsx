@@ -92,11 +92,22 @@ async function getFandomData(slug: string) {
       return null;
     }
 
+    console.log('[Fandom Page] Fetching data for fandom:', {
+      id: fandom.id,
+      slug: fandom.slug,
+      name: fandom.name,
+    });
+
     // Fetch fandom elements in parallel
     const [tags, plotBlocks] = await Promise.all([
       TagModel.getByFandom(fandom.id),
       PlotBlockModel.getRootBlocks(fandom.id),
     ]);
+
+    console.log('[Fandom Page] Fetched counts:', {
+      tags: tags.length,
+      plotBlocks: plotBlocks.length,
+    });
 
     return {
       fandom,

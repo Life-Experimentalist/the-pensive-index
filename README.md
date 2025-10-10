@@ -13,7 +13,7 @@ The Pensieve Index solves a fundamental problem in fanfiction: **readers can't f
 Unlike existing platforms that use basic tags, we provide:
 
 - 🔍 **Library-First Discovery**: Search existing tagged stories with complex criteria before generating new prompts
-- 🌳 **Hierarchical Tagging**: Plot blocks with conditional branching (e.g., Goblin Inheritance → Black Lordship → After Sirius Death)
+- 🌳 **Hierarchical Tagging**: tropes with conditional branching (e.g., Goblin Inheritance → Black Lordship → After Sirius Death)
 - 🎯 **Dual Output**: Show matching stories AND enhanced prompts with novelty highlights
 - 👥 **Community Curation**: Admin-driven content growth with browser extension for story submission
 
@@ -73,7 +73,7 @@ This project follows [Spec-Driven Development](https://github.com/github/spec-ki
 Fandom (Harry Potter, Percy Jackson)
 ├── Tags (angst, fluff, harry/hermione)
 │   └── Tag Classes (harry-shipping, hermione-shipping)
-└── Plot Blocks (Structured Tropes)
+└── tropes (Structured Tropes)
     ├── Goblin Inheritance
     │   ├── Black Lordship
     │   │   ├── After Sirius Death
@@ -104,7 +104,7 @@ Fandom (Harry Potter, Percy Jackson)
 ## 📱 User Interface
 
 ### Desktop (Three-Panel Layout)
-- **Selection Panel**: Fandom selector, tag browsers, plot block trees
+- **Selection Panel**: Fandom selector, tag browsers, trope trees
 - **Pathway Builder**: Drag-and-drop canvas with visual connections
 - **Output Panel**: Story results + prompt generation with novelty highlights
 
@@ -153,7 +153,7 @@ This project uses [Spec-Kit](https://github.com/speckit.specify-dev) for structu
 
 ```powershell
 # Create a new feature
-/speckit.specify "Add validation engine for plot block conflicts"
+/speckit.specify "Add validation engine for trope conflicts"
 
 # Plan implementation
 /speckit.plan "TypeScript, React, dnd-kit integration"
@@ -228,7 +228,7 @@ npm run type-check   # Run TypeScript checks
   - [x] Error logging and reporting
   - [x] Database indexing and optimization
   - [x] Resource usage monitoring (free-tier)
-- [ ] Core data models (Fandoms, Tags, Plot Blocks)
+- [ ] Core data models (Fandoms, Tags, tropes)
 - [ ] Validation engine with conflict detection
 - [ ] Drag-and-drop pathway builder
 - [ ] Story search and discovery
@@ -272,13 +272,13 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 1: Core Admin System (Spec 004 - Simplified)**
 
 ```
-/speckit.specify "Build a hierarchical admin system with Project Admins who can create fandoms and assign Fandom Admins, plus Fandom Admins who manage their specific fandom content. Project Admins have global permissions to create/edit fandoms, assign admin roles, and access all validation rules. Fandom Admins can only manage tags, plot blocks, validation rules, and story submissions for their assigned fandoms. Include role-based access control, admin invitation system, and audit logging for all admin actions. Focus on single-fandom management first."
+/speckit.specify "Build a hierarchical admin system with Project Admins who can create fandoms and assign Fandom Admins, plus Fandom Admins who manage their specific fandom content. Project Admins have global permissions to create/edit fandoms, assign admin roles, and access all validation rules. Fandom Admins can only manage tags, tropes, validation rules, and story submissions for their assigned fandoms. Include role-based access control, admin invitation system, and audit logging for all admin actions. Focus on single-fandom management first."
 ```
 
 ### **Phase 2: Fandom Content Management (Spec 005 - Simplified)**
 
 ```
-/speckit.specify "Create a modular fandom creation system where Project Admins can add new fandoms with custom taxonomies, and Fandom Admins can populate them with tags, plot blocks, characters, and validation rules. Support fandom templates for common genres, bulk import/export of fandom content, and hierarchical content organization. Include content approval workflows, version control for fandom data, and automated content validation to ensure data integrity. Single-fandom focus only."
+/speckit.specify "Create a modular fandom creation system where Project Admins can add new fandoms with custom taxonomies, and Fandom Admins can populate them with tags, tropes, characters, and validation rules. Support fandom templates for common genres, bulk import/export of fandom content, and hierarchical content organization. Include content approval workflows, version control for fandom data, and automated content validation to ensure data integrity. Single-fandom focus only."
 ```
 
 ```
@@ -389,7 +389,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 6: Crossover Support (Spec 004)**
 
 ```
-/speckit.specify "Integrate the pathway with the data in the admin dashboard and redo the ui of the pathways page and integrate and make it look like the admin dashboard and finally i want you to have a drag adn drop of tags and plot blocks(tropes) to create a story and the tags adn tropes will have to pass a successful validation before being added to the pathway, and next i want you to have a library to search for stories in the library, and also add a search for existing pathways and make sure that the extensions and such are working and integrated with the main platform. I want this to be done and polished perfectly and make it ready for the production deployment. In the admin dashboard now use the real data from the cloudflare d1 database and make sure that the admin dashboard is mobile responsive and it using real data not mock."
+/speckit.specify "Integrate the pathway with the data in the admin dashboard and redo the ui of the pathways page and integrate and make it look like the admin dashboard and finally i want you to have a drag adn drop of tags and tropes(tropes) to create a story and the tags adn tropes will have to pass a successful validation before being added to the pathway, and next i want you to have a library to search for stories in the library, and also add a search for existing pathways and make sure that the extensions and such are working and integrated with the main platform. I want this to be done and polished perfectly and make it ready for the production deployment. In the admin dashboard now use the real data from the cloudflare d1 database and make sure that the admin dashboard is mobile responsive and it using real data not mock."
 ```
 
 ```
@@ -397,7 +397,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ```
 
 ```
-/speckit.plan "Redo the ui of the pathways, add interactive drag and drop of tags and plot blocks(tropes) to create a story, integrate the pathway with the data in the admin dashboard, implement validation engine for pathway items, build story library search with relevance scoring, add existing pathway search with filtering, ensure browser extension integration with main platform, make all interfaces mobile responsive using Tailwind CSS, optimize performance for smooth interactions, conduct end-to-end testing with Playwright, deploy to Cloudflare Pages with environment configuration. Make sure to keep it as free as possible. And in the admin dashboard use the real data from the cloudflare d1 and remove all the mock data in all the admin pages and use real data"
+/speckit.plan "Build on existing Next.js 14+ app with TypeScript 5.x. Implement pathway builder using @dnd-kit with real-time validation engine. Create story and pathway search with Cloudflare D1 full-text search. Replace all admin dashboard mock data with Cloudflare D1 queries. Ensure mobile responsiveness with Tailwind CSS. Integrate browser extension with GitHub Issues workflow. Use consistent design system across all pages. Redo the ui of the pathways, add interactive drag and drop of tags and tropes(tropes) to create a story, integrate the pathway with the data in the admin dashboard, implement validation engine for pathway items, build story library search with relevance scoring, add existing pathway search with filtering, ensure browser extension integration with main platform, make all interfaces mobile responsive using Tailwind CSS, optimize performance for smooth interactions, conduct end-to-end testing with Playwright, deploy to Cloudflare Pages with environment configuration. Make sure to keep it as free as possible. And in the admin dashboard use the real data from the cloudflare d1 and remove all the mock data in all the admin pages and use real data"
 ```
 
 ```
@@ -499,7 +499,7 @@ PS V:\Code\ProjectCode\the-pensive-index>
 ### **Phase 1-2: Admin Foundation**
 - Get basic admin roles working
 - Create/manage fandoms
-- Add tags, plot blocks, validation rules
+- Add tags, tropes, validation rules
 - **Test with 1-2 fandoms (Harry Potter, Percy Jackson)**
 
 ### **Phase 3: User Interface**
@@ -536,7 +536,7 @@ Start with **Spec 004** (basic admin system) and get:
 - Project Admin dashboard working
 - Fandom creation
 - Basic role management
-- Simple tag/plot block management
+- Simple tag/trope management
 
 Then move to **Spec 006** (user interface) to get:
 - Public story discovery
@@ -558,13 +558,13 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 1: Core Admin System (Spec 004 - Simplified)**
 
 ```powershell
-/speckit.specify "Build a hierarchical admin system with Project Admins who can create fandoms and assign Fandom Admins, plus Fandom Admins who manage their specific fandom content. Project Admins have global permissions to create/edit fandoms, assign admin roles, and access all validation rules. Fandom Admins can only manage tags, plot blocks, validation rules, and story submissions for their assigned fandoms. Include role-based access control, admin invitation system, and audit logging for all admin actions. Focus on single-fandom management first."
+/speckit.specify "Build a hierarchical admin system with Project Admins who can create fandoms and assign Fandom Admins, plus Fandom Admins who manage their specific fandom content. Project Admins have global permissions to create/edit fandoms, assign admin roles, and access all validation rules. Fandom Admins can only manage tags, tropes, validation rules, and story submissions for their assigned fandoms. Include role-based access control, admin invitation system, and audit logging for all admin actions. Focus on single-fandom management first."
 ```
 
 ### **Phase 2: Fandom Content Management (Spec 005 - Simplified)**
 
 ```powershell
-/speckit.specify "Create a modular fandom creation system where Project Admins can add new fandoms with custom taxonomies, and Fandom Admins can populate them with tags, plot blocks, characters, and validation rules. Support fandom templates for common genres, bulk import/export of fandom content, and hierarchical content organization. Include content approval workflows, version control for fandom data, and automated content validation to ensure data integrity. Single-fandom focus only."
+/speckit.specify "Create a modular fandom creation system where Project Admins can add new fandoms with custom taxonomies, and Fandom Admins can populate them with tags, tropes, characters, and validation rules. Support fandom templates for common genres, bulk import/export of fandom content, and hierarchical content organization. Include content approval workflows, version control for fandom data, and automated content validation to ensure data integrity. Single-fandom focus only."
 ```
 
 ### **Phase 3: Public User Interface (Spec 006)**
@@ -596,7 +596,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 1-2: Admin Foundation**
 - Get basic admin roles working
 - Create/manage fandoms
-- Add tags, plot blocks, validation rules
+- Add tags, tropes, validation rules
 - **Test with 1-2 fandoms (Harry Potter, Percy Jackson)**
 
 ### **Phase 3: User Interface**
@@ -633,7 +633,7 @@ Start with **Spec 004** (basic admin system) and get:
 - Project Admin dashboard working
 - Fandom creation
 - Basic role management
-- Simple tag/plot block management
+- Simple tag/trope management
 
 Then move to **Spec 006** (user interface) to get:
 - Public story discovery

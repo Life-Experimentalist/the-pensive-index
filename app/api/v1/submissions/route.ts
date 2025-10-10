@@ -6,18 +6,18 @@ import {
   SubmissionService,
   CreateSubmissionRequest,
   SubmissionQueryFilters,
-} from '../../../../src/lib/services/submission-service';
-import { QueueService } from '../../../../src/lib/services/queue-service';
-import { DuplicateDetector } from '../../../../src/lib/validation/duplicate-detector';
-import { QualityScorer } from '../../../../src/lib/validation/quality-scorer';
-import { TagSuggester } from '../../../../src/lib/validation/tag-suggester';
+} from '@/lib/services/submission-service';
+import { QueueService } from '@/lib/services/queue-service';
+import { DuplicateDetector } from '@/lib/validation/duplicate-detector';
+import { QualityScorer } from '@/lib/validation/quality-scorer';
+import { TagSuggester } from '@/lib/validation/tag-suggester';
 import {
   SubmissionStatus,
   CompletionStatus,
   QueuePriority,
   QueueComplexity,
   StorySubmission,
-} from '../../../../src/types/submission';
+} from '@/types/submission';
 
 // Request validation schema
 const createSubmissionSchema = z.object({

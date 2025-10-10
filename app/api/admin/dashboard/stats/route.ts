@@ -2,14 +2,14 @@
  * Admin Dashboard Stats API Route
  *
  * Provides real statistics and metrics for the admin dashboard
- * including user counts, content counts, and system health.
+ * including user counts (from Clerk), content counts, and system health.
  *
  * @package the-pensive-index
  * @version 1.0.0
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/lib/database/init';
 import {
@@ -19,7 +19,6 @@ import {
   plotBlocks,
   validationRules,
   stories,
-  adminUsers,
 } from '@/lib/database/schema';
 
 interface DashboardStats {
@@ -74,6 +73,29 @@ export async function GET(request: NextRequest) {
     // Get initialized database connection
     const connection = await getDb();
 
+    // Get Clerk users and admin counts
+    const clerk = await clerkClient();
+    const allUsers = await clerk.users.getUserList({ limit: 500 });
+
+    const totalUsers = allUsers.totalCount;
+    const adminUsers = allUsers.data.filter(
+      user =>
+        user.publicMetadata?.role === 'ProjectAdmin' ||
+        user.publicMetadata?.role === 'FandomAdmin'
+    );
+    const projectAdmins = allUsers.data.filter(
+      user => user.publicMetadata?.role === 'ProjectAdmin'
+    );
+    const activeAdmins = adminUsers.filter(
+      user => user.publicMetadata?.isActive !== false
+    );
+
+    // Calculate new users this week
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const newUsersThisWeek = allUsers.data.filter(
+      user => user.createdAt >= oneWeekAgo
+    ).length;
+
     // Get actual counts from database with fallbacks for missing tables/columns
     // Database status: Fandoms ✅ | Tags ⚠️ (schema mismatch) | Stories ❌ (missing)
 
@@ -94,12 +116,12 @@ export async function GET(request: NextRequest) {
 
       // Count tags - working with schema differences, use basic query
       connection
-        .select({ id: tags.id, name: tags.name })
+        .select()
         .from(tags)
         .then((result: any[]) => result.length)
         .catch(() => 0),
 
-      // Count plot blocks - table may not exist yet
+      // Count tropes - table may not exist yet
       // connection
       //   .select()
       //   .from(plotBlocks)
@@ -125,12 +147,12 @@ export async function GET(request: NextRequest) {
 
       // Pathways not implemented yet
       Promise.resolve(0),
-    ]);    // Calculate response time
+    ]); // Calculate response time
     const responseTime = Date.now() - startTime;
 
     // Get active fandoms count from database
     const activeFandomCount = await connection
-      .select({ id: fandoms.id, is_active: fandoms.is_active })
+      .select()
       .from(fandoms)
       .where(eq(fandoms.is_active, true))
       .then((result: any[]) => result.length)
@@ -143,10 +165,10 @@ export async function GET(request: NextRequest) {
 
     const stats: DashboardStats = {
       users: {
-        total: 0, // Will be updated with real Clerk user count
-        active: 0,
-        admins: 0,
-        new_this_week: 0,
+        total: totalUsers, // Total users from Clerk
+        active: activeAdmins.length, // Active admin users from Clerk
+        admins: adminUsers.length, // All admins (ProjectAdmin + FandomAdmin)
+        new_this_week: newUsersThisWeek, // New users in last 7 days
       },
       content: {
         fandoms: activeFandomCount,
@@ -169,6 +191,17 @@ export async function GET(request: NextRequest) {
         active_connections: 1, // Placeholder
       },
     };
+
+    console.log('Dashboard stats generated:', {
+      totalUsers,
+      adminCount: adminUsers.length,
+      activeAdmins: activeAdmins.length,
+      projectAdmins: projectAdmins.length,
+      newUsersThisWeek,
+      fandomCount,
+      activeFandomCount,
+      tagCount,
+    });
 
     return NextResponse.json(stats);
   } catch (error) {

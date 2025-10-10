@@ -14,17 +14,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 
-import { SubmissionService } from '../../../../../../../src/lib/services/submission-service';
-import { QueueService } from '../../../../../../../src/lib/services/queue-service';
-import { AdminUserModel } from '../../../../../../../src/lib/admin/models/AdminUser';
-import { PermissionValidator } from '../../../../../../../src/lib/admin/utils/PermissionValidator';
-import { GitHubService } from '../../../../../../../src/lib/github/github-service';
-import { EmailService } from '../../../../../../../src/lib/notifications/email-service';
-import { DatabaseService } from '../../../../../../../src/lib/database/database-service';
-import {
-  ModerationAction,
-  SubmissionStatus,
-} from '../../../../../../../src/types/submission';
+import { SubmissionService } from '@/lib/services/submission-service';
+import { QueueService } from '@/lib/services/queue-service';
+import { AdminUserModel } from '@/lib/admin/models/AdminUser';
+import { PermissionValidator } from '@/lib/admin/utils/PermissionValidator';
+import { GitHubService } from '@/lib/github/github-service';
+import { EmailService } from '@/lib/notifications/email-service';
+import { DatabaseService } from '@/lib/database/database-service';
+import { ModerationAction, SubmissionStatus } from '@/types/submission';
 
 // Request validation schema
 const reviewRequestSchema = z.object({

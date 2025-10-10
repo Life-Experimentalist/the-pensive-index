@@ -7,7 +7,7 @@ import {
 import { z } from 'zod';
 
 /**
- * Search for stories based on tags and plot blocks
+ * Search for stories based on tags and tropes
  * POST /api/search/stories
  */
 export async function POST(request: NextRequest) {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // TODO: Implement complex tag and plot block filtering
+        // TODO: Implement complex tag and trope filtering
         // This would involve JOIN operations with story_tags and story_plot_blocks tables
 
         return conditions.length > 0 ? and(...conditions) : undefined;

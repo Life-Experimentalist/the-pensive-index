@@ -5,9 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { SubmissionService } from '../../../../src/lib/services/submission-service';
-import { QueueService } from '../../../../src/lib/services/queue-service';
-import { AdminUserModel } from '../../../../src/lib/admin/models/AdminUser';
+import { SubmissionService } from '@/lib/services/submission-service';
+import { QueueService } from '@/lib/services/queue-service';
+import { AdminUserModel } from '@/lib/admin/models/AdminUser';
 
 export async function POST(request: NextRequest) {
   try {

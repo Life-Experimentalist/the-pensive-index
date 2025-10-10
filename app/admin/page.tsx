@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import {
   Users,
@@ -12,11 +11,8 @@ import {
   BarChart3,
   Tag,
   Shield,
-  TrendingUp,
-  Database,
-  Activity,
-  Clock,
 } from 'lucide-react';
+import LoadingPage from '@/app/loading';
 
 interface DashboardStats {
   users: {
@@ -47,6 +43,59 @@ interface DashboardStats {
   };
 }
 
+// Static admin card configuration (moved outside component to avoid recreation on each render)
+const adminCards = [
+  {
+    title: 'User Management',
+    description: 'Manage user roles and permissions',
+    icon: Users,
+    href: '/admin/users',
+    color: 'bg-blue-500',
+  },
+  {
+    title: 'Validation Rules',
+    description: 'Create and manage validation rules',
+    icon: Settings,
+    href: '/admin/validation-rules',
+    color: 'bg-green-500',
+  },
+  {
+    title: 'Rule Templates',
+    description: 'Manage reusable rule templates',
+    icon: FileText,
+    href: '/admin/rule-templates',
+    color: 'bg-purple-500',
+  },
+  {
+    title: 'Tag Classes',
+    description: 'Configure tag classification rules',
+    icon: Tag,
+    href: '/admin/tag-classes',
+    color: 'bg-orange-500',
+  },
+  {
+    title: 'Testing Sandbox',
+    description: 'Test validation rules and scenarios',
+    icon: TestTube,
+    href: '/admin/testing-sandbox',
+    color: 'bg-pink-500',
+  },
+  {
+    title: 'Analytics',
+    description: 'View platform analytics and insights',
+    icon: BarChart3,
+    href: '/admin/analytics',
+    color: 'bg-indigo-500',
+  },
+  {
+    title: 'Fandom Admin',
+    description: 'Manage fandom-specific content',
+    icon: Shield,
+    href: '/admin/fandom-admin',
+    color: 'bg-teal-500',
+  },
+];
+
 export default function AdminPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,57 +125,11 @@ export default function AdminPage() {
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, []);
-  const adminCards = [
-    {
-      title: 'User Management',
-      description: 'Manage user roles and permissions',
-      icon: Users,
-      href: '/admin/users',
-      color: 'bg-blue-500',
-    },
-    {
-      title: 'Validation Rules',
-      description: 'Create and manage validation rules',
-      icon: Settings,
-      href: '/admin/validation-rules',
-      color: 'bg-green-500',
-    },
-    {
-      title: 'Rule Templates',
-      description: 'Manage reusable rule templates',
-      icon: FileText,
-      href: '/admin/rule-templates',
-      color: 'bg-purple-500',
-    },
-    {
-      title: 'Tag Classes',
-      description: 'Configure tag classification rules',
-      icon: Tag,
-      href: '/admin/tag-classes',
-      color: 'bg-orange-500',
-    },
-    {
-      title: 'Testing Sandbox',
-      description: 'Test validation rules and scenarios',
-      icon: TestTube,
-      href: '/admin/testing-sandbox',
-      color: 'bg-pink-500',
-    },
-    {
-      title: 'Analytics',
-      description: 'View platform analytics and insights',
-      icon: BarChart3,
-      href: '/admin/analytics',
-      color: 'bg-indigo-500',
-    },
-    {
-      title: 'Fandom Admin',
-      description: 'Manage fandom-specific content',
-      icon: Shield,
-      href: '/admin/fandom-admin',
-      color: 'bg-teal-500',
-    },
-  ];
+
+  // Show loading page while fetching initial data
+  if (loading && !stats) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="space-y-6">
@@ -159,9 +162,7 @@ export default function AdminPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading
-                    ? '...'
-                    : stats?.users?.total?.toLocaleString() ?? '0'}
+                  {stats?.users?.total?.toLocaleString() ?? '0'}
                 </p>
               </div>
             </div>
@@ -179,9 +180,7 @@ export default function AdminPage() {
                   Active Rules
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading
-                    ? '...'
-                    : stats?.content?.validation_rules?.toLocaleString() ?? '0'}
+                  {stats?.content?.validation_rules?.toLocaleString() ?? '0'}
                 </p>
               </div>
             </div>
@@ -195,11 +194,9 @@ export default function AdminPage() {
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Templates</p>
+                <p className="text-sm font-medium text-gray-600">Tags</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading
-                    ? '...'
-                    : stats?.content?.tags?.toLocaleString() ?? '0'}
+                  {stats?.content?.tags?.toLocaleString() ?? '0'}
                 </p>
               </div>
             </div>
@@ -235,46 +232,6 @@ export default function AdminPage() {
           })}
         </div>
       </div>
-
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-full">
-                <Settings className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">
-                  New validation rule created
-                </p>
-                <p className="text-xs text-gray-500">2 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <Users className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">User role updated</p>
-                <p className="text-xs text-gray-500">4 hours ago</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-full">
-                <FileText className="h-4 w-4 text-purple-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Rule template updated</p>
-                <p className="text-xs text-gray-500">1 day ago</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

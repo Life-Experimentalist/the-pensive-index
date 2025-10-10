@@ -112,7 +112,7 @@ Follow spec-kit conventions:
 # Good commit messages
 feat: add drag-and-drop pathway builder for desktop
 fix: resolve validation conflict resolution modal display
-test: add comprehensive plot block tree dependency tests
+test: add comprehensive trope tree dependency tests
 docs: update constitution with responsive design requirements
 
 # Include implementation details when relevant
@@ -230,7 +230,7 @@ tests/
 ```typescript
 // Component test example
 describe('PathwayBuilder', () => {
-  it('should allow dragging plot blocks to pathway', async () => {
+  it('should allow dragging tropes to pathway', async () => {
     render(<PathwayBuilder fandomId="harry-potter" onPathwayChange={mockFn} />);
 
     const plotBlock = screen.getByText('Goblin Inheritance');

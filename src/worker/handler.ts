@@ -3,6 +3,12 @@
  *
  * Intelligent routing between Next.js app and enhanced documentation
  * Provides unified experience with performance optimization
+ *
+ * TODO: HARDCODED COLORS - Replace 50+ hardcoded Tailwind color classes with theme tokens
+ * Search patterns: text-gray-*, bg-white, bg-gray-*, hover:bg-white/*, etc.
+ * Replace with: text-foreground, bg-card, border-border, text-primary
+ * Locations: Line ~74-80 (fandom links), 686 (logo), 689-692 (nav), 725+ (feature cards)
+ * Impact: Consistent theming, automatic dark mode support
  */
 
 interface Env {

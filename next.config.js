@@ -104,10 +104,11 @@ const nextConfig = {
   experimental: {
     optimizeCss: true, // Enable CSS optimization
     optimizePackageImports: ['@heroicons/react', 'lucide-react', 'date-fns'], // Tree-shake large packages
-    turbo: {
-      // Turbopack configuration (when enabled)
-      resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-    },
+  },
+
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
   },
 
   // Environment variable configuration

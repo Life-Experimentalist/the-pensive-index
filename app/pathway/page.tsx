@@ -1,3 +1,10 @@
+// TODO: HARDCODED COLORS - Complete color token migration (currently 30% done)
+// Already converted: Main container, headers (lines 189-191)
+// Still needs conversion: Card backgrounds, button styles, form inputs, badges
+// Search for: text-gray-*, bg-white, bg-gray-*, border-gray-*, text-blue-*
+// Replace with: text-foreground, bg-card, border-border, text-primary
+// Target completion: 100% theme token compliance
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,8 +12,7 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import LoadingPage from '@/app/loading';
-import PageHeader from '@/components/ui/PageHeader';
-import PageFooter from '@/components/ui/PageFooter';
+import MainLayout from '@/components/layout/MainLayout';
 
 interface Tag {
   id: string;
@@ -210,16 +216,15 @@ export default function PathwayBuilderPage() {
   }
 
   return (
-    <>
-      <PageHeader />
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 pt-24 pb-12">
+    <MainLayout fullWidth className="!p-0">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
               Story Pathway Builder
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-lg text-foreground/70 max-w-3xl mx-auto">
               Craft your perfect story pathway by combining tags and tropes.
               Discover matching stories or generate a creative prompt for new
               ones.
@@ -227,7 +232,7 @@ export default function PathwayBuilderPage() {
           </div>
 
           {/* Fandom Selection Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-purple-100 dark:border-purple-900/30 p-8 mb-8 hover:shadow-xl transition-shadow">
+          <div className="bg-card rounded-xl shadow-lg border border-purple-100 dark:border-purple-900/30 p-8 mb-8 hover:shadow-xl transition-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
                 <svg
@@ -244,14 +249,14 @@ export default function PathwayBuilderPage() {
                   />
                 </svg>
               </div>
-              <label className="text-lg font-semibold text-gray-900 dark:text-white">
+              <label className="text-lg font-semibold text-foreground">
                 Select Your Fandom
               </label>
             </div>
             <select
               value={selectedFandom}
               onChange={e => setSelectedFandom(e.target.value)}
-              className="w-full px-5 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-lg transition-all hover:border-purple-300 dark:hover:border-purple-600"
+              className="w-full px-5 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-card text-foreground text-lg transition-all hover:border-purple-300 dark:hover:border-purple-600"
             >
               <option value="">Choose a fandom...</option>
               {fandoms.map(fandom => (
@@ -265,7 +270,7 @@ export default function PathwayBuilderPage() {
           {selectedFandom && (
             <>
               {/* Pathway Details Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-indigo-100 dark:border-indigo-900/30 p-8 mb-8 hover:shadow-xl transition-shadow">
+              <div className="bg-card rounded-xl shadow-lg border border-indigo-100 dark:border-indigo-900/30 p-8 mb-8 hover:shadow-xl transition-shadow">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
                     <svg
@@ -583,7 +588,6 @@ export default function PathwayBuilderPage() {
           }
         `}</style>
       </div>
-      <PageFooter />
-    </>
+    </MainLayout>
   );
 }

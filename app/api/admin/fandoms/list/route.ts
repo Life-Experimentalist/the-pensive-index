@@ -8,9 +8,28 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-const dbPath = path.join(process.cwd(), 'data', 'the-pensive-index.db');
-const db = new Database(dbPath);
+// Lazy database connection to avoid build-time errors
+function getDb() {
+  const dbPath = path.join(process.cwd(), 'data', 'the-pensive-index.db');
+
+  // Check if directory exists, create if not (for Cloudflare builds)
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  // Create empty database if it doesn't exist
+  if (!fs.existsSync(dbPath)) {
+    // Return empty response during build
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return null;
+    }
+  }
+
+  return new Database(dbPath);
+}
 
 export async function GET() {
   try {
@@ -18,6 +37,11 @@ export async function GET() {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const db = getDb();
+    if (!db) {
+      return NextResponse.json({ fandoms: [] }); // Return empty during build
     }
 
     // Get all fandoms
@@ -28,6 +52,7 @@ export async function GET() {
     `);
 
     const fandoms = stmt.all();
+    db.close();
 
     return NextResponse.json({ fandoms });
   } catch (error) {
@@ -38,3 +63,4 @@ export async function GET() {
     );
   }
 }
+

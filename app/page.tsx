@@ -12,7 +12,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import UserContent from '@/components/HomePage/UserContent';
 import HydratedLink from '@/components/ui/HydratedLink';
 import { Metadata } from 'next';
-import { FandomModel } from '@/lib/database/models';
+import { getFandoms } from '@/lib/utils/fandom';
 
 // SEO Metadata
 export const metadata: Metadata = {
@@ -79,20 +79,9 @@ export const metadata: Metadata = {
   },
 };
 
-// Server-side data fetching for fandom list
-async function getFandomsData() {
-  try {
-    const fandoms = await FandomModel.getAllActive();
-    return fandoms.slice(0, 6); // Show top 6 popular fandoms on homepage
-  } catch (error) {
-    console.error('Failed to fetch fandoms:', error);
-    return [];
-  }
-}
-
 export default async function HomePage() {
-  // Fetch fandoms for SSR
-  const fandoms = await getFandomsData();
+  // Fetch top 6 featured fandoms for homepage
+  const fandoms = await getFandoms(6);
 
   return (
     <MainLayout fullWidth className="!p-0">

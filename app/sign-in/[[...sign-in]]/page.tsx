@@ -25,7 +25,9 @@ export default function Page() {
 
   useEffect(() => {
     // Wait for auth to load
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      return;
+    }
 
     // If user is already signed in and there's a redirect_url, redirect them
     if (isSignedIn) {

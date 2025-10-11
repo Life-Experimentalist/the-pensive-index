@@ -120,14 +120,13 @@ export async function POST(request: NextRequest) {
         id: tagId,
         name,
         slug,
-        description: description || null,
         fandom_id,
+        description: description || null,
         tag_class_id: tag_class_id || null,
         parent_id: parent_id || null,
         category: category || null,
         is_active: is_active ?? true,
-        created_at: now,
-        updated_at: now,
+        // created_at and updated_at will use database defaults
       })
       .returning();
 

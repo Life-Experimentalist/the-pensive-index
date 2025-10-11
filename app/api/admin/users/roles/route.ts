@@ -11,13 +11,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-// Initialize database connection
-const dbPath = path.join(process.cwd(), 'data', 'the-pensive-index.db');
-const db = new Database(dbPath);
+// Lazy database connection to avoid build-time errors
+function getDb() {
+  const dbPath = path.join(process.cwd(), 'data', 'the-pensive-index.db');
+
+  // Check if directory exists, create if not (for Cloudflare builds)
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  // Create empty database if it doesn't exist
+  if (!fs.existsSync(dbPath)) {
+    // Return null during build
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return null;
+    }
+  }
+
+  return new Database(dbPath);
+}
 
 // Helper function to get user's fandom assignments
-function getUserFandomAssignments(userId: string) {
+function getUserFandomAssignments(db: Database.Database, userId: string) {
   const stmt = db.prepare(`
     SELECT ufa.*, f.name as fandom_name, f.slug as fandom_slug
     FROM user_fandom_assignments ufa
@@ -29,6 +47,7 @@ function getUserFandomAssignments(userId: string) {
 
 // Helper function to check if user can manage target user
 function canManageUser(
+  db: Database.Database,
   currentUserId: string,
   targetUserId: string,
   currentUserRole: string
@@ -39,8 +58,8 @@ function canManageUser(
 
   if (currentUserRole === 'FandomAdmin') {
     // FandomAdmin can only manage users in their assigned fandoms
-    const currentUserFandoms = getUserFandomAssignments(currentUserId);
-    const targetUserFandoms = getUserFandomAssignments(targetUserId);
+    const currentUserFandoms = getUserFandomAssignments(db, currentUserId);
+    const targetUserFandoms = getUserFandomAssignments(db, targetUserId);
 
     // Check if there's any overlap in fandom assignments
     return currentUserFandoms.some((currentFandom: any) =>
@@ -62,6 +81,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
     const client = await clerkClient();
     const currentUser = await client.users.getUser(userId);
     const currentUserRole = currentUser.publicMetadata?.role as string;
@@ -71,6 +98,7 @@ export async function GET() {
       currentUserRole !== 'ProjectAdmin' &&
       currentUserRole !== 'FandomAdmin'
     ) {
+      db.close();
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -80,7 +108,7 @@ export async function GET() {
     // Get fandom assignments for all users
     const usersWithAssignments = await Promise.all(
       usersResponse.data.map(user => {
-        const fandomAssignments = getUserFandomAssignments(user.id);
+        const fandomAssignments = getUserFandomAssignments(db, user.id);
 
         return {
           id: user.id,
@@ -91,7 +119,7 @@ export async function GET() {
           fandomAssignments: fandomAssignments,
           createdAt: user.createdAt,
           lastSignInAt: user.lastSignInAt,
-          canManage: canManageUser(userId, user.id, currentUserRole),
+          canManage: canManageUser(db, userId, user.id, currentUserRole),
         };
       })
     );
@@ -104,11 +132,14 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({
+    const result = {
       users: filteredUsers,
       currentUserRole,
-      currentUserFandoms: getUserFandomAssignments(userId),
-    });
+      currentUserFandoms: getUserFandomAssignments(db, userId),
+    };
+
+    db.close();
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Get users error:', error);
     return NextResponse.json(
@@ -126,6 +157,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+
     const client = await clerkClient();
     const currentUser = await client.users.getUser(userId);
     const currentUserRole = currentUser.publicMetadata?.role as string;
@@ -135,12 +174,14 @@ export async function POST(request: NextRequest) {
       currentUserRole !== 'ProjectAdmin' &&
       currentUserRole !== 'FandomAdmin'
     ) {
+      db.close();
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     const { targetUserId, role, fandomIds } = await request.json();
 
     if (!targetUserId || !role) {
+      db.close();
       return NextResponse.json(
         { error: 'targetUserId and role are required' },
         { status: 400 }
@@ -150,6 +191,7 @@ export async function POST(request: NextRequest) {
     // Validate role
     const validRoles = ['User', 'FandomAdmin', 'ProjectAdmin'];
     if (!validRoles.includes(role)) {
+      db.close();
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
     }
 
@@ -157,6 +199,7 @@ export async function POST(request: NextRequest) {
     if (currentUserRole === 'FandomAdmin') {
       // FandomAdmin cannot promote users to ProjectAdmin
       if (role === 'ProjectAdmin') {
+        db.close();
         return NextResponse.json(
           { error: 'FandomAdmin cannot assign ProjectAdmin role' },
           { status: 403 }
@@ -164,7 +207,8 @@ export async function POST(request: NextRequest) {
       }
 
       // FandomAdmin can only manage users within their fandoms
-      if (!canManageUser(userId, targetUserId, currentUserRole)) {
+      if (!canManageUser(db, userId, targetUserId, currentUserRole)) {
+        db.close();
         return NextResponse.json(
           { error: 'You can only manage users within your assigned fandoms' },
           { status: 403 }
@@ -206,17 +250,16 @@ export async function POST(request: NextRequest) {
       clearStmt.run(targetUserId);
     }
 
+    db.close();
     return NextResponse.json({
       success: true,
       message: `Role updated to ${role} successfully`,
     });
   } catch (error) {
-    console.error('Update user role error:', error);
+    console.error('Update role error:', error);
     return NextResponse.json(
-      { error: 'Failed to update user role' },
+      { error: 'Failed to update role' },
       { status: 500 }
     );
-  } finally {
-    // Note: We don't close the database connection as it's shared
   }
 }

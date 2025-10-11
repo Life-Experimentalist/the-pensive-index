@@ -30,9 +30,13 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com/Life-Experimentalists/the-pensive-index', icon: Github },
+  {
+    name: 'GitHub',
+    href: 'https://github.com/Life-Experimentalists/the-pensive-index',
+    icon: Github,
+  },
   { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'Email', href: 'mailto:contact@pensive-index.com', icon: Mail },
+  { name: 'Email', href: 'mailto:pensive@vkrishna04.me', icon: Mail },
 ];
 
 export default function MainFooter() {

@@ -1,16 +1,3 @@
-/**
- * Testing Sandbox Page
- *
- * Interactive testing interface for validation rules:
- * - Test individual rules or full pathways
- * - Mock pathway data input
- * - Real-time validation results
- * - Performance metrics
- *
- * @package the-pensive-index
- * @version 1.0.0
- */
-
 'use client';
 
 import React, { useState } from 'react';

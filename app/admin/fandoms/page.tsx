@@ -48,7 +48,9 @@ export default function FandomsAdminPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/fandoms');
-      if (!response.ok) throw new Error('Failed to fetch fandoms');
+      if (!response.ok) {
+        throw new Error('Failed to fetch fandoms');
+      }
       const data = await response.json();
       setFandoms(data.fandoms || []);
     } catch (err) {
@@ -97,14 +99,14 @@ export default function FandomsAdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const url = editingFandom
         ? `/api/admin/fandoms/${editingFandom.id}`
         : '/api/admin/fandoms';
-      
+
       const method = editingFandom ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },

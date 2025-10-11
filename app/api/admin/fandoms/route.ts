@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // TODO: Add authentication once auth system is configured
     const userId = 'dev-user-id';
@@ -128,21 +128,39 @@ export function GET(request: NextRequest) {
     // Parse query parameters
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const search = searchParams.get('search') || undefined;
 
-    // Simple response for now - this would integrate with the service layer
+    const { getDatabase } = await import('@/lib/database');
+    const { fandoms, tags, plotBlocks, fandomAdminAssignments } = await import(
+      '@/lib/database/schema'
+    );
+    const { sql } = await import('drizzle-orm');
+
+    const dbConnection = getDatabase();
+    const db = await dbConnection;
+
+    // Get fandoms with aggregated counts
+    const fandomsWithStats = await db
+      .select({
+        id: fandoms.id,
+        name: fandoms.name,
+        slug: fandoms.slug,
+        description: fandoms.description,
+        is_active: fandoms.is_active,
+        created_at: fandoms.created_at,
+        updated_at: fandoms.updated_at,
+        tag_count: sql<number>`(SELECT COUNT(*) FROM ${tags} WHERE ${tags.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+        plot_block_count: sql<number>`(SELECT COUNT(*) FROM ${plotBlocks} WHERE ${plotBlocks.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+        admin_count: sql<number>`(SELECT COUNT(*) FROM ${fandomAdminAssignments} WHERE ${fandomAdminAssignments.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+      })
+      .from(fandoms)
+      .orderBy(fandoms.name);
+
     return NextResponse.json({
       success: true,
-      data: {
-        fandoms: [], // TODO: Implement list functionality in service
-        pagination: {
-          page,
-          limit,
-          total: 0,
-          total_pages: 0,
-        },
-      },
+      fandoms: fandomsWithStats,
+      total: fandomsWithStats.length,
     });
   } catch (error) {
     console.error('Fandoms list error:', error);
@@ -150,7 +168,7 @@ export function GET(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: 'Failed to fetch fandoms',
       },
       { status: 500 }
     );

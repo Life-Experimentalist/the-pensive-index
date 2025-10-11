@@ -103,6 +103,8 @@ export const plotBlocks = sqliteTable('plot_blocks', {
   name: text('name').notNull(),
   slug: text('slug').notNull(),
   description: text('description').notNull(),
+  category: text('category'),
+  tag_combination: text('tag_combination', { mode: 'json' }).$type<string[]>(),
   display_order: integer('display_order').notNull().default(0),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   created_at: integer('created_at', { mode: 'timestamp' })

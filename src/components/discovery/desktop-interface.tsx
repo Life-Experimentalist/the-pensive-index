@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import Link from 'next/link';
 
 // Import types and components
 import type { Fandom } from '@/types';
@@ -75,21 +76,54 @@ export function DesktopInterface({
       {/* Left Panel: Selection */}
       <div className="w-1/3 min-w-[400px] max-w-[500px] bg-gray-50 border-r border-gray-200 flex flex-col">
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Build Your Story
-          </h2>
-          <FandomSelector
-            selectedFandomId={selectedFandom?.id}
-            onFandomSelect={handleFandomSelect}
-          />
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground mb-0">
+              Build Your Story
+            </h2>
+            <div className="flex gap-3 items-center">
+              <Link
+                href="/pathway"
+                className="text-sm text-foreground/70 hover:underline"
+              >
+                Pathway
+              </Link>
+              <Link
+                href="/fandoms"
+                className="text-sm text-foreground/70 hover:underline"
+              >
+                Fandoms
+              </Link>
+            </div>
+          </div>
+
+          {/* Only render the global FandomSelector when not on a fandom-specific route */}
+          {!selectedFandomSlug ? (
+            <div className="mt-4">
+              <FandomSelector
+                selectedFandomId={selectedFandom?.id}
+                onFandomSelect={handleFandomSelect}
+              />
+            </div>
+          ) : (
+            <div className="mt-3 text-sm text-foreground/70">
+              Viewing fandom:{' '}
+              <span className="font-medium">{selectedFandomSlug}</span>
+              <Link
+                href="/fandoms"
+                className="ml-3 text-sm text-foreground/80 hover:underline"
+              >
+                ← Back to fandom list
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-6 space-y-8">
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">Tags</h3>
+              <h3 className="text-md font-medium text-foreground mb-4">Tags</h3>
               {selectedFandom ? (
-                <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-md border border-blue-200">
+                <div className="text-sm text-foreground/70 bg-blue-50 p-4 rounded-md border border-blue-200">
                   <p className="font-medium text-blue-900 mb-2">
                     ✨ Tag Selection Coming Soon
                   </p>
@@ -100,16 +134,18 @@ export function DesktopInterface({
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 italic">
+                <p className="text-sm text-foreground/60 italic">
                   Select a fandom to view tags
                 </p>
               )}
             </div>
 
             <div>
-              <h3 className="text-md font-medium text-gray-900 mb-4">Tropes</h3>
+              <h3 className="text-md font-medium text-foreground mb-4">
+                Tropes
+              </h3>
               {selectedFandom ? (
-                <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-md border border-blue-200">
+                <div className="text-sm text-foreground/70 bg-blue-50 p-4 rounded-md border border-blue-200">
                   <p className="font-medium text-blue-900 mb-2">
                     ✨ Trope Tree Coming Soon
                   </p>
@@ -120,7 +156,7 @@ export function DesktopInterface({
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 italic">
+                <p className="text-sm text-foreground/60 italic">
                   Select a fandom to view tropes
                 </p>
               )}
@@ -130,10 +166,12 @@ export function DesktopInterface({
       </div>
 
       {/* Center Panel: Pathway Builder */}
-      <div className="w-1/3 min-w-[300px] max-w-[400px] bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-1/3 min-w-[300px] max-w-[400px] bg-card border-r border-gray-200 flex flex-col">
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Your Pathway</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">
+            Your Pathway
+          </h2>
+          <p className="text-sm text-foreground/70 mt-1">
             Selected elements will appear here
           </p>
         </div>
@@ -141,7 +179,7 @@ export function DesktopInterface({
         <div className="flex-1 min-h-0 overflow-hidden">
           <div className="p-6 h-full">
             {selectedFandom ? (
-              <div className="text-sm text-gray-600 bg-green-50 p-4 rounded-md border border-green-200">
+              <div className="text-sm text-foreground/70 bg-green-50 p-4 rounded-md border border-green-200">
                 <p className="font-medium text-green-900 mb-2">
                   ✨ Pathway Builder Coming Soon
                 </p>
@@ -152,7 +190,7 @@ export function DesktopInterface({
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 italic text-center mt-8">
+              <p className="text-sm text-foreground/60 italic text-center mt-8">
                 Select a fandom and tags/plot blocks to build your pathway
               </p>
             )}
@@ -163,10 +201,10 @@ export function DesktopInterface({
       {/* Right Panel: Results */}
       <div className="flex-1 min-w-[400px] bg-gray-50 flex flex-col">
         <div className="flex-shrink-0 p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Discover Stories
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-foreground/70 mt-1">
             Existing stories and new prompts based on your pathway
           </p>
         </div>
@@ -174,7 +212,7 @@ export function DesktopInterface({
         <div className="flex-1 min-h-0 overflow-hidden">
           <div className="p-6 h-full">
             {selectedFandom ? (
-              <div className="text-sm text-gray-600 bg-purple-50 p-4 rounded-md border border-purple-200">
+              <div className="text-sm text-foreground/70 bg-purple-50 p-4 rounded-md border border-purple-200">
                 <p className="font-medium text-purple-900 mb-2">
                   ✨ Story Results Coming Soon
                 </p>
@@ -185,7 +223,7 @@ export function DesktopInterface({
                 </p>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 italic text-center mt-8">
+              <p className="text-sm text-foreground/60 italic text-center mt-8">
                 Build a pathway to discover matching stories
               </p>
             )}

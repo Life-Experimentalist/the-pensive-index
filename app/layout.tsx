@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import './globals.css';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -58,7 +59,16 @@ export default function RootLayout({
           <meta name="color-scheme" content="light dark" />
         </head>
         <body className={inter.className} suppressHydrationWarning={true}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <div className="min-h-screen flex flex-col">
+              <header className="w-full border-b border-gray-200 dark:border-gray-700 p-3 flex justify-end">
+                <div className="mr-4">
+                  <ThemeToggle />
+                </div>
+              </header>
+              <main className="flex-1">{children}</main>
+            </div>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

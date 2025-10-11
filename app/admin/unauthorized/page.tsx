@@ -1,12 +1,3 @@
-/**
- * Admin Unauthorized Page
- *
- * Displayed when users have some admin access but not enough for specific features
- *
- * @package the-pensive-index
- * @version 1.0.0
- */
-
 import Link from 'next/link';
 import { UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';

@@ -8,12 +8,9 @@
  * @version 1.0.0
  */
 
-import UserNavigation from '@/components/HomePage/UserNavigation';
+import MainLayout from '@/components/layout/MainLayout';
 import UserContent from '@/components/HomePage/UserContent';
 import HydratedLink from '@/components/ui/HydratedLink';
-import ClientThemeToggle from '@/components/theme/ClientThemeToggle';
-import Image from 'next/image';
-import Link from 'next/link';
 import { Metadata } from 'next';
 import { FandomModel } from '@/lib/database/models';
 
@@ -98,33 +95,9 @@ export default async function HomePage() {
   const fandoms = await getFandomsData();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm fixed w-full top-0 z-50 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/icon.png"
-                alt="The Pensieve Index"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-              />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                The Pensieve Index
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <ClientThemeToggle />
-              <UserNavigation />
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <MainLayout fullWidth className="!p-0">
       {/* Hero Section */}
-      <main className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+      <section className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-pink-900 min-h-[calc(100vh-4rem)] flex items-center justify-center relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/2 -right-1/4 w-96 h-96 bg-white dark:bg-gray-800 opacity-10 rounded-full blur-3xl animate-pulse"></div>
@@ -269,7 +242,7 @@ export default async function HomePage() {
             style={{ animationDelay: '4s' }}
           ></div>
         </div>
-      </main>
+      </section>
 
       {/* Features Section */}
       <section className="py-20 bg-gray-50 dark:bg-gray-800">
@@ -443,6 +416,6 @@ export default async function HomePage() {
           }),
         }}
       />
-    </div>
+    </MainLayout>
   );
 }

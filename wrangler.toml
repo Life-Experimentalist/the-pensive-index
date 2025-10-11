@@ -32,13 +32,13 @@ database_id = "57eace70-cb4f-4fb2-9a7a-8037960f44d6"
 # KV storage for caching
 [[kv_namespaces]]
 binding = "CACHE"
-id = "4e66268461374e29a8b2ad480cbe2ca7"  # the-pensive-index KV namespace
-preview_id = "4e66268461374e29a8b2ad480cbe2ca7"  # Using same for preview (free tier)
+id = "4e66268461374e29a8b2ad480cbe2ca7"
+preview_id = "4e66268461374e29a8b2ad480cbe2ca7"
 
 # Development KV namespace
 [env.development.kv_namespaces]
 binding = "CACHE"
-id = "4e66268461374e29a8b2ad480cbe2ca7"  # Using same for dev (free tier)
+id = "4e66268461374e29a8b2ad480cbe2ca7"
 
 # Durable Objects for rate limiting
 [[durable_objects.bindings]]

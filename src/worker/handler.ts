@@ -47,7 +47,7 @@ Sitemap: https://pensive.vkrishna04.me/sitemap.xml
     <section class="gradient-bg pt-24 pb-20" role="banner" aria-labelledby="hero-title">
       <div class="container mx-auto px-6 text-center">
         <h1 id="hero-title" class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-          Library-First Fanfiction Story Discovery Platform
+          Discovery-Focused Fanfiction Story Search Platform
         </h1>
         <p class="text-xl md:text-2xl mb-6 opacity-90 max-w-4xl mx-auto">
           Discover existing fanfiction stories with precision using our intelligent tagging system for
@@ -125,7 +125,7 @@ function generateSitemap(): string {
     <image:image>
       <image:loc>https://pensive.vkrishna04.me/social-banner.png</image:loc>
       <image:title>The Pensive Index - Fanfiction Story Discovery Platform</image:title>
-      <image:caption>Library-first fanfiction discovery with intelligent tagging system</image:caption>
+  <image:caption>Discovery-focused fanfiction search with intelligent tagging system</image:caption>
     </image:image>
   </url>
 
@@ -196,9 +196,9 @@ const ENHANCED_DOCS_HTML = `
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
   <!-- Primary SEO Meta Tags -->
-  <title>The Pensive Index - Library-First Fanfiction Story Discovery Platform | Find & Generate Stories</title>
-  <meta name="title" content="The Pensive Index - Library-First Fanfiction Story Discovery Platform | Find & Generate Stories" />
-  <meta name="description" content="Discover existing fanfiction stories with precision using our intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, Marvel, DC Comics, and 50+ other fandoms. Library-first approach prioritizes finding existing content before suggesting new stories." />
+  <title>The Pensive Index - Discovery-Focused Fanfiction Story Search Platform | Find & Generate Stories</title>
+  <meta name="title" content="The Pensive Index - Discovery-Focused Fanfiction Story Search Platform | Find & Generate Stories" />
+  <meta name="description" content="Discover existing fanfiction stories with precision using our intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, Marvel, DC Comics, and 50+ other fandoms. Discovery-focused approach prioritizes finding existing content before suggesting new stories." />
   <meta name="keywords" content="fanfiction search engine, fanfic discovery platform, story finder, Harry Potter fanfiction, Percy Jackson stories, Marvel fanfiction, DC Comics fanfic, Anime fanfiction, tagged stories, plot generator, story prompts, creative writing, fandom stories, fanfic library, fiction search, story recommendations, character relationships, tropes, drag and drop story builder, intelligent search, relevance scoring, fanfiction tags, story pathways, creative prompts, writing inspiration, fanfic community" />
   <meta name="author" content="Krishna GSVV (VKrishna04)" />
   <meta name="creator" content="Krishna GSVV" />
@@ -223,7 +223,7 @@ const ENHANCED_DOCS_HTML = `
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="The Pensive Index" />
-  <meta property="og:title" content="The Pensive Index - Library-First Fanfiction Story Discovery Platform" />
+  <meta property="og:title" content="The Pensive Index - Discovery-Focused Fanfiction Story Search Platform" />
   <meta property="og:description" content="Discover existing fanfiction stories with precision using our intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for 50+ fandoms including Harry Potter, Percy Jackson, Marvel, and more." />
   <meta property="og:url" content="https://pensive.vkrishna04.me/" />
   <meta property="og:image" content="https://pensive.vkrishna04.me/social-banner.png" />
@@ -239,7 +239,7 @@ const ENHANCED_DOCS_HTML = `
   <meta name="twitter:site" content="@VKrishna04" />
   <meta name="twitter:creator" content="@VKrishna04" />
   <meta name="twitter:title" content="The Pensive Index - Fanfiction Story Discovery Platform" />
-  <meta name="twitter:description" content="Discover existing fanfiction stories with precision or generate intelligent prompts. Library-first approach for Harry Potter, Percy Jackson, Marvel, and 50+ fandoms." />
+  <meta name="twitter:description" content="Discover existing fanfiction stories with precision or generate intelligent prompts. Discovery-focused approach for Harry Potter, Percy Jackson, Marvel, and 50+ fandoms." />
   <meta name="twitter:image" content="https://pensive.vkrishna04.me/social-banner.png" />
   <meta name="twitter:image:alt" content="The Pensive Index - Fanfiction Story Discovery Platform" />
   <meta name="twitter:domain" content="pensive.vkrishna04.me" />
@@ -331,7 +331,7 @@ const ENHANCED_DOCS_HTML = `
       ]
     },
     "foundingDate": "2025-09-17",
-    "description": "Library-first fanfiction story discovery platform with intelligent tagging and prompt generation for creative writers and fandom enthusiasts.",
+  "description": "Discovery-focused fanfiction story search platform with intelligent tagging and prompt generation for creative writers and fandom enthusiasts.",
     "keywords": "fanfiction, story discovery, creative writing, fandom, search engine, story generator",
     "contactPoint": {
       "@type": "ContactPoint",
@@ -349,7 +349,7 @@ const ENHANCED_DOCS_HTML = `
     "name": "The Pensive Index",
     "alternateName": "Pensive Index",
     "url": "https://pensive.vkrishna04.me",
-    "description": "Library-first fanfiction story discovery platform with intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, Marvel, and 50+ other fandoms.",
+  "description": "Discovery-focused fanfiction story search platform with intelligent tagging system. Search thousands of tagged stories or generate detailed prompts for Harry Potter, Percy Jackson, Marvel, and 50+ other fandoms.",
     "inLanguage": "en-US",
     "copyrightYear": "2025",
     "creator": {
@@ -389,7 +389,7 @@ const ENHANCED_DOCS_HTML = `
         "Drag-and-drop story pathway builder",
         "Multi-fandom support",
         "Relevance scoring",
-        "Library-first discovery approach"
+  "Discovery-focused discovery approach"
       ]
     }
   }
@@ -406,7 +406,7 @@ const ENHANCED_DOCS_HTML = `
     "applicationSubCategory": "Story Discovery Platform",
     "url": "https://pensive.vkrishna04.me",
     "downloadUrl": "https://pensive.vkrishna04.me/search",
-    "description": "Library-first fanfiction story discovery platform with intelligent tagging system for finding existing stories and generating creative prompts.",
+  "description": "Discovery-focused fanfiction story search platform with intelligent tagging system for finding existing stories and generating creative prompts.",
     "softwareVersion": "1.0.0",
     "releaseDate": "2025-09-28",
     "author": {
@@ -431,7 +431,7 @@ const ENHANCED_DOCS_HTML = `
       "bestRating": "5"
     },
     "featureList": [
-      "Library-first story discovery",
+  "Discovery-focused story search",
       "Advanced tagging system",
       "Intelligent prompt generation",
       "Multi-fandom support (Harry Potter, Percy Jackson, Marvel, DC, Anime, etc.)",
@@ -465,15 +465,15 @@ const ENHANCED_DOCS_HTML = `
         "name": "What is The Pensive Index?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The Pensive Index is a library-first fanfiction story discovery platform that helps you find existing tagged stories before suggesting new content. It features an intelligent tagging system, advanced search capabilities, and prompt generation for creative writing across 50+ fandoms including Harry Potter, Percy Jackson, Marvel, DC Comics, and more."
+          "text": "The Pensive Index is a discovery-focused fanfiction story search platform that helps you find existing tagged stories before suggesting new content. It features an intelligent tagging system, advanced search capabilities, and prompt generation for creative writing across 50+ fandoms including Harry Potter, Percy Jackson, Marvel, DC Comics, and more."
         }
       },
       {
         "@type": "Question",
-        "name": "How does the library-first approach work?",
+  "name": "How does the discovery-focused approach work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Our library-first approach prioritizes showing you existing stories that match your criteria before generating new prompts. You build story pathways using our drag-and-drop interface, and our algorithm searches thousands of tagged stories to find the best matches. Only when existing stories don't meet your needs do we suggest creating new content with detailed prompts highlighting novelty aspects."
+          "text": "Our discovery-focused approach prioritizes showing you existing stories that match your criteria before generating new prompts. You build story pathways using our drag-and-drop interface, and our algorithm searches thousands of tagged stories to find the best matches. Only when existing stories don't meet your needs do we suggest creating new content with detailed prompts highlighting novelty aspects."
         }
       },
       {
@@ -708,7 +708,7 @@ const ENHANCED_DOCS_HTML = `
   <section class="gradient-bg pt-24 pb-20">
     <div class="container mx-auto px-6 text-center">
       <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-        Library-First Story Discovery
+  Discovery-Focused Story Search
       </h1>
       <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">
         Discover existing fanfiction stories with precision, then generate intelligent prompts for new content.
@@ -736,7 +736,7 @@ const ENHANCED_DOCS_HTML = `
           designed for both casual readers and dedicated fanfiction enthusiasts.
         </p>
         <div class="grid md:grid-cols-3 gap-8">
-          <!-- Library-First Search -->
+          <!-- Discovery-Focused Search -->
           <article class="feature-card p-8" itemscope itemtype="https://schema.org/SoftwareApplication">
             <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6" aria-hidden="true">
               <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" role="img" aria-label="Search icon">
@@ -744,7 +744,7 @@ const ENHANCED_DOCS_HTML = `
               </svg>
             </div>
             <h3 class="text-xl font-semibold mb-4 text-gray-900" itemprop="name">
-              Library-First Story Search Engine
+              Discovery-Focused Story Search Engine
             </h3>
             <p class="text-gray-600 leading-relaxed" itemprop="description">
               Advanced <strong>fanfiction search engine</strong> with intelligent tagging system.
@@ -806,7 +806,7 @@ const ENHANCED_DOCS_HTML = `
     <div class="container mx-auto px-6 text-center">
       <h2 class="text-4xl font-bold mb-8 text-gray-900">See It In Action</h2>
       <p class="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-        Experience the power of library-first story discovery with our interactive demo
+  Experience the power of discovery-focused story search with our interactive demo
       </p>
       <a href="/search" class="btn-primary text-lg px-8 py-4">
         Try Interactive Demo
@@ -861,7 +861,7 @@ const ENHANCED_DOCS_HTML = `
             <span class="text-2xl font-bold" itemprop="name">The Pensive Index</span>
           </div>
           <p class="text-gray-300 leading-relaxed mb-6" itemprop="description">
-            <strong>The ultimate fanfiction discovery platform</strong> featuring library-first story search,
+            <strong>The ultimate fanfiction discovery platform</strong> featuring discovery-focused story search,
             intelligent tagging system, and AI-powered prompt generation. Serving readers and writers across
             <strong>50+ fandoms</strong> including Harry Potter, Percy Jackson, Marvel, DC Comics, Anime, and more.
           </p>
@@ -1039,7 +1039,7 @@ export function handleRequest(
       name: 'The Pensive Index - Fanfiction Discovery Platform',
       short_name: 'Pensive Index',
       description:
-        'Library-first story discovery and intelligent prompt generation for fanfiction across 50+ popular fandoms',
+        'Discovery-focused story search and intelligent prompt generation for fanfiction across 50+ popular fandoms',
       start_url: '/',
       display: 'standalone',
       background_color: '#1e293b',

@@ -2,7 +2,7 @@
  * Services Index
  *
  * Central export point for all business logic services in the discovery interface.
- * These services implement the core functionality that powers the library-first
+ * These services implement the core functionality that powers the discovery-focused
  * story discovery platform.
  */
 
@@ -77,11 +77,11 @@ export class DiscoveryServices {
   /**
    * Initialize all services with shared configuration
    */
-  async initialize(config?: {
+  initialize(config?: {
     cacheSize?: number;
     performanceMode?: 'fast' | 'balanced' | 'thorough';
     debugMode?: boolean;
-  }): Promise<void> {
+  }): void {
     // Services are already initialized as singletons
     // This method is available for future configuration needs
 

@@ -382,7 +382,7 @@ export function StoryResults({
             Discovery Results
           </h2>
           <p className="text-sm text-gray-600 mt-1">
-            {stories.length} stories found • Library-first approach
+            {stories.length} stories found • Discovery-focused approach
           </p>
         </div>
 

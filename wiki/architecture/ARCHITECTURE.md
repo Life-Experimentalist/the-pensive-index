@@ -12,7 +12,7 @@
 
 ## 🎯 Overview
 
-The Pensive Index is a **library-first story discovery platform** for fanfiction that prioritizes finding existing tagged stories before generating new story prompts. It uses a modern, scalable architecture built with Next.js 13+ App Router.
+The Pensive Index is a **discovery-focused story search platform** for fanfiction that prioritizes finding existing tagged stories before generating new story prompts. It uses a modern, scalable architecture built with Next.js 13+ App Router.
 
 ## 🏗️ Project Structure
 

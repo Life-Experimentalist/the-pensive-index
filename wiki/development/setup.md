@@ -304,4 +304,4 @@ npm run test -- --verbose
 
 ---
 
-*Remember: We're library-first, test-first, and community-driven. Happy coding!*
+*Remember: We're discovery-focused, test-first, and community-driven. Happy coding!*

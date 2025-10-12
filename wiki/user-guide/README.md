@@ -4,7 +4,7 @@ Welcome to The Pensieve Index - your gateway to discovering fanfiction that perf
 
 ## What is The Pensieve Index?
 
-The Pensieve Index is a **library-first story discovery platform**. Unlike other platforms that rely on basic tags, we use:
+The Pensieve Index is a **discovery-focused story search platform**. Unlike other platforms that rely on basic tags, we use:
 
 - **Hierarchical Tagging**: Complex tropes with conditional branching
 - **Existing Story Search**: Find precisely matching stories first
@@ -178,4 +178,4 @@ Help grow the library by submitting stories you find:
 
 ---
 
-*Happy story hunting! Remember: we're library-first, so existing stories come before new prompts.*
+*Happy story hunting! Remember: we're discovery-focused — existing stories are shown before new prompts when applicable.*

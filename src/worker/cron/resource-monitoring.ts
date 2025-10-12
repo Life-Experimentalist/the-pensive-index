@@ -7,8 +7,8 @@
  * @module worker/cron/resource-monitoring
  */
 
-import { resourceUsage } from '@/lib/database/schemas/performance-schema';
-import { ErrorService } from '@/lib/services/error-service';
+import { resourceUsage } from '@/lib/database/schemas/performance';
+import { ErrorService } from '@/lib/monitoring/error-service';
 
 /**
  * Cloudflare Free Tier Limits

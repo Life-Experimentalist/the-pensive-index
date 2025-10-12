@@ -50,16 +50,20 @@ export default function MainFooter() {
               The Pensieve Index
             </h3>
             <p className="text-sm text-foreground/60 mb-4">
-              Your library-first fanfiction discovery platform
+              Your discovery-focused fanfiction discovery platform
             </p>
             <div className="flex space-x-4">
-              {socialLinks.map((item) => (
+              {socialLinks.map(item => (
                 <a
                   key={item.name}
                   href={item.href}
                   className="text-foreground/60 hover:text-foreground transition-colors"
                   target={item.href.startsWith('http') ? '_blank' : undefined}
-                  rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  rel={
+                    item.href.startsWith('http')
+                      ? 'noopener noreferrer'
+                      : undefined
+                  }
                 >
                   <span className="sr-only">{item.name}</span>
                   <item.icon className="h-5 w-5" />
@@ -74,7 +78,7 @@ export default function MainFooter() {
               Product
             </h4>
             <ul className="space-y-2">
-              {footerLinks.product.map((link) => (
+              {footerLinks.product.map(link => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
@@ -93,13 +97,17 @@ export default function MainFooter() {
               Resources
             </h4>
             <ul className="space-y-2">
-              {footerLinks.resources.map((link) => (
+              {footerLinks.resources.map(link => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
                     className="text-sm text-foreground/60 hover:text-foreground transition-colors"
                     target={link.href.startsWith('http') ? '_blank' : undefined}
-                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    rel={
+                      link.href.startsWith('http')
+                        ? 'noopener noreferrer'
+                        : undefined
+                    }
                   >
                     {link.name}
                   </Link>
@@ -114,7 +122,7 @@ export default function MainFooter() {
               Legal
             </h4>
             <ul className="space-y-2">
-              {footerLinks.legal.map((link) => (
+              {footerLinks.legal.map(link => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
@@ -131,8 +139,8 @@ export default function MainFooter() {
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-border">
           <p className="text-sm text-foreground/60 text-center">
-            &copy; {new Date().getFullYear()} The Pensieve Index. All rights reserved.
-            Built with ❤️ for the fanfiction community.
+            &copy; {new Date().getFullYear()} The Pensieve Index. All rights
+            reserved. Built with ❤️ for the fanfiction community.
           </p>
         </div>
       </div>

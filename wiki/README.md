@@ -49,7 +49,7 @@ This directory contains comprehensive documentation for The Pensieve Index proje
 ## Documentation Principles
 
 Our documentation follows these principles:
-- **Library-First**: Emphasizes story discovery over prompt generation
+- **Discovery-Focused**: Emphasizes story search and discovery over prompt generation
 - **User-Centric**: Written for specific user types (readers, writers, admins)
 - **Spec-Driven**: Aligns with our Spec-Kit development methodology
 - **Living Documentation**: Updated with each feature implementation

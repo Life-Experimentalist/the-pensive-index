@@ -1,6 +1,6 @@
 # 🌟 The Pensieve Index
 
-**Library-first story discovery platform and intelligent prompt generator for fanfiction**
+**Discovery-focused fanfiction search platform with intelligent prompt generation**
 
 [![Spec-Kit](https://img.shields.io/badge/Built%20with-Spec--Kit-blue.svg)](https://github.com/github/spec-kit)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org/)
@@ -12,7 +12,7 @@ The Pensieve Index solves a fundamental problem in fanfiction: **readers can't f
 
 Unlike existing platforms that use basic tags, we provide:
 
-- 🔍 **Library-First Discovery**: Search existing tagged stories with complex criteria before generating new prompts
+ - 🔍 **Discovery-Focused Search**: Search existing tagged stories with complex criteria before generating new prompts
 - 🌳 **Hierarchical Tagging**: tropes with conditional branching (e.g., Goblin Inheritance → Black Lordship → After Sirius Death)
 - 🎯 **Dual Output**: Show matching stories AND enhanced prompts with novelty highlights
 - 👥 **Community Curation**: Admin-driven content growth with browser extension for story submission
@@ -60,8 +60,8 @@ This project follows [Spec-Driven Development](https://github.com/github/spec-ki
 # 4. Execute with TDD: Tests → User Approval → Implementation
 ```
 
-### Core Principles
-- **Library-First**: Prioritize existing story discovery over prompt generation
+-### Core Principles
+- **Discovery-Focused**: Prioritize existing story discovery over prompt generation
 - **Test-First**: TDD mandatory (non-negotiable for validation engine)
 - **Responsive Design**: Desktop drag-and-drop + mobile tap-to-select
 - **Community Growth**: Admin-curated content with public submission workflow
@@ -238,14 +238,14 @@ wrangler kv:key put --binding=CACHE <key> <value>
 ```
 
 ### Deployment
-See [CLOUDFLARE_DEPLOYMENT.md](./CLOUDFLARE_DEPLOYMENT.md) for complete deployment guide:
+See [CLOUDFLARE_DEPLOYMENT.md]() for complete deployment guide:
 - Cloudflare Pages setup
 - D1 database configuration
 - KV cache setup
 - GitHub Actions CI/CD
 - Environment variables
 
-Quick deploy checklist: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
+Quick deploy checklist: [DEPLOYMENT_CHECKLIST.md]()
 
 ## 📋 Project Status
 
@@ -333,7 +333,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 3: Public User Interface (Spec 001)**
 
 ```
-/speckit.specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement the library-first approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
+/speckit.specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement the discovery-focused approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
 ```
 
 ```
@@ -341,7 +341,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ```
 
 ```
-/speckit.plan "Create public-facing Next.js pages with server-side rendering for SEO. Implement drag-and-drop using @dnd-kit/core with TypeScript for desktop pathway building. Add responsive mobile interface using Tailwind CSS breakpoints and touch gestures. Build pathway validation engine with real-time conflict detection using existing validation patterns. Implement story search with SQLite full-text search and relevance scoring algorithms. Create dual-output system showing existing stories plus AI-generated prompts. Use React Server Components for performance with client components for interactivity. Add advanced filtering with URL state management. Implement library-first search prioritizing existing content over prompt generation."
+/speckit.plan "Create public-facing Next.js pages with server-side rendering for SEO. Implement drag-and-drop using @dnd-kit/core with TypeScript for desktop pathway building. Add responsive mobile interface using Tailwind CSS breakpoints and touch gestures. Build pathway validation engine with real-time conflict detection using existing validation patterns. Implement story search with SQLite full-text search and relevance scoring algorithms. Create dual-output system showing existing stories plus AI-generated prompts. Use React Server Components for performance with client components for interactivity. Add advanced filtering with URL state management. Implement discovery-focused search prioritizing existing content over prompt generation."
 ```
 
 ```
@@ -607,7 +607,7 @@ You're absolutely right! Let's get the core functionality working first before a
 ### **Phase 3: Public User Interface (Spec 006)**
 
 ```powershell
-/speckit.specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement the library-first approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
+/speckit.specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement a discovery-focused approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
 ```
 
 ### **Phase 4: Community Features (Spec 007)**

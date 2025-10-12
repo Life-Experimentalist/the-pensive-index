@@ -7,7 +7,7 @@
  * the current library."
  *
  * This test validates the dual output system per constitutional requirement
- * for library-first discovery with enhanced prompt generation.
+ * for discovery-focused discovery with enhanced prompt generation.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';

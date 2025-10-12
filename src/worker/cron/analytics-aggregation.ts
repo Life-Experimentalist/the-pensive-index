@@ -10,7 +10,7 @@ import { eq, and, gte, lt, sql } from 'drizzle-orm';
 import {
   analyticsEvents,
   analyticsAggregates,
-} from '@/lib/database/schemas/performance-schema';
+} from '@/lib/database/schemas/performance';
 
 /**
  * Aggregation bucket size in milliseconds
@@ -51,7 +51,9 @@ function calculateConversionRate(
     e => e.eventType === 'pathway_finished'
   ).length;
 
-  if (pathwayCreated === 0) return null;
+  if (pathwayCreated === 0) {
+    return null;
+  }
 
   return pathwayFinished / pathwayCreated;
 }

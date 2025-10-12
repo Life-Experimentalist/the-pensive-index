@@ -5,7 +5,7 @@
  * with relevance scoring and filtering so I can find stories that match my pathway
  * before considering creating new content."
  *
- * This test validates the complete library-first search workflow per
+ * This test validates the complete discovery-focused search workflow per
  * constitutional requirement to prioritize finding existing stories.
  */
 

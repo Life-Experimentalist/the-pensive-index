@@ -6,7 +6,7 @@ This document outlines the complete development roadmap for The Pensieve Index u
 
 ## 📋 Overview
 
-The Pensieve Index follows a **library-first approach** to fanfiction discovery, prioritizing existing story search over prompt generation. The development is structured in phases that build incrementally on each other, ensuring a working system at each stage.
+The Pensieve Index follows a **discovery-focused approach** to fanfiction discovery, prioritizing existing story search over prompt generation. The development is structured in phases that build incrementally on each other, ensuring a working system at each stage.
 
 ## 🗺️ Development Phases
 
@@ -73,17 +73,17 @@ The Pensieve Index follows a **library-first approach** to fanfiction discovery,
 
 ```powershell
 # Specification Command
-/specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement the library-first approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
+/specify "Build the main public-facing story discovery interface that allows anonymous users to browse fandoms, build story pathways using drag-and-drop (desktop) or tap-to-select (mobile), and discover existing stories or generate new story prompts. Implement a discovery-focused approach with relevance scoring, advanced filtering, responsive design, real-time pathway validation, and dual output showing matching stories plus create-new-story prompts with novelty highlights. Single-fandom stories only."
 
 # Implementation Plan Command
-/plan "Create public-facing Next.js pages with server-side rendering for SEO. Implement drag-and-drop using @dnd-kit/core with TypeScript for desktop pathway building. Add responsive mobile interface using Tailwind CSS breakpoints and touch gestures. Build pathway validation engine with real-time conflict detection using existing validation patterns. Implement story search with SQLite full-text search and relevance scoring algorithms. Create dual-output system showing existing stories plus AI-generated prompts. Use React Server Components for performance with client components for interactivity. Add advanced filtering with URL state management. Implement library-first search prioritizing existing content over prompt generation."
+/plan "Create public-facing Next.js pages with server-side rendering for SEO. Implement drag-and-drop using @dnd-kit/core with TypeScript for desktop pathway building. Add responsive mobile interface using Tailwind CSS breakpoints and touch gestures. Build pathway validation engine with real-time conflict detection using existing validation patterns. Implement story search with SQLite full-text search and relevance scoring algorithms. Create dual-output system showing existing stories plus AI-generated prompts. Use React Server Components for performance with client components for interactivity. Add advanced filtering with URL state management. Implement a discovery-focused search prioritizing existing content over prompt generation."
 ```
 
 **Target Features:**
 - 🎯 Public story discovery interface
 - 🎯 Drag-and-drop pathway builder (desktop)
 - 🎯 Tap-to-select interface (mobile)
-- 🎯 Library-first search with relevance scoring
+  - 🎯 Discovery-focused search with relevance scoring
 - 🎯 Real-time pathway validation
 - 🎯 Dual output (existing stories + prompts)
 - 🎯 Advanced filtering and search

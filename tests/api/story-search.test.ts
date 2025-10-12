@@ -1,7 +1,7 @@
 /**
  * Contract Test: POST /api/v1/discovery/search/stories
  *
- * Purpose: Validate API contract for library-first story search with relevance scoring
+ * Purpose: Validate API contract for discovery-focused story search with relevance scoring
  * Status: MUST FAIL - No implementation exists yet (TDD requirement)
  */
 
@@ -73,7 +73,7 @@ describe('POST /api/v1/discovery/search/stories - Contract Test', () => {
     }
   });
 
-  it('should prioritize library-first search results', async () => {
+  it('should prioritize discovery-focused search results', async () => {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -93,7 +93,7 @@ describe('POST /api/v1/discovery/search/stories - Contract Test', () => {
 
     // Should include library search metadata
     expect(data).toHaveProperty('searchType');
-    expect(data.searchType).toBe('library-first');
+    expect(data.searchType).toBe('discovery-focused');
   });
 
   it('should respond within 500ms per constitutional requirement', async () => {

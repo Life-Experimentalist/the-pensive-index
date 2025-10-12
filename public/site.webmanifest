@@ -1,7 +1,7 @@
 {
     "name": "The Pensive Index - Fanfiction Story Discovery Platform",
     "short_name": "Pensive Index",
-    "description": "Library-first fanfiction story discovery with intelligent tagging and prompt generation for creative writers and fandom enthusiasts",
+    "description": "Discovery-focused fanfiction story discovery with intelligent tagging and prompt generation for creative writers and fandom enthusiasts",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

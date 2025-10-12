@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/v1/discovery/search/stories
  *
- * Library-first story search with relevance scoring.
+ * Discovery-focused story search with relevance scoring.
  * Returns matching stories and generates prompts for gaps.
  *
  * Performance target: <500ms response time
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       includePopular: filters.includePopular ?? true,
     };
 
-    // Perform library-first search
+    // Perform discovery-focused search
     const searchResponse = await SearchResultModel.performSearch(searchRequest);
 
     const executionTime = Date.now() - startTime;
@@ -131,7 +131,8 @@ export async function POST(request: NextRequest) {
           isValid: searchResponse.pathway.validation.isValid,
         },
         discovery: {
-          libraryFirst: true,
+          discoveryFocused: true,
+          libraryFirst: false,
           storyCount: searchResponse.stories.length,
           noveltyPotential:
             searchResponse.pathway.noveltyScore > 0.7
@@ -151,7 +152,8 @@ export async function POST(request: NextRequest) {
         searchTime: searchResponse.metadata.searchTime,
         timestamp: new Date().toISOString(),
         performanceTarget: executionTime <= 500 ? 'met' : 'exceeded',
-        libraryFirst: true,
+        discoveryFocused: true,
+        libraryFirst: false,
       },
     };
 
@@ -162,7 +164,8 @@ export async function POST(request: NextRequest) {
       'X-Search-Time': searchResponse.metadata.searchTime.toString(),
       'X-Performance-Target': executionTime <= 500 ? 'met' : 'exceeded',
       'X-Story-Count': searchResponse.stories.length.toString(),
-      'X-Library-First': 'true',
+      'X-Library-First': 'false',
+      'X-Discovery-Focused': 'true',
       'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300', // Short cache for dynamic search
     });
 

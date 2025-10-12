@@ -64,7 +64,7 @@ Brief description of what this feature does and why it's needed.
 - Accessibility requirements
 
 ## Design Constraints
-- Library-first principle compliance
+- Discovery-focused principle compliance
 - Responsive design requirements
 - Validation engine integration
 
@@ -115,7 +115,7 @@ High-level technical approach and component structure.
 
 Every feature must align with our constitution:
 
-1. **Story Library First**: Prioritize finding existing stories over generating new prompts
+1. **Discovery-Focused**: Prioritize finding existing stories over generating new prompts
 2. **Hierarchical Data Integrity**: Maintain clean data models with proper validation
 3. **Test-First Development**: Write comprehensive tests before implementation
 4. **Responsive Design Excellence**: Ensure outstanding mobile and desktop experiences
@@ -125,7 +125,7 @@ Every feature must align with our constitution:
 
 Before implementing any feature, verify:
 
-- [ ] Does this support library-first discovery?
+- [ ] Does this support discovery-focused search?
 - [ ] Are validation rules properly implemented?
 - [ ] Do tests cover all critical paths?
 - [ ] Is the design responsive and accessible?
@@ -145,8 +145,8 @@ Before implementing any feature, verify:
 When working with AI agents, provide context:
 
 ```
-Context: Working on The Pensieve Index, a library-first fanfiction discovery platform.
-Constitution: Follow our 5 core principles (library-first, data integrity, TDD, responsive design, community growth).
+Context: Working on The Pensieve Index, a discovery-focused fanfiction search platform.
+Constitution: Follow our 5 core principles (discovery-focused search, data integrity, TDD, responsive design, community growth).
 Tech Stack: Next.js 13+, TypeScript 5.x, React 18+, Tailwind CSS, Cloudflare D1, dnd-kit.
 Current Task: [Describe your specific task]
 ```
@@ -373,7 +373,7 @@ Configure your IDE for Spec-Kit workflows:
 
 **Specification Rejected**
 - Review constitutional compliance
-- Ensure library-first approach
+ - Ensure discovery-focused approach
 - Add missing acceptance criteria
 
 **Implementation Stalled**

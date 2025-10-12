@@ -11,7 +11,7 @@ import { getPerformanceDatabase } from '@/lib/database/performance-db';
 import {
   performanceMetrics,
   performanceAggregates,
-} from '@/lib/database/schemas/performance-schema';
+} from '@/lib/database/schemas/performance';
 
 /**
  * Aggregation bucket size in milliseconds

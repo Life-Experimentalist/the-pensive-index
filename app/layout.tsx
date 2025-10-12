@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3003'
   ),
   description:
-    'A library-first story discovery platform and intelligent prompt generator for fanfiction',
+    'A discovery-focused story discovery platform and intelligent prompt generator for fanfiction',
   icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'The Pensieve Index',
     description:
-      'A library-first story discovery platform and intelligent prompt generator for fanfiction',
+      'A discovery-focused story discovery platform and intelligent prompt generator for fanfiction',
     images: ['/social-banner.png'],
     type: 'website',
   },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'The Pensieve Index',
     description:
-      'A library-first story discovery platform and intelligent prompt generator for fanfiction',
+      'A discovery-focused story discovery platform and intelligent prompt generator for fanfiction',
     images: ['/social-banner.png'],
   },
 };

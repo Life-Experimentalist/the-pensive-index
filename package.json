@@ -96,9 +96,7 @@
 		"tsx": "^4.6.0",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.2.4",
-		"wrangler": "^4.42.2",
-		"nodemailer": "^6.10.1",
-		"@types/nodemailer": "^7.0.1"
+	"wrangler": "^4.42.2"
 	},
 	"engines": {
 		"node": ">=18.0.0",

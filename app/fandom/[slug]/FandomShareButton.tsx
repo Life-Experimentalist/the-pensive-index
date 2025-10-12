@@ -35,7 +35,7 @@ export default function FandomShareButton({
   return (
     <button
       onClick={handleShare}
-      className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+      className="p-2 text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
       title="Share this page"
       aria-label="Share this fandom page"
     >

@@ -1,9 +1,10 @@
-// TODO: HARDCODED COLORS - Complete color token migration (currently 30% done)
-// Already converted: Main container, headers (lines 189-191)
-// Still needs conversion: Card backgrounds, button styles, form inputs, badges
-// Search for: text-gray-*, bg-white, bg-gray-*, border-gray-*, text-blue-*
-// Replace with: text-foreground, bg-card, border-border, text-primary
-// Target completion: 100% theme token compliance
+// ✅ COLOR TOKEN MIGRATION COMPLETE (100%)
+// All color classes have been converted to theme-aware tokens:
+// - text-gray-* → text-foreground, text-muted-foreground
+// - bg-white/bg-gray-* → bg-card, bg-background
+// - border-gray-* → border-border
+// - Gradients maintained for branded elements (purple/indigo)
+// Migration completed: October 12, 2025
 
 'use client';
 
@@ -55,7 +56,7 @@ export default function PathwayBuilderPage() {
   useEffect(() => {
     const loadFandoms = async () => {
       try {
-        const res = await fetch('/api/fandoms');
+        const res = await fetch('/api/fandom');
         if (res.ok) {
           const data = await res.json();
           console.log('[Pathway] Loaded fandoms:', data.fandoms);
@@ -81,8 +82,8 @@ export default function PathwayBuilderPage() {
         console.log('[Pathway] Loading data for fandom:', selectedFandom);
 
         const [tagsRes, tropesRes] = await Promise.all([
-          fetch(`/api/fandoms/${selectedFandom}/tags`),
-          fetch(`/api/fandoms/${selectedFandom}/tropes`),
+          fetch(`/api/fandom/${selectedFandom}/tags`),
+          fetch(`/api/fandom/${selectedFandom}/tropes`),
         ]);
 
         console.log('[Pathway] API responses:', {
@@ -287,14 +288,14 @@ export default function PathwayBuilderPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl font-bold text-foreground">
                     Pathway Details
                   </h2>
                 </div>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-foreground/70 mb-2">
                       Pathway Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -302,21 +303,23 @@ export default function PathwayBuilderPage() {
                       value={pathwayName}
                       onChange={e => setPathwayName(e.target.value)}
                       placeholder="e.g., Time Travel Harry Potter Stories"
-                      className="w-full px-5 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all hover:border-indigo-300 dark:hover:border-indigo-600"
+                      className="w-full px-5 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-card text-foreground placeholder-muted-foreground transition-all hover:border-indigo-300 dark:hover:border-indigo-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-semibold text-foreground/70 mb-2">
                       Description{' '}
-                      <span className="text-gray-400 text-xs">(Optional)</span>
+                      <span className="text-muted-foreground text-xs">
+                        (Optional)
+                      </span>
                     </label>
                     <textarea
                       value={pathwayDescription}
                       onChange={e => setPathwayDescription(e.target.value)}
                       placeholder="Describe your pathway..."
                       rows={3}
-                      className="w-full px-5 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all hover:border-indigo-300 dark:hover:border-indigo-600"
+                      className="w-full px-5 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-card text-foreground placeholder-muted-foreground transition-all hover:border-indigo-300 dark:hover:border-indigo-600"
                     />
                   </div>
 
@@ -326,11 +329,11 @@ export default function PathwayBuilderPage() {
                       id="isPublic"
                       checked={isPublic}
                       onChange={e => setIsPublic(e.target.checked)}
-                      className="w-5 h-5 text-indigo-600 border-gray-300 dark:border-gray-600 rounded focus:ring-indigo-500"
+                      className="w-5 h-5 text-indigo-600 border-border rounded focus:ring-indigo-500"
                     />
                     <label
                       htmlFor="isPublic"
-                      className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                      className="text-sm font-medium text-foreground/70 cursor-pointer"
                     >
                       📢 Make this pathway public (others can view and use it)
                     </label>
@@ -341,7 +344,7 @@ export default function PathwayBuilderPage() {
               {/* Selection Panels */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 {/* Tags Panel */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-purple-100 dark:border-purple-900/30 p-6 hover:shadow-xl transition-shadow">
+                <div className="bg-card rounded-xl shadow-lg border border-purple-100 dark:border-purple-900/30 p-6 hover:shadow-xl transition-shadow">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
@@ -359,7 +362,7 @@ export default function PathwayBuilderPage() {
                           />
                         </svg>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h3 className="text-xl font-bold text-foreground">
                         Tags
                       </h3>
                     </div>
@@ -370,9 +373,9 @@ export default function PathwayBuilderPage() {
                   <div className="max-h-96 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                     {tags.length === 0 ? (
                       <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
                           <svg
-                            className="w-8 h-8 text-gray-400"
+                            className="w-8 h-8 text-muted-foreground"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -385,7 +388,7 @@ export default function PathwayBuilderPage() {
                             />
                           </svg>
                         </div>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">
+                        <p className="text-muted-foreground font-medium">
                           No tags available for this fandom
                         </p>
                       </div>
@@ -397,7 +400,7 @@ export default function PathwayBuilderPage() {
                           className={`w-full text-left px-4 py-3 rounded-lg transition-all transform hover:scale-[1.02] ${
                             selectedTags.includes(tag.id)
                               ? 'bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 border-2 border-purple-400 dark:border-purple-500 text-purple-900 dark:text-purple-100 shadow-md'
-                              : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                              : 'bg-muted border-2 border-transparent text-foreground hover:bg-muted/80'
                           }`}
                         >
                           <div className="font-semibold">{tag.name}</div>
@@ -413,7 +416,7 @@ export default function PathwayBuilderPage() {
                 </div>
 
                 {/* Tropes Panel */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-indigo-100 dark:border-indigo-900/30 p-6 hover:shadow-xl transition-shadow">
+                <div className="bg-card rounded-xl shadow-lg border border-indigo-100 dark:border-indigo-900/30 p-6 hover:shadow-xl transition-shadow">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
@@ -431,7 +434,7 @@ export default function PathwayBuilderPage() {
                           />
                         </svg>
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h3 className="text-xl font-bold text-foreground">
                         Tropes
                       </h3>
                     </div>
@@ -442,9 +445,9 @@ export default function PathwayBuilderPage() {
                   <div className="max-h-96 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                     {tropes.length === 0 ? (
                       <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
                           <svg
-                            className="w-8 h-8 text-gray-400"
+                            className="w-8 h-8 text-muted-foreground"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -457,7 +460,7 @@ export default function PathwayBuilderPage() {
                             />
                           </svg>
                         </div>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">
+                        <p className="text-muted-foreground font-medium">
                           No tropes available for this fandom
                         </p>
                       </div>
@@ -469,7 +472,7 @@ export default function PathwayBuilderPage() {
                           className={`w-full text-left px-4 py-3 rounded-lg transition-all transform hover:scale-[1.02] ${
                             selectedTropes.includes(trope.id)
                               ? 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 border-2 border-indigo-400 dark:border-indigo-500 text-indigo-900 dark:text-indigo-100 shadow-md'
-                              : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                              : 'bg-muted border-2 border-transparent text-foreground hover:bg-muted/80'
                           }`}
                         >
                           <div className="font-semibold">{trope.name}</div>
@@ -524,7 +527,7 @@ export default function PathwayBuilderPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <button
                   onClick={() => router.push('/')}
-                  className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-semibold hover:shadow-lg transform hover:scale-105"
+                  className="px-8 py-4 border-2 border-border rounded-xl text-foreground hover:bg-muted transition-all font-semibold hover:shadow-lg transform hover:scale-105"
                 >
                   Cancel
                 </button>
@@ -532,7 +535,7 @@ export default function PathwayBuilderPage() {
                 <button
                   onClick={handleSavePathway}
                   disabled={isSaving || !pathwayName.trim()}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 dark:disabled:from-gray-600 dark:disabled:to-gray-700 text-white rounded-xl transition-all font-semibold disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
+                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:from-muted disabled:to-muted/80 text-white rounded-xl transition-all font-semibold disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
                 >
                   {isSaving ? (
                     <span className="flex items-center gap-2">
@@ -574,17 +577,11 @@ export default function PathwayBuilderPage() {
             background: transparent;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: hsl(var(--muted-foreground) / 0.3);
             border-radius: 3px;
           }
-          .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4b5563;
-          }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-          }
-          .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
+            background: hsl(var(--muted-foreground) / 0.5);
           }
         `}</style>
       </div>

@@ -12,9 +12,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 // Mock API route handlers that will be implemented later
-import { POST as assignFandom } from '@/app/api/admin/fandoms/assign/route';
-import { GET as getFandomAssignments } from '@/app/api/admin/fandoms/assignments/route';
-import { PUT as reassignFandom } from '@/app/api/admin/fandoms/reassign/route';
+import { POST as assignFandom } from '@/app/api/admin/fandom/assign/route';
+import { GET as getFandomAssignments } from '@/app/api/admin/fandom/assignments/route';
+import { PUT as reassignFandom } from '@/app/api/admin/fandom/reassign/route';
 
 describe('Fandom Assignment API', () => {
   let projectAdminHeaders: HeadersInit;
@@ -48,7 +48,7 @@ describe('Fandom Assignment API', () => {
     // Cleanup test assignments
   });
 
-  describe('POST /api/admin/fandoms/assign', () => {
+  describe('POST /api/admin/fandom/assign', () => {
     it('should allow Project Admin to assign user to fandom', async () => {
       const requestBody = {
         user_id: 'new-fandom-admin',
@@ -57,7 +57,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -84,7 +84,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: fandomAdminHeaders,
@@ -107,7 +107,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -131,7 +131,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -155,7 +155,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -168,7 +168,7 @@ describe('Fandom Assignment API', () => {
 
       // Second assignment should fail
       const duplicateRequest = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -189,7 +189,7 @@ describe('Fandom Assignment API', () => {
 
       // Assign to first fandom
       const firstAssignment = await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -204,7 +204,7 @@ describe('Fandom Assignment API', () => {
 
       // Assign same user to second fandom
       const secondAssignment = await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -222,11 +222,11 @@ describe('Fandom Assignment API', () => {
     });
   });
 
-  describe('GET /api/admin/fandoms/assignments', () => {
+  describe('GET /api/admin/fandom/assignments', () => {
     beforeEach(async () => {
       // Create test fandom assignments
       await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -238,7 +238,7 @@ describe('Fandom Assignment API', () => {
       );
 
       await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -252,7 +252,7 @@ describe('Fandom Assignment API', () => {
 
     it('should allow Project Admin to view all fandom assignments', async () => {
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assignments',
+        'http://localhost/api/admin/fandom/assignments',
         {
           method: 'GET',
           headers: projectAdminHeaders,
@@ -276,7 +276,7 @@ describe('Fandom Assignment API', () => {
 
     it('should filter assignments by fandom', async () => {
       const request = new NextRequest(
-        `http://localhost/api/admin/fandoms/assignments?fandom_id=${testFandomId}`,
+        `http://localhost/api/admin/fandom/assignments?fandom_id=${testFandomId}`,
         {
           method: 'GET',
           headers: projectAdminHeaders,
@@ -294,7 +294,7 @@ describe('Fandom Assignment API', () => {
 
     it('should restrict Fandom Admin to their assigned fandoms only', async () => {
       const request = new NextRequest(
-        `http://localhost/api/admin/fandoms/assignments?fandom_id=${testFandomId}`,
+        `http://localhost/api/admin/fandom/assignments?fandom_id=${testFandomId}`,
         {
           method: 'GET',
           headers: fandomAdminHeaders,
@@ -312,7 +312,7 @@ describe('Fandom Assignment API', () => {
 
     it('should reject access to non-assigned fandom for Fandom Admin', async () => {
       const request = new NextRequest(
-        `http://localhost/api/admin/fandoms/assignments?fandom_id=${otherFandomId}`,
+        `http://localhost/api/admin/fandom/assignments?fandom_id=${otherFandomId}`,
         {
           method: 'GET',
           headers: fandomAdminHeaders,
@@ -329,7 +329,7 @@ describe('Fandom Assignment API', () => {
 
     it('should support pagination', async () => {
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assignments?page=1&limit=1',
+        'http://localhost/api/admin/fandom/assignments?page=1&limit=1',
         {
           method: 'GET',
           headers: projectAdminHeaders,
@@ -348,7 +348,7 @@ describe('Fandom Assignment API', () => {
 
     it('should include fandom details in response', async () => {
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assignments',
+        'http://localhost/api/admin/fandom/assignments',
         {
           method: 'GET',
           headers: projectAdminHeaders,
@@ -366,13 +366,13 @@ describe('Fandom Assignment API', () => {
     });
   });
 
-  describe('PUT /api/admin/fandoms/reassign', () => {
+  describe('PUT /api/admin/fandom/reassign', () => {
     let existingAssignmentId: string;
 
     beforeEach(async () => {
       // Create an existing assignment to reassign
       const response = await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -396,7 +396,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/reassign',
+        'http://localhost/api/admin/fandom/reassign',
         {
           method: 'PUT',
           headers: projectAdminHeaders,
@@ -424,7 +424,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/reassign',
+        'http://localhost/api/admin/fandom/reassign',
         {
           method: 'PUT',
           headers: fandomAdminHeaders,
@@ -447,7 +447,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/reassign',
+        'http://localhost/api/admin/fandom/reassign',
         {
           method: 'PUT',
           headers: projectAdminHeaders,
@@ -474,7 +474,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/reassign',
+        'http://localhost/api/admin/fandom/reassign',
         {
           method: 'PUT',
           headers: projectAdminHeaders,
@@ -500,7 +500,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -524,7 +524,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: { Authorization: 'Bearer unauthorized-token' },
@@ -550,7 +550,7 @@ describe('Fandom Assignment API', () => {
       };
 
       const request = new NextRequest(
-        'http://localhost/api/admin/fandoms/assign',
+        'http://localhost/api/admin/fandom/assign',
         {
           method: 'POST',
           headers: projectAdminHeaders,
@@ -570,7 +570,7 @@ describe('Fandom Assignment API', () => {
     it('should log fandom reassignment actions', async () => {
       // Create initial assignment
       const initialResponse = await assignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/assign', {
+        new NextRequest('http://localhost/api/admin/fandom/assign', {
           method: 'POST',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -585,7 +585,7 @@ describe('Fandom Assignment API', () => {
 
       // Reassign
       const reassignResponse = await reassignFandom(
-        new NextRequest('http://localhost/api/admin/fandoms/reassign', {
+        new NextRequest('http://localhost/api/admin/fandom/reassign', {
           method: 'PUT',
           headers: projectAdminHeaders,
           body: JSON.stringify({
@@ -610,7 +610,7 @@ describe('Fandom Assignment API', () => {
 
       const requests = userIds.map(userId =>
         assignFandom(
-          new NextRequest('http://localhost/api/admin/fandoms/assign', {
+          new NextRequest('http://localhost/api/admin/fandom/assign', {
             method: 'POST',
             headers: projectAdminHeaders,
             body: JSON.stringify({
@@ -636,7 +636,7 @@ describe('Fandom Assignment API', () => {
         .fill(null)
         .map((_, index) =>
           assignFandom(
-            new NextRequest('http://localhost/api/admin/fandoms/assign', {
+            new NextRequest('http://localhost/api/admin/fandom/assign', {
               method: 'POST',
               headers: projectAdminHeaders,
               body: JSON.stringify({

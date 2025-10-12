@@ -135,8 +135,8 @@ export default function AdminPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
           Welcome to the administrative dashboard. Select a section below to
           manage different aspects of the platform.
         </p>
@@ -144,9 +144,9 @@ export default function AdminPage() {
 
       {/* Error Display */}
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-destructive bg-destructive/10">
           <CardContent className="p-4">
-            <p className="text-red-600 text-sm">{error}</p>
+            <p className="text-destructive text-sm">{error}</p>
           </CardContent>
         </Card>
       )}
@@ -160,8 +160,8 @@ export default function AdminPage() {
                 <Users className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold text-foreground">
                   {stats?.users?.total?.toLocaleString() ?? '0'}
                 </p>
               </div>
@@ -176,10 +176,10 @@ export default function AdminPage() {
                 <Settings className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-muted-foreground">
                   Active Rules
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-foreground">
                   {stats?.content?.validation_rules?.toLocaleString() ?? '0'}
                 </p>
               </div>
@@ -194,8 +194,8 @@ export default function AdminPage() {
                 <FileText className="h-6 w-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tags</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-muted-foreground">Tags</p>
+                <p className="text-2xl font-bold text-foreground">
                   {stats?.content?.tags?.toLocaleString() ?? '0'}
                 </p>
               </div>
@@ -206,7 +206,7 @@ export default function AdminPage() {
 
       {/* Admin Sections */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
           Administration Sections
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -224,7 +224,7 @@ export default function AdminPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">{card.description}</p>
+                    <p className="text-muted-foreground">{card.description}</p>
                   </CardContent>
                 </Card>
               </Link>

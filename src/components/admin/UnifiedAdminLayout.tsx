@@ -5,7 +5,7 @@
  * Replaces the existing AdminLayoutClient with improved UX and consistent design.
  *
  * @package the-pensive-index
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 'use client';
@@ -15,11 +15,12 @@ import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
-import { Shield, Loader2 } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import AdminTopBar from './AdminTopBar';
+import MainNavigation from '@/components/layout/MainNavigation';
 import CollapsibleSidebar from './CollapsibleSidebar';
 import AdminDebugInfo from './AdminDebugInfo';
+import AdminLoadingScreen from './AdminLoadingScreen';
 
 interface UnifiedAdminLayoutProps {
   children: React.ReactNode;
@@ -37,14 +38,7 @@ export default function UnifiedAdminLayout({
 
   // Loading state
   if (!isLoaded) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-sm text-gray-600">Loading admin dashboard...</p>
-        </div>
-      </div>
-    );
+    return <AdminLoadingScreen />;
   }
 
   // Not authenticated
@@ -157,26 +151,31 @@ export default function UnifiedAdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top navigation bar - Fixed at top */}
-      <AdminTopBar
-        title={title}
-        onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      />
+    <div className="min-h-screen bg-background">
+      {/* Use MainNavigation for consistent navigation across all pages */}
+      <MainNavigation />
 
-      {/* Collapsible sidebar - Floating above content */}
+      {/* Collapsible sidebar - Fixed position */}
       <CollapsibleSidebar
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Main content area - Full width, sidebar floats above */}
-      <main className={cn('pt-16 min-h-screen w-full', className)}>
+      {/* Main content area - With proper margin for sidebar */}
+      <main
+        className={cn(
+          'min-h-screen w-full transition-all duration-300',
+          // Add left margin for desktop to account for collapsed sidebar (64px = 16 * 4)
+          'md:ml-16',
+          // The sidebar expands on hover, content stays with fixed margin
+          className
+        )}
+      >
         <div className="p-4 md:p-6">
-          {/* Page title (if not shown in top bar) */}
+          {/* Page title */}
           {title && (
-            <div className="mb-6 lg:hidden">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+            <div className="mb-6">
+              <h1 className="text-xl md:text-2xl font-bold text-foreground">
                 {title}
               </h1>
             </div>

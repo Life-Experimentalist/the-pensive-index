@@ -260,7 +260,7 @@ export default function AdminModerationPage(): JSX.Element {
    */
   const loadFandoms = async (): Promise<void> => {
     try {
-      const response = await fetch('/api/admin/fandoms');
+      const response = await fetch('/api/admin/fandom');
       if (response.ok) {
         const data = await response.json();
         setFandoms(data.fandoms.map((f: any) => f.name));

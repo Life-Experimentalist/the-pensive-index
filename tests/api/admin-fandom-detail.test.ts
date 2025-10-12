@@ -1,5 +1,5 @@
 /**
- * Contract Test: GET /api/admin/fandoms/[id]
+ * Contract Test: GET /api/admin/fandom/[id]
  *
  * Tests the API endpoint for retrieving a specific fandom's detailed
  * information, including taxonomy structure, content statistics,
@@ -20,7 +20,7 @@ import type {
 // NOTE: This is a TDD contract test - the actual endpoint doesn't exist yet
 // This test MUST FAIL until the implementation is created
 
-describe('GET /api/admin/fandoms/[id] - Contract Tests', () => {
+describe('GET /api/admin/fandom/[id] - Contract Tests', () => {
   let mockRequest: (
     id: string | number,
     options?: { userId?: string; role?: string }
@@ -36,7 +36,7 @@ describe('GET /api/admin/fandoms/[id] - Contract Tests', () => {
       id: string | number,
       options: { userId?: string; role?: string } = {}
     ) => {
-      const url = `http://localhost:3000/api/admin/fandoms/${id}`;
+      const url = `http://localhost:3000/api/admin/fandom/${id}`;
 
       const request = new NextRequest(url, {
         method: 'GET',
@@ -50,7 +50,7 @@ describe('GET /api/admin/fandoms/[id] - Contract Tests', () => {
 
     // Import the actual endpoint (will fail until implemented)
     try {
-      const module = await import('@/app/api/admin/fandoms/[id]/route');
+      const module = await import('@/app/api/admin/fandom/[id]/route');
       endpoint = module.GET;
     } catch (error) {
       console.warn('Endpoint not implemented yet - this is expected for TDD');

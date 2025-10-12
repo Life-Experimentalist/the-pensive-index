@@ -1,5 +1,5 @@
 /**
- * Contract Test: GET /api/admin/fandoms
+ * Contract Test: GET /api/admin/fandom
  *
  * Tests the API endpoint for listing fandoms with filtering, pagination,
  * and hierarchical access control. Verifies that FandomAdmins only see
@@ -20,7 +20,7 @@ import type {
 // NOTE: This is a TDD contract test - the actual endpoint doesn't exist yet
 // This test MUST FAIL until the implementation is created
 
-describe('GET /api/admin/fandoms - Contract Tests', () => {
+describe('GET /api/admin/fandom - Contract Tests', () => {
   let mockRequest: (
     params?: URLSearchParams,
     options?: { userId?: string; role?: string }
@@ -33,7 +33,7 @@ describe('GET /api/admin/fandoms - Contract Tests', () => {
       params?: URLSearchParams,
       options: { userId?: string; role?: string } = {}
     ) => {
-      const baseUrl = 'http://localhost:3000/api/admin/fandoms';
+      const baseUrl = 'http://localhost:3000/api/admin/fandom';
       const url = params ? `${baseUrl}?${params.toString()}` : baseUrl;
 
       const request = new NextRequest(url, {
@@ -48,7 +48,7 @@ describe('GET /api/admin/fandoms - Contract Tests', () => {
 
     // Import the actual endpoint (will fail until implemented)
     try {
-      const module = await import('@/app/api/admin/fandoms/route');
+      const module = await import('@/app/api/admin/fandom/route');
       endpoint = module.GET;
     } catch (error) {
       console.warn('Endpoint not implemented yet - this is expected for TDD');

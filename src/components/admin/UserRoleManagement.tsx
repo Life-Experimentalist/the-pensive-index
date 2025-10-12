@@ -84,7 +84,7 @@ export default function UserRoleManagement() {
 
   const fetchFandoms = async () => {
     try {
-      const response = await fetch('/api/admin/fandoms/list');
+      const response = await fetch('/api/admin/fandom/list');
       const result = await response.json();
 
       if (response.ok) {

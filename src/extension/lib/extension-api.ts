@@ -175,7 +175,7 @@ export class ExtensionAPI {
   // Get available fandoms from API
   async getFandoms(): Promise<FandomData[]> {
     try {
-      const response = await fetch(`${this.baseURL}/api/fandoms`);
+      const response = await fetch(`${this.baseURL}/api/fandom`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -192,7 +192,7 @@ export class ExtensionAPI {
   async getFandomTags(fandomSlug: string): Promise<string[]> {
     try {
       const response = await fetch(
-        `${this.baseURL}/api/fandoms/${fandomSlug}/tags`
+        `${this.baseURL}/api/fandom/${fandomSlug}/tags`
       );
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

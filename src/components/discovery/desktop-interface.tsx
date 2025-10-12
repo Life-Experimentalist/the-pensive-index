@@ -88,7 +88,7 @@ export function DesktopInterface({
                 Pathway
               </Link>
               <Link
-                href="/fandoms"
+                href="/fandom"
                 className="text-sm text-foreground/70 hover:underline"
               >
                 Fandoms
@@ -109,7 +109,7 @@ export function DesktopInterface({
               Viewing fandom:{' '}
               <span className="font-medium">{selectedFandomSlug}</span>
               <Link
-                href="/fandoms"
+                href="/fandom"
                 className="ml-3 text-sm text-foreground/80 hover:underline"
               >
                 ← Back to fandom list

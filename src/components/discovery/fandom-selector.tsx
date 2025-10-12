@@ -49,7 +49,7 @@ export function FandomSelector({
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/discovery/fandoms');
+      const response = await fetch('/api/v1/discoveryfandom');
 
       if (!response.ok) {
         throw new Error(`Failed to fetch fandoms: ${response.statusText}`);

@@ -2,10 +2,10 @@
  * Collapsible Sidebar Component
  *
  * A modern collapsible sidebar that shows only icons by default and expands on hover.
- * Features smooth animations, active states, and responsive design.
+ * Features smooth animations, active states, theme toggle integration, and responsive design.
  *
  * @package the-pensive-index
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 'use client';
@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import ThemeToggle from '@/components/theme/ThemeToggle';
 import {
   LayoutDashboard,
   Settings,
@@ -159,13 +160,13 @@ export default function CollapsibleSidebar({
       {isMobileOpen && (
         <aside
           className={cn(
-            'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out z-40 w-64 md:hidden',
+            'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card border-r border-border shadow-lg transition-all duration-300 ease-in-out z-40 w-64 md:hidden',
             className
           )}
         >
           {/* Mobile navigation content */}
-          <nav className="pt-4 pb-4 h-full overflow-y-auto">
-            <div className="space-y-1 px-2">
+          <nav className="pt-4 pb-4 h-full overflow-y-auto flex flex-col">
+            <div className="space-y-1 px-2 flex-1">
               {navigationItems.map(item => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
@@ -176,16 +177,16 @@ export default function CollapsibleSidebar({
                     href={item.href}
                     onClick={onMobileClose}
                     className={cn(
-                      'group flex items-center px-3 py-3 rounded-lg transition-all duration-200',
-                      'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                      'group flex items-center px-3 py-3 rounded-lg transition-all duration-300 ease-out',
+                      'hover:bg-accent hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
                       isActive
-                        ? 'bg-blue-50 text-blue-700 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-accent text-accent-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     {/* Active indicator */}
                     {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full shadow-sm" />
                     )}
 
                     <Icon className="h-5 w-5 flex-shrink-0" />
@@ -196,6 +197,13 @@ export default function CollapsibleSidebar({
                 );
               })}
             </div>
+
+            {/* Mobile Theme Toggle */}
+            <div className="border-t border-border pt-4 px-2">
+              <div className="flex justify-center">
+                <ThemeToggle />
+              </div>
+            </div>
           </nav>
         </aside>
       )}
@@ -203,7 +211,7 @@ export default function CollapsibleSidebar({
       {/* Desktop sidebar - Original expanding behavior but with better positioning */}
       <aside
         className={cn(
-          'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out',
+          'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card border-r border-border shadow-lg transition-all duration-300 ease-in-out',
           // Desktop behavior - z-50 when expanded to float above content
           'hidden md:flex md:flex-col',
           isExpanded || isPinned ? 'w-64 z-50' : 'w-16 z-20',
@@ -217,15 +225,15 @@ export default function CollapsibleSidebar({
           <button
             onClick={togglePin}
             className={cn(
-              'p-1.5 rounded-md hover:bg-gray-100 transition-all duration-200',
+              'p-1.5 rounded-md hover:bg-accent transition-all duration-200',
               isExpanded || isPinned ? 'opacity-100' : 'opacity-0'
             )}
             title={isPinned ? 'Unpin sidebar' : 'Pin sidebar'}
           >
             {isPinned ? (
-              <ChevronLeft className="h-4 w-4 text-gray-600" />
+              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-600" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             )}
           </button>
         </div>
@@ -242,38 +250,38 @@ export default function CollapsibleSidebar({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'group flex items-center relative rounded-lg transition-all duration-200',
-                    'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
+                    'group flex items-center relative rounded-lg transition-all duration-300 ease-out',
+                    'hover:bg-accent hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
                     isExpanded || isPinned ? 'px-3 py-2.5' : 'px-3 py-3',
                     isActive
-                      ? 'bg-blue-50 text-blue-700 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-accent text-accent-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                   title={isExpanded || isPinned ? undefined : item.label}
                 >
                   {/* Active indicator */}
                   {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full" />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full shadow-sm" />
                   )}
 
                   {/* Icon */}
                   <Icon
                     className={cn(
-                      'flex-shrink-0 transition-colors duration-200',
+                      'flex-shrink-0 transition-all duration-300 ease-out',
                       isExpanded || isPinned ? 'h-5 w-5' : 'h-6 w-6',
                       isActive
-                        ? 'text-blue-600'
-                        : 'text-gray-500 group-hover:text-gray-700'
+                        ? 'text-primary'
+                        : 'text-muted-foreground group-hover:text-foreground group-hover:scale-110'
                     )}
                   />
 
                   {/* Label - only shown when expanded */}
                   <span
                     className={cn(
-                      'font-medium text-sm transition-all duration-200',
+                      'font-medium text-sm transition-all duration-300 ease-out',
                       isExpanded || isPinned
-                        ? 'ml-3 opacity-100'
-                        : 'ml-0 opacity-0 w-0 overflow-hidden'
+                        ? 'ml-3 opacity-100 translate-x-0'
+                        : 'ml-0 opacity-0 -translate-x-2 w-0 overflow-hidden'
                     )}
                   >
                     {item.label}
@@ -281,15 +289,15 @@ export default function CollapsibleSidebar({
 
                   {/* Tooltip for collapsed state */}
                   {!isExpanded && !isPinned && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-2 bg-popover text-popover-foreground border border-border text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none whitespace-nowrap z-50 shadow-lg">
                       {item.label}
                       {item.description && (
-                        <div className="text-gray-300 text-xs mt-0.5">
+                        <div className="text-muted-foreground text-xs mt-0.5">
                           {item.description}
                         </div>
                       )}
                       {/* Tooltip arrow */}
-                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-popover" />
                     </div>
                   )}
                 </Link>
@@ -298,21 +306,26 @@ export default function CollapsibleSidebar({
           </div>
         </nav>
 
-        {/* Bottom section with role indicator */}
+        {/* Role Indicator */}
         <div
           className={cn(
-            'absolute bottom-4 left-0 right-0 px-2 transition-all duration-200',
+            'px-2 pb-2 border-t border-border pt-4 transition-all duration-200',
             isExpanded || isPinned ? 'opacity-100' : 'opacity-0'
           )}
         >
-          <div className="border-t border-gray-200 pt-4">
-            <div className="flex items-center text-xs text-gray-500 px-3">
-              <div className="w-2 h-2 rounded-full bg-green-400 mr-2" />
-              Admin Mode
-            </div>
+          <div className="flex items-center text-xs text-muted-foreground px-3 mb-3">
+            <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
+            Admin Mode
           </div>
         </div>
-      </aside>
+
+        {/* Theme Toggle - Always visible */}
+        <div className="px-2 pb-4 border-t border-border pt-4">
+          <div className="flex justify-center">
+            <ThemeToggle />
+          </div>
+        </div>
+      </aside>;
     </>
   );
 }

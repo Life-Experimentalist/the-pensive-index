@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
+
+// Import speed-measure-webpack-plugin if available (install with: npm install speed-measure-webpack-plugin --save-dev)
+let SpeedMeasurePlugin;
+try {
+  SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+} catch (e) {
+  // Plugin not installed, skip
+  console.log(
+    '📊 speed-measure-webpack-plugin not found. Install it with: npm install speed-measure-webpack-plugin --save-dev'
+  );
+}
+
 const nextConfig = {
   // Cloudflare Pages deployment configuration
   // output: 'export', // Disabled for Cloudflare Pages with edge functions
@@ -26,10 +38,44 @@ const nextConfig = {
     formats: ['image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        pathname: '/v1/avatar/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+        pathname: '/v1/image/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.clerk.dev',
+        pathname: '/v1/avatar/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.clerk.dev',
+        pathname: '/v1/image/**',
+      },
+    ],
   },
 
   // Optimize bundle size and performance
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  webpack: (config, { dev, isServer }) => {
+    // Wrap config with SpeedMeasurePlugin if available and in production mode
+    let smp;
+    if (SpeedMeasurePlugin && !dev && process.env.MEASURE_BUILD === 'true') {
+      smp = new SpeedMeasurePlugin({
+        outputFormat: 'human',
+        outputTarget: '.docs/build-performance.txt',
+      });
+      console.log(
+        '📊 Speed measurements enabled. Results will be saved to build-performance.txt'
+      );
+    }
+
     // Production optimizations
     if (!dev && !isServer) {
       // Aggressive bundle splitting
@@ -89,7 +135,8 @@ const nextConfig = {
       };
     }
 
-    return config;
+    // Return wrapped config if speed measurement is enabled
+    return smp ? smp.wrap(config) : config;
   },
 
   // Enable compression

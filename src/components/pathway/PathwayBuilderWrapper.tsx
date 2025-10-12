@@ -27,7 +27,7 @@ export default function PathwayBuilderWrapper({
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/fandoms/${fandomId}/pathway-data`);
+        const response = await fetch(`/api/fandom/${fandomId}/pathway-data`);
 
         if (!response.ok) {
           throw new Error(

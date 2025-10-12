@@ -4,6 +4,7 @@ import {
   integer,
   real,
   blob,
+  index,
 } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
@@ -271,6 +272,51 @@ export const pathways = sqliteTable('pathways', {
     .notNull()
     .default(sql`(unixepoch())`),
 });
+
+// Pathway tags junction table
+export const pathwayTags = sqliteTable(
+  'pathway_tags',
+  {
+    id: text('id').primaryKey(), // UUID
+    pathway_id: text('pathway_id')
+      .notNull()
+      .references(() => pathways.id, { onDelete: 'cascade' }),
+    tag_id: text('tag_id')
+      .notNull()
+      .references(() => tags.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull().default(0),
+    created_at: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  table => ({
+    pathwayTagIdx: index('pathway_tag_idx').on(table.pathway_id, table.tag_id),
+  })
+);
+
+// Pathway plot blocks junction table
+export const pathwayPlotBlocks = sqliteTable(
+  'pathway_plot_blocks',
+  {
+    id: text('id').primaryKey(), // UUID
+    pathway_id: text('pathway_id')
+      .notNull()
+      .references(() => pathways.id, { onDelete: 'cascade' }),
+    plot_block_id: text('plot_block_id')
+      .notNull()
+      .references(() => plotBlocks.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull().default(0),
+    created_at: integer('created_at', { mode: 'timestamp' })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  table => ({
+    pathwayPlotBlockIdx: index('pathway_plot_block_idx').on(
+      table.pathway_id,
+      table.plot_block_id
+    ),
+  })
+);
 
 // Admin users table
 export const adminUsers = sqliteTable('admin_users', {

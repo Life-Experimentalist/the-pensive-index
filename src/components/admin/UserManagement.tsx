@@ -208,7 +208,7 @@ const UserManagement: React.FC = () => {
 
   const loadFandoms = async () => {
     try {
-      const response = await fetch('/api/fandoms');
+      const response = await fetch('/api/fandom');
       if (response.ok) {
         const data = await response.json();
         setAvailableFandoms(data.fandoms?.map((f: any) => f.name) || []);

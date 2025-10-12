@@ -92,7 +92,7 @@ export default function PlotBlocksAdminPage() {
       setLoading(true);
       const [blocksRes, fandomsRes] = await Promise.all([
         fetch('/api/admin/plot-blocks'),
-        fetch('/api/admin/fandoms'),
+        fetch('/api/admin/fandom'),
       ]);
 
       if (!blocksRes.ok || !fandomsRes.ok) {

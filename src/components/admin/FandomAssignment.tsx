@@ -35,7 +35,7 @@ import {
   Star,
   Loader2,
   CheckSquare,
-  Square
+  Square,
 } from 'lucide-react';
 
 // Types
@@ -95,9 +95,14 @@ const FANDOM_ROLES: AdminRole[] = [
     name: 'fandom_admin',
     display_name: 'Fandom Admin',
     description: 'Full administrative control over fandom content and users',
-    permissions: ['validation:fandom', 'admin:fandom_assign', 'fandom:moderate', 'fandom:settings'],
+    permissions: [
+      'validation:fandom',
+      'admin:fandom_assign',
+      'fandom:moderate',
+      'fandom:settings',
+    ],
     color: 'text-purple-600 bg-purple-100',
-    icon: Crown
+    icon: Crown,
   },
   {
     name: 'fandom_moderator',
@@ -105,7 +110,7 @@ const FANDOM_ROLES: AdminRole[] = [
     description: 'Content moderation and community management',
     permissions: ['validation:fandom', 'fandom:moderate', 'fandom:content'],
     color: 'text-blue-600 bg-blue-100',
-    icon: Shield
+    icon: Shield,
   },
   {
     name: 'validator',
@@ -113,8 +118,8 @@ const FANDOM_ROLES: AdminRole[] = [
     description: 'Validate and approve story submissions',
     permissions: ['validation:fandom', 'story:validate'],
     color: 'text-green-600 bg-green-100',
-    icon: Star
-  }
+    icon: Star,
+  },
 ];
 
 /**
@@ -123,7 +128,7 @@ const FANDOM_ROLES: AdminRole[] = [
 export default function FandomAssignment({
   className = '',
   selectedFandomId,
-  onFandomSelect
+  onFandomSelect,
 }: FandomAssignmentProps) {
   const { user } = useUser();
 
@@ -131,15 +136,21 @@ export default function FandomAssignment({
   const [fandoms, setFandoms] = useState<Fandom[]>([]);
   const [assignments, setAssignments] = useState<FandomAssignment[]>([]);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
-  const [expandedFandoms, setExpandedFandoms] = useState<Set<string>>(new Set());
-  const [selectedAssignments, setSelectedAssignments] = useState<Set<string>>(new Set());
+  const [expandedFandoms, setExpandedFandoms] = useState<Set<string>>(
+    new Set()
+  );
+  const [selectedAssignments, setSelectedAssignments] = useState<Set<string>>(
+    new Set()
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('active');
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showBulkPanel, setShowBulkPanel] = useState(false);
-  const [bulkOperation, setBulkOperation] = useState<BulkOperation | null>(null);
+  const [bulkOperation, setBulkOperation] = useState<BulkOperation | null>(
+    null
+  );
 
   // Permission states
   const [canAssign, setCanAssign] = useState<Record<string, boolean>>({});
@@ -167,11 +178,16 @@ export default function FandomAssignment({
   const loadFandomsAndAssignments = async () => {
     setIsLoading(true);
     try {
-      const [fandomsResponse, assignmentsResponse, usersResponse] = await Promise.all([
-        fetch('/api/fandoms'),
-        fetch(`/api/admin/fandoms/assign${selectedFandomId ? `?fandom_id=${selectedFandomId}` : ''}`),
-        fetch('/api/admin/users?action=list&is_active=true')
-      ]);
+      const [fandomsResponse, assignmentsResponse, usersResponse] =
+        await Promise.all([
+          fetch('/api/fandom'),
+          fetch(
+            `/api/admin/fandom/assign${
+              selectedFandomId ? `?fandom_id=${selectedFandomId}` : ''
+            }`
+          ),
+          fetch('/api/admin/users?action=list&is_active=true'),
+        ]);
 
       if (fandomsResponse.ok) {
         const fandomsData = await fandomsResponse.json();
@@ -204,7 +220,9 @@ export default function FandomAssignment({
     if (!user?.id) return;
 
     try {
-      const response = await fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=validation:global`);
+      const response = await fetch(
+        `/api/admin/users?action=permissions&user_id=${user.id}&permission=validation:global`
+      );
       const data = await response.json();
       setCanViewAll(data.permission_check?.has_permission || false);
     } catch (error) {
@@ -224,17 +242,26 @@ export default function FandomAssignment({
     for (const fandom of fandoms) {
       try {
         const [assignResponse, revokeResponse] = await Promise.all([
-          fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:fandom_assign&fandom_id=${fandom.id}`),
-          fetch(`/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:revoke&fandom_id=${fandom.id}`)
+          fetch(
+            `/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:fandom_assign&fandom_id=${fandom.id}`
+          ),
+          fetch(
+            `/api/admin/users?action=permissions&user_id=${user.id}&permission=admin:revoke&fandom_id=${fandom.id}`
+          ),
         ]);
 
         const assignData = await assignResponse.json();
         const revokeData = await revokeResponse.json();
 
-        assignPermissions[fandom.id] = assignData.permission_check?.has_permission || false;
-        revokePermissions[fandom.id] = revokeData.permission_check?.has_permission || false;
+        assignPermissions[fandom.id] =
+          assignData.permission_check?.has_permission || false;
+        revokePermissions[fandom.id] =
+          revokeData.permission_check?.has_permission || false;
       } catch (error) {
-        console.error(`Error checking permissions for fandom ${fandom.id}:`, error);
+        console.error(
+          `Error checking permissions for fandom ${fandom.id}:`,
+          error
+        );
       }
     }
 
@@ -281,8 +308,12 @@ export default function FandomAssignment({
    * Select all assignments for a fandom
    */
   const selectAllInFandom = (fandomId: string) => {
-    const fandomAssignments = filteredAssignments.filter(a => a.fandom_id === fandomId);
-    const allSelected = fandomAssignments.every(a => selectedAssignments.has(a.id));
+    const fandomAssignments = filteredAssignments.filter(
+      a => a.fandom_id === fandomId
+    );
+    const allSelected = fandomAssignments.every(a =>
+      selectedAssignments.has(a.id)
+    );
 
     setSelectedAssignments(prev => {
       const newSet = new Set(prev);
@@ -303,18 +334,18 @@ export default function FandomAssignment({
 
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/admin/fandoms/assign', {
+      const response = await fetch('/api/admin/fandom/assign', {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           operation: operation.type,
           assignment_ids: operation.assignments,
           target_role: operation.target_role,
           target_user: operation.target_user,
-          reason: operation.reason || `Bulk ${operation.type} operation`
-        })
+          reason: operation.reason || `Bulk ${operation.type} operation`,
+        }),
       });
 
       const result = await response.json();
@@ -341,18 +372,27 @@ export default function FandomAssignment({
    */
   const filteredAssignments = useMemo(() => {
     return assignments.filter(assignment => {
-      const matchesSearch = assignment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           assignment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           assignment.fandom_name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch =
+        assignment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        assignment.user_email
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        assignment.fandom_name.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesRole = filterRole === 'all' || assignment.role.name === filterRole;
+      const matchesRole =
+        filterRole === 'all' || assignment.role.name === filterRole;
 
-      const matchesStatus = filterStatus === 'all' ||
-                           (filterStatus === 'active' && assignment.is_active) ||
-                           (filterStatus === 'inactive' && !assignment.is_active) ||
-                           (filterStatus === 'expiring' && assignment.expires_at && new Date(assignment.expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      const matchesStatus =
+        filterStatus === 'all' ||
+        (filterStatus === 'active' && assignment.is_active) ||
+        (filterStatus === 'inactive' && !assignment.is_active) ||
+        (filterStatus === 'expiring' &&
+          assignment.expires_at &&
+          new Date(assignment.expires_at) <
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
-      const matchesFandom = !selectedFandomId || assignment.fandom_id === selectedFandomId;
+      const matchesFandom =
+        !selectedFandomId || assignment.fandom_id === selectedFandomId;
 
       return matchesSearch && matchesRole && matchesStatus && matchesFandom;
     });
@@ -378,13 +418,17 @@ export default function FandomAssignment({
     return (
       <div className={`flex items-center justify-center p-8 ${className}`}>
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <span className="ml-3 text-gray-600">Loading fandom assignments...</span>
+        <span className="ml-3 text-gray-600">
+          Loading fandom assignments...
+        </span>
       </div>
     );
   }
 
   return (
-    <div className={`fandom-assignment bg-white rounded-lg shadow-sm border ${className}`}>
+    <div
+      className={`fandom-assignment bg-white rounded-lg shadow-sm border ${className}`}
+    >
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -432,7 +476,7 @@ export default function FandomAssignment({
                 type="text"
                 placeholder="Search users, fandoms..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -441,7 +485,7 @@ export default function FandomAssignment({
           {/* Role filter */}
           <select
             value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
+            onChange={e => setFilterRole(e.target.value)}
             className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Roles</option>
@@ -455,7 +499,7 @@ export default function FandomAssignment({
           {/* Status filter */}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={e => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="active">Active Only</option>
@@ -501,7 +545,9 @@ export default function FandomAssignment({
           <div className="p-8 text-center text-gray-500">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium">No fandoms found</p>
-            <p className="text-sm">Check your permissions or contact an administrator</p>
+            <p className="text-sm">
+              Check your permissions or contact an administrator
+            </p>
           </div>
         )}
       </div>
@@ -522,7 +568,7 @@ function FandomSection({
   onToggleExpansion,
   onToggleSelection,
   onSelectAll,
-  onRefresh
+  onRefresh,
 }: {
   fandom: Fandom;
   assignments: FandomAssignment[];
@@ -541,13 +587,17 @@ function FandomSection({
   const roleCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     FANDOM_ROLES.forEach(role => {
-      counts[role.name] = assignments.filter(a => a.role.name === role.name && a.is_active).length;
+      counts[role.name] = assignments.filter(
+        a => a.role.name === role.name && a.is_active
+      ).length;
     });
     return counts;
   }, [assignments]);
 
   // Check if all assignments in this fandom are selected
-  const allSelected = assignments.length > 0 && assignments.every(a => selectedAssignments.has(a.id));
+  const allSelected =
+    assignments.length > 0 &&
+    assignments.every(a => selectedAssignments.has(a.id));
   const someSelected = assignments.some(a => selectedAssignments.has(a.id));
 
   return (
@@ -587,7 +637,8 @@ function FandomSection({
                   {fandom.name}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {assignments.filter(a => a.is_active).length} active assignments
+                  {assignments.filter(a => a.is_active).length} active
+                  assignments
                 </p>
               </div>
             </button>
@@ -602,7 +653,9 @@ function FandomSection({
                 const IconComponent = role.icon;
                 return (
                   <div key={role.name} className="flex items-center space-x-1">
-                    <IconComponent className={`w-3 h-3 ${role.color.split(' ')[0]}`} />
+                    <IconComponent
+                      className={`w-3 h-3 ${role.color.split(' ')[0]}`}
+                    />
                     <span className="text-gray-600">{count}</span>
                   </div>
                 );
@@ -691,7 +744,7 @@ function AssignmentRow({
   isSelected,
   canRevoke,
   onToggleSelection,
-  onRefresh
+  onRefresh,
 }: {
   assignment: FandomAssignment;
   isSelected: boolean;
@@ -702,23 +755,26 @@ function AssignmentRow({
   const [showActions, setShowActions] = useState(false);
   const [isRevoking, setIsRevoking] = useState(false);
 
-  const role = FANDOM_ROLES.find(r => r.name === assignment.role.name) || FANDOM_ROLES[0];
+  const role =
+    FANDOM_ROLES.find(r => r.name === assignment.role.name) || FANDOM_ROLES[0];
   const IconComponent = role.icon;
 
   const handleRevoke = async () => {
-    if (!canRevoke) return;
+    if (!canRevoke) {
+      return;
+    }
 
     setIsRevoking(true);
     try {
-      const response = await fetch('/api/admin/fandoms/assign', {
+      const response = await fetch('/api/admin/fandom/assign', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           assignment_id: assignment.id,
-          reason: 'Revoked via fandom admin interface'
-        })
+          reason: 'Revoked via fandom admin interface',
+        }),
       });
 
       if (response.ok) {
@@ -758,9 +814,13 @@ function AssignmentRow({
           {/* Assignment details */}
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-medium text-gray-900">{assignment.user_name}</span>
+              <span className="font-medium text-gray-900">
+                {assignment.user_name}
+              </span>
               <span className="text-sm text-gray-500">•</span>
-              <span className="text-sm font-medium text-gray-700">{role.display_name}</span>
+              <span className="text-sm font-medium text-gray-700">
+                {role.display_name}
+              </span>
               {!assignment.is_active && (
                 <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">
                   Inactive
@@ -768,7 +828,8 @@ function AssignmentRow({
               )}
             </div>
             <div className="text-sm text-gray-600">
-              {assignment.user_email} • Assigned {new Date(assignment.created_at).toLocaleDateString()}
+              {assignment.user_email} • Assigned{' '}
+              {new Date(assignment.created_at).toLocaleDateString()}
               {assignment.assigned_by_name && (
                 <span> by {assignment.assigned_by_name}</span>
               )}
@@ -805,7 +866,7 @@ function AddAssignmentForm({
   fandomId,
   fandomName,
   onSuccess,
-  onCancel
+  onCancel,
 }: {
   fandomId: string;
   fandomName: string;
@@ -831,16 +892,16 @@ function AddAssignmentForm({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/admin/fandoms/assign', {
+      const response = await fetch('/api/admin/fandom/assign', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           user_id: selectedUser,
           fandom_id: fandomId,
-          role: selectedRole
-        })
+          role: selectedRole,
+        }),
       });
 
       if (response.ok) {
@@ -871,7 +932,7 @@ function AddAssignmentForm({
             </label>
             <select
               value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
+              onChange={e => setSelectedUser(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
@@ -891,7 +952,7 @@ function AddAssignmentForm({
             </label>
             <select
               value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
+              onChange={e => setSelectedRole(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
@@ -947,7 +1008,7 @@ function BulkOperationsPanel({
   users,
   onOperation,
   onClose,
-  isProcessing
+  isProcessing,
 }: {
   selectedAssignments: string[];
   assignments: FandomAssignment[];
@@ -957,12 +1018,16 @@ function BulkOperationsPanel({
   onClose: () => void;
   isProcessing: boolean;
 }) {
-  const [operationType, setOperationType] = useState<'assign' | 'reassign' | 'revoke' | 'transfer'>('reassign');
+  const [operationType, setOperationType] = useState<
+    'assign' | 'reassign' | 'revoke' | 'transfer'
+  >('reassign');
   const [targetRole, setTargetRole] = useState('');
   const [targetUser, setTargetUser] = useState('');
   const [reason, setReason] = useState('');
 
-  const selectedAssignmentObjects = assignments.filter(a => selectedAssignments.includes(a.id));
+  const selectedAssignmentObjects = assignments.filter(a =>
+    selectedAssignments.includes(a.id)
+  );
 
   const handleExecute = () => {
     onOperation({
@@ -970,7 +1035,7 @@ function BulkOperationsPanel({
       assignments: selectedAssignments,
       target_role: targetRole || undefined,
       target_user: targetUser || undefined,
-      reason: reason || undefined
+      reason: reason || undefined,
     });
   };
 
@@ -980,10 +1045,7 @@ function BulkOperationsPanel({
         <h4 className="font-medium text-gray-900">
           Bulk Operations ({selectedAssignments.length} selected)
         </h4>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600"
-        >
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
           <X className="w-4 h-4" />
         </button>
       </div>
@@ -996,7 +1058,7 @@ function BulkOperationsPanel({
           </label>
           <select
             value={operationType}
-            onChange={(e) => setOperationType(e.target.value as any)}
+            onChange={e => setOperationType(e.target.value as any)}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="reassign">Change Role</option>
@@ -1013,7 +1075,7 @@ function BulkOperationsPanel({
             </label>
             <select
               value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
+              onChange={e => setTargetRole(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
@@ -1035,7 +1097,7 @@ function BulkOperationsPanel({
             </label>
             <select
               value={targetUser}
-              onChange={(e) => setTargetUser(e.target.value)}
+              onChange={e => setTargetUser(e.target.value)}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
@@ -1057,7 +1119,7 @@ function BulkOperationsPanel({
           <input
             type="text"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={e => setReason(e.target.value)}
             placeholder="Operation reason..."
             className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
@@ -1070,7 +1132,8 @@ function BulkOperationsPanel({
         <div className="text-sm text-gray-600 space-y-1">
           {selectedAssignmentObjects.slice(0, 3).map(assignment => (
             <div key={assignment.id}>
-              {assignment.user_name} • {assignment.fandom_name} • {assignment.role.display_name}
+              {assignment.user_name} • {assignment.fandom_name} •{' '}
+              {assignment.role.display_name}
             </div>
           ))}
           {selectedAssignmentObjects.length > 3 && (
@@ -1089,7 +1152,8 @@ function BulkOperationsPanel({
         </button>
         <button
           onClick={handleExecute}
-          disabled={isProcessing ||
+          disabled={
+            isProcessing ||
             (operationType === 'reassign' && !targetRole) ||
             (operationType === 'transfer' && !targetUser)
           }
@@ -1101,9 +1165,7 @@ function BulkOperationsPanel({
               Processing...
             </>
           ) : (
-            <>
-              Execute {operationType}
-            </>
+            <>Execute {operationType}</>
           )}
         </button>
       </div>

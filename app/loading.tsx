@@ -31,7 +31,7 @@ export default function LoadingPage() {
               alt="The Pensieve Index - Loading"
               width={240}
               height={120}
-              className="mx-auto relative"
+              className="mx-auto relative h-auto"
               priority
             />
           </div>

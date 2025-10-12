@@ -92,7 +92,7 @@ export default function TagsAdminPage() {
       setLoading(true);
       const [tagsRes, fandomsRes] = await Promise.all([
         fetch('/api/admin/tags'),
-        fetch('/api/admin/fandoms'),
+        fetch('/api/admin/fandom'),
       ]);
 
       if (!tagsRes.ok || !fandomsRes.ok) {

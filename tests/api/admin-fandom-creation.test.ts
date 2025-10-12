@@ -1,5 +1,5 @@
 /**
- * Contract Test: POST /api/admin/fandoms
+ * Contract Test: POST /api/admin/fandom
  *
  * Tests the API endpoint for creating new fandoms with the modular fandom
  * creation system. Verifies request/response formats, validation, permissions,
@@ -19,7 +19,7 @@ import type {
 // NOTE: This is a TDD contract test - the actual endpoint doesn't exist yet
 // This test MUST FAIL until the implementation is created
 
-describe('POST /api/admin/fandoms - Contract Tests', () => {
+describe('POST /api/admin/fandom - Contract Tests', () => {
   let mockRequest: (
     body: any,
     options?: { userId?: string; role?: string }
@@ -32,7 +32,7 @@ describe('POST /api/admin/fandoms - Contract Tests', () => {
       body: any,
       options: { userId?: string; role?: string } = {}
     ) => {
-      const url = 'http://localhost:3000/api/admin/fandoms';
+      const url = 'http://localhost:3000/api/admin/fandom';
       const request = new NextRequest(url, {
         method: 'POST',
         headers: {
@@ -47,7 +47,7 @@ describe('POST /api/admin/fandoms - Contract Tests', () => {
 
     // Import the actual endpoint (will fail until implemented)
     try {
-      const module = await import('@/app/api/admin/fandoms/route');
+      const module = await import('@/app/api/admin/fandom/route');
       endpoint = module.POST;
     } catch (error) {
       console.warn('Endpoint not implemented yet - this is expected for TDD');
@@ -377,7 +377,7 @@ describe('POST /api/admin/fandoms - Contract Tests', () => {
 
   describe('Content-Type Validation', () => {
     it('should reject non-JSON content type', async () => {
-      const url = 'http://localhost:3000/api/admin/fandoms';
+      const url = 'http://localhost:3000/api/admin/fandom';
       const request = new NextRequest(url, {
         method: 'POST',
         headers: {

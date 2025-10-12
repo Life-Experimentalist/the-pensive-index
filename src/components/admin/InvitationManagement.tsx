@@ -987,7 +987,7 @@ function CreateInvitationForm({
   useEffect(() => {
     if (!fandomId) {
       // Load fandoms for selection
-      fetch('/api/fandoms')
+      fetch('/api/fandom')
         .then(res => res.json())
         .then(data => setFandoms(data.fandoms || []))
         .catch(console.error);

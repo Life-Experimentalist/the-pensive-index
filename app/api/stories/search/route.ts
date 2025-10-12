@@ -84,3 +84,74 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+/**
+ * POST /api/stories/search
+ * Search for stories matching pathway criteria (tags, tropes, etc.)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { fandomId, tags, tropes, plotBlocks, minVotes, pollStatus, sortBy, limit, offset } = body;
+
+    if (!fandomId) {
+      return NextResponse.json(
+        { error: 'Missing required parameter: fandomId' },
+        { status: 400 }
+      );
+    }
+
+    const db = getDatabase();
+    const startTime = Date.now();
+
+    // Build base query
+    let queryConditions = [
+      eq(stories.fandom_id, fandomId),
+      eq(stories.poll_status, (pollStatus || 'approved') as any),
+    ];
+
+    // Add vote filter
+    const minVoteCount = minVotes || 0;
+    if (minVoteCount > 0) {
+      queryConditions.push(sql`${stories.vote_count} >= ${minVoteCount}`);
+    }
+
+    // TODO: Implement tag and trope filtering when pathway_tags junction table exists
+    // TODO: Implement relevance scoring based on matched tags
+    // For now, return stories from the fandom
+
+    let dbQuery = db.select().from(stories);
+
+    if (queryConditions.length > 0) {
+      dbQuery = dbQuery.where(and(...queryConditions)) as typeof dbQuery;
+    }
+
+    const allResults = await dbQuery.all();
+
+    // Apply pagination
+    const limitCount = Math.min(limit || 20, 100);
+    const offsetCount = offset || 0;
+    const results = allResults.slice(offsetCount, offsetCount + limitCount);
+
+    const executionTime = Date.now() - startTime;
+
+    return NextResponse.json({
+      stories: results,
+      total: allResults.length,
+      limit: limitCount,
+      offset: offsetCount,
+      searchMetadata: {
+        tagsUsed: tags || [],
+        tropesUsed: tropes || [],
+        plotBlocksUsed: plotBlocks || [],
+        executionTime,
+      },
+    });
+  } catch (error) {
+    console.error('[API] POST story search error:', error);
+    return NextResponse.json(
+      { error: 'Failed to search stories' },
+      { status: 500 }
+    );
+  }
+}

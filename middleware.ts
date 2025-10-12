@@ -11,7 +11,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
-  '/api/fandoms(.*)',
+  '/api/fandom(.*)',
   '/api/stories(.*)',
 ]);
 

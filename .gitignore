@@ -87,3 +87,10 @@ backup/*
 check-to-be-trashed
 .github/prompts*
 .specify
+package-lock.json
+
+!README.md
+!CONTRIBUTING.md
+!LICENSE.md
+
+*.md

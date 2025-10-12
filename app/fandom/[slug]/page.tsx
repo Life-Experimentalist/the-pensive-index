@@ -1,5 +1,5 @@
 /**
- * Fandom Discovery Page - T046
+ * Fandom Discovery Page
  *
  * Dynamic fandom discovery page with URL-based fandom selection, pathway building interface,
  * and proper error boundaries. Includes breadcrumb navigation and social sharing.
@@ -10,12 +10,11 @@
 
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { FandomModel, TagModel, PlotBlockModel } from '@/lib/database/models';
 import { ResponsiveWrapper } from '@/components/discovery/responsive-wrapper';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import FandomShareButton from './FandomShareButton';
+import MainLayout from '@/components/layout/MainLayout';
 import FandomErrorFallback from './FandomErrorFallback';
 
 interface FandomPageProps {
@@ -123,15 +122,15 @@ async function getFandomData(slug: string) {
 // Loading component for Suspense
 function FandomLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-6 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="h-96 bg-gray-200 rounded-lg"></div>
-            <div className="h-96 bg-gray-200 rounded-lg"></div>
-            <div className="h-96 bg-gray-200 rounded-lg"></div>
+            <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
           </div>
         </div>
       </div>
@@ -155,131 +154,119 @@ export default async function FandomDiscoveryPage({
 
   return (
     <ErrorBoundary fallback={<FandomErrorFallback />}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {/* Header with breadcrumb navigation */}
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Breadcrumb Navigation */}
-              <nav className="flex items-center space-x-2 text-sm text-gray-500">
-                <Link
-                  href="/"
-                  className="hover:text-indigo-600 transition-colors"
-                >
-                  Home
-                </Link>
-                <span>/</span>
-                <Link
-                  href="/discover"
-                  className="hover:text-indigo-600 transition-colors"
-                >
-                  Discover
-                </Link>
-                <span>/</span>
-                <span className="text-gray-900 font-medium">{fandom.name}</span>
-              </nav>
+      <MainLayout
+        fullWidth
+        breadcrumbs={[
+          { label: 'Fandoms', href: '/fandom' },
+          { label: fandom.name },
+        ]}
+        showShare={true}
+        shareData={{
+          title: `${fandom.name} Story Discovery`,
+          text: `Discover ${fandom.name} fanfiction stories on The Pensieve Index`,
+        }}
+      >
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {/* Fandom Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl">
+                {fandom.name}
+              </h1>
+              <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 dark:text-gray-300">
+                {fandom.description ||
+                  `Discover stories and generate prompts in the ${fandom.name} universe`}
+              </p>
 
-              {/* Social Sharing */}
-              <div className="flex items-center space-x-2">
-                <FandomShareButton fandomName={fandom.name} />
+              {/* Fandom Statistics */}
+              <div className="mt-6 flex justify-center space-x-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {tags.length}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Tags Available
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {plotBlocks.length}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    Tropes
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Fandom Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-              {fandom.name}
-            </h1>
-            <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500">
-              {fandom.description ||
-                `Discover stories and generate prompts in the ${fandom.name} universe`}
-            </p>
-
-            {/* Fandom Statistics */}
-            <div className="mt-6 flex justify-center space-x-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-600">
-                  {tags.length}
-                </div>
-                <div className="text-sm text-gray-500">Tags Available</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-600">
-                  {plotBlocks.length}
-                </div>
-                <div className="text-sm text-gray-500">Tropes</div>
-              </div>
-            </div>
+            {/* Discovery Interface */}
+            <Suspense fallback={<FandomLoading />}>
+              <ResponsiveWrapper
+                selectedFandomSlug={fandom.slug}
+                className="mt-8"
+              />
+            </Suspense>
           </div>
 
-          {/* Discovery Interface */}
-          <Suspense fallback={<FandomLoading />}>
-            <ResponsiveWrapper
-              selectedFandomSlug={fandom.slug}
-              className="mt-8"
-            />
-          </Suspense>
-        </main>
-
-        {/* Structured Data for SEO */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebPage',
-              name: `${fandom.name} Story Discovery`,
-              description:
-                fandom.description ||
-                `Discover ${fandom.name} fanfiction stories and generate creative prompts`,
-              url: `https://pensive-index.vercel.app/fandom/${fandom.slug}`,
-              isPartOf: {
-                '@type': 'WebSite',
-                name: 'The Pensieve Index',
-                url: 'https://pensive-index.vercel.app',
-              },
-              breadcrumb: {
-                '@type': 'BreadcrumbList',
-                itemListElement: [
-                  {
-                    '@type': 'ListItem',
-                    position: 1,
-                    name: 'Home',
-                    item: 'https://pensive-index.vercel.app',
-                  },
-                  {
-                    '@type': 'ListItem',
-                    position: 2,
-                    name: 'Discover',
-                    item: 'https://pensive-index.vercel.app/discover',
-                  },
-                  {
-                    '@type': 'ListItem',
-                    position: 3,
-                    name: fandom.name,
-                    item: `https://pensive-index.vercel.app/fandom/${fandom.slug}`,
-                  },
-                ],
-              },
-              mainEntity: {
-                '@type': 'Thing',
-                name: fandom.name,
-                description: fandom.description,
-              },
-            }),
-          }}
-        />
-      </div>
+          {/* Structured Data for SEO */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'WebPage',
+                name: `${fandom.name} Story Discovery`,
+                description:
+                  fandom.description ||
+                  `Discover ${fandom.name} fanfiction stories and generate creative prompts`,
+                url: `https://pensive-index.vercel.app/fandom/${fandom.slug}`,
+                isPartOf: {
+                  '@type': 'WebSite',
+                  name: 'The Pensieve Index',
+                  url: 'https://pensive-index.vercel.app',
+                },
+                breadcrumb: {
+                  '@type': 'BreadcrumbList',
+                  itemListElement: [
+                    {
+                      '@type': 'ListItem',
+                      position: 1,
+                      name: 'Home',
+                      item: 'https://pensive-index.vercel.app',
+                    },
+                    {
+                      '@type': 'ListItem',
+                      position: 2,
+                      name: 'Fandoms',
+                      item: 'https://pensive-index.vercel.app/fandom',
+                    },
+                    {
+                      '@type': 'ListItem',
+                      position: 3,
+                      name: fandom.name,
+                      item: `https://pensive-index.vercel.app/fandom/${fandom.slug}`,
+                    },
+                  ],
+                },
+                mainEntity: {
+                  '@type': 'Thing',
+                  name: fandom.name,
+                  description: fandom.description,
+                },
+              }),
+            }}
+          />
+        </div>
+      </MainLayout>
     </ErrorBoundary>
   );
 }
 
 // Generate static params for popular fandoms (optional optimization)
+// Only generate during development to avoid build-time database errors
 export async function generateStaticParams() {
+  // Skip static generation in production builds to avoid database access errors
   try {
     const fandoms = await FandomModel.getAllActive();
     // Generate static pages for top 10 most popular fandoms
@@ -287,10 +274,18 @@ export async function generateStaticParams() {
       slug: fandom.slug,
     }));
   } catch (error) {
-    console.error('Failed to generate static params:', error);
+    console.error(
+      '[Fandom] Database unavailable during static params generation:',
+      error
+    );
+    // Fallback: return empty array if database is not accessible at build time
     return [];
   }
 }
+
+// Enable dynamic rendering for database-dependent pages
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 
 // Enable ISR (Incremental Static Regeneration) for better performance
 export const revalidate = 3600; // Revalidate every hour

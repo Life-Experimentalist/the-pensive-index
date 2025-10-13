@@ -83,6 +83,7 @@ temp/
 # Spec-kit generated files
 specs/*/
 !specs/.gitkeep
+!specs/**/*.md
 backup/*
 check-to-be-trashed
 .github/prompts*
@@ -94,4 +95,5 @@ package-lock.json
 !LICENSE.md
 
 *.md
+!specs/**/*.md
 .specify/

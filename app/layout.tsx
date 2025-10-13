@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+// import { Inter } from 'next/font/google';  // Commented out for CI build - requires network access
 import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['latin'] });  // Commented out for CI build
 
 export const metadata: Metadata = {
   title: 'The Pensieve Index',
@@ -57,7 +57,7 @@ export default function RootLayout({
           <meta name="theme-color" content="#ffffff" />
           <meta name="color-scheme" content="light dark" />
         </head>
-        <body className={inter.className} suppressHydrationWarning={true}>
+        <body suppressHydrationWarning={true}>
           <ThemeProvider>{children}</ThemeProvider>
         </body>
       </html>

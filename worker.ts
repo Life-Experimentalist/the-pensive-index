@@ -4,12 +4,20 @@
  * Unified worker handling:
  * - Next.js app and documentation routing
  * - Scheduled cron jobs for performance monitoring
+ * - Durable Objects for rate limiting
  */
 
 import { handleRequest } from './src/worker/handler.js';
 import { handleMetricsAggregationCron } from './src/worker/cron/metrics-aggregation';
 import { handleAnalyticsAggregationCron } from './src/worker/cron/analytics-aggregation';
 import { handleResourceMonitoringCron } from './src/worker/cron/resource-monitoring';
+import { RateLimiter } from './src/worker/rate-limiter';
+
+// Cloudflare Workers types
+interface ScheduledEvent {
+  cron: string;
+  scheduledTime: number;
+}
 
 const worker = {
   /**
@@ -51,4 +59,4 @@ const worker = {
 
 export default worker;
 
-export { handleRequest };
+export { handleRequest, RateLimiter };

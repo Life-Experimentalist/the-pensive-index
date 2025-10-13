@@ -46,9 +46,10 @@ name = "RATE_LIMITER"
 class_name = "RateLimiter"
 script_name = "the-pensive-index"
 
+# Migration for Durable Objects (using new_sqlite_classes for free plan compatibility)
 [[migrations]]
 tag = "v1"
-new_classes = ["RateLimiter"]
+new_sqlite_classes = ["RateLimiter"]
 
 # Scheduled cron triggers for performance monitoring
 [triggers]

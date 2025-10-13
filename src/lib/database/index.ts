@@ -437,14 +437,12 @@ export class DatabaseSeeder {
   private async seedFandoms(db: DatabaseConnection): Promise<void> {
     const fandoms = [
       {
-        id: 'harry-potter',
         name: 'Harry Potter',
         description: 'The wizarding world created by J.K. Rowling',
         slug: 'harry-potter',
         is_active: true,
       },
       {
-        id: 'percy-jackson',
         name: 'Percy Jackson',
         description: 'Camp Half-Blood and the world of Greek mythology',
         slug: 'percy-jackson',
@@ -498,7 +496,6 @@ export class DatabaseSeeder {
     // Implementation for test data
     const testFandoms = [
       {
-        id: 'star-trek',
         name: 'Star Trek',
         description: 'Science fiction franchise created by Gene Roddenberry',
         slug: 'star-trek',

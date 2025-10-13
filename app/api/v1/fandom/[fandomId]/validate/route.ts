@@ -40,7 +40,13 @@ export const POST = CommonMiddleware.public(
       request: NextRequest,
       { params }: { params: Promise<{ fandomId: string }> }
     ) => {
-      const { fandomId } = await params;
+      const { fandomId: fandomIdStr } = await params;
+      const fandomId = parseInt(fandomIdStr);
+      
+      if (isNaN(fandomId)) {
+        throw ErrorFactory.validation('Invalid fandom ID format');
+      }
+      
       const body = await request.json();
       const validatedData = fandomValidationRequestSchema.parse(body);
 
@@ -53,13 +59,16 @@ export const POST = CommonMiddleware.public(
       });
 
       if (!fandom) {
-        throw ErrorFactory.notFound('Fandom', fandomId);
+        throw ErrorFactory.notFound('Fandom', fandomIdStr);
       }
 
       // Load tag classes for this fandom
+      // Note: tagClasses.fandom_id is TEXT but fandoms.id is INTEGER 
+      // This is a schema mismatch that requires CAST or string conversion
+      const fandomIdStr2 = String(fandomId);
       const fandomTagClasses = await db.query.tagClasses.findMany({
         where: and(
-          eq(tagClasses.fandom_id, fandomId),
+          eq(tagClasses.fandom_id, fandomIdStr2),
           eq(tagClasses.is_active, true)
         ),
       });

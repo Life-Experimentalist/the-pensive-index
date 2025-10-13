@@ -7,7 +7,7 @@ import type { Fandom } from '@/types';
 
 interface FandomSearchProps {
   fandoms: Array<{
-    id: string;
+    id: number;
     name: string;
     slug: string;
     description: string;

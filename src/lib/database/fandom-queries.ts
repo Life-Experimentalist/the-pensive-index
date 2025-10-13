@@ -37,10 +37,15 @@ export class FandomQueries {
    * Get fandom by ID
    */
   async getFandomById(id: string): Promise<Fandom | null> {
+    const fandomId = parseInt(id);
+    if (isNaN(fandomId)) {
+      return null;
+    }
+    
     const result = await this.db
       .select()
       .from(fandoms)
-      .where(eq(fandoms.id, id))
+      .where(eq(fandoms.id, fandomId))
       .limit(1);
 
     return result[0] || null;
@@ -132,13 +137,18 @@ export class FandomQueries {
     id: string,
     updates: Partial<Omit<Fandom, 'id' | 'created_at'>>
   ): Promise<Fandom | null> {
+    const fandomId = parseInt(id);
+    if (isNaN(fandomId)) {
+      return null;
+    }
+    
     const [updatedFandom] = await this.db
       .update(fandoms)
       .set({
         ...updates,
         updated_at: sql`datetime('now')`,
       })
-      .where(eq(fandoms.id, id))
+      .where(eq(fandoms.id, fandomId))
       .returning();
 
     return updatedFandom || null;
@@ -148,13 +158,18 @@ export class FandomQueries {
    * Soft delete fandom (deactivate)
    */
   async deactivateFandom(id: string): Promise<boolean> {
+    const fandomId = parseInt(id);
+    if (isNaN(fandomId)) {
+      return false;
+    }
+    
     const result = await this.db
       .update(fandoms)
       .set({
         is_active: false,
         updated_at: sql`datetime('now')`,
       })
-      .where(eq(fandoms.id, id));
+      .where(eq(fandoms.id, fandomId));
 
     return result.changes > 0;
   }
@@ -163,7 +178,12 @@ export class FandomQueries {
    * Hard delete fandom (use with caution)
    */
   async deleteFandom(id: string): Promise<boolean> {
-    const result = await this.db.delete(fandoms).where(eq(fandoms.id, id));
+    const fandomId = parseInt(id);
+    if (isNaN(fandomId)) {
+      return false;
+    }
+    
+    const result = await this.db.delete(fandoms).where(eq(fandoms.id, fandomId));
 
     return result.changes > 0;
   }

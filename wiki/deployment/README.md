@@ -1,3 +1,26 @@
+# Deployment Guide (Overview)
+
+This page is the entry point for deployment instructions for The Pensieve Index. The repository deploys to Cloudflare Workers (Pages + Workers), uses Cloudflare D1 (SQLite) via Drizzle for the main database, and relies on KV namespaces for caching and Workers Sites for static assets.
+
+Key artifacts in the repo
+- `wrangler.toml` — Cloudflare worker configuration, bindings (D1, KV, DO), migrations, crons, and site config
+- `worker.ts` — Cloudflare worker entry handlers (fetch, scheduled)
+- `scripts/migrate-database.ts` and `migrations/` — database migrations and seed scripts
+- `public/` — static assets published to Workers Sites
+
+Quick deploy checklist
+- [ ] Confirm `wrangler.toml` has correct environment secrets and binding names for the target account
+- [ ] Run migrations: `npm run migrate` (see `scripts/` for project-specific scripts)
+- [ ] Build and test locally: `npm run build` then `npm run test`
+- [ ] Deploy to preview/staging using Wrangler or the Cloudflare dashboard
+
+Common deploy pitfalls
+- Missing Durable Object migrations on free plan — ensure `new_sqlite_classes` contains DO names if required
+- KV namespace mismatches — confirm `CACHE` vs site KV names are not conflated
+- Secrets mismatch — verify API keys and tokens in Cloudflare environment variables
+
+Next steps
+- See `production-deployment-guide.md` (detailed steps) and `observability.md` for logs and alerting configuration.
 # Deployment Guide
 
 The Pensieve Index is designed for deployment on **Cloudflare Pages** with **Cloudflare D1** database.

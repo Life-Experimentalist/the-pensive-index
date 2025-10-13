@@ -1,3 +1,70 @@
+# Architecture — Overview
+
+This document summarizes the system architecture and component responsibilities for The Pensieve Index.
+
+High-level components
+- Web UI — Next.js (App Router) React front-end under `app/` with server and client components
+- API & Server logic — Next.js route handlers in `app/api/` and Cloudflare Worker entry `worker.ts` for background/scheduled tasks
+- Database — Cloudflare D1 (SQLite) with Drizzle ORM for data access and migrations under `migrations/`
+- Caching — Cloudflare KV (namespace `CACHE`) and in-memory caches where appropriate
+- Rate limiting — Durable Object `RateLimiter` to coordinate quotas and throttling
+
+Data model highlights
+- Fandoms → Tags → Tropes (hierarchical trope trees)
+- Pathways — user-created selections of tropes/tags that define a story prompt or filter
+- Stories — indexed entries with tags, tropes, and metadata used for library-first discovery
+
+Trope tree
+- Tropes are stored as nodes with optional parent relationships that form branching trees.
+- The validation engine enforces allowed combinations only at finalization time (on Finish) and suggests fixes for impossible states.
+
+Communication & integration
+- GitHub Issues — story submissions flow uses GitHub Issues (via `@octokit/rest`) and admin review
+- Browser extension — tags and story metadata can be submitted via the extension (see `extension/`)
+
+Deployment topology
+- Frontend and server code deploy to Cloudflare Pages + Workers
+- Background jobs scheduled via Cloudflare Worker crons (configured in `wrangler.toml`)
+
+Where to update architecture diagrams
+- Keep diagrams in `wiki/architecture/diagrams/` and update `ARCHITECTURE.md` when components change.
+
+Checklist before architectural changes
+- [ ] Update this document and add an architecture diagram
+- [ ] Add migration notes under `migrations/` and `wiki/deployment/`
+- [ ] Run integration tests and document rollback steps
+
+Architecture diagram (Mermaid)
+-------------------------------
+
+```mermaid
+flowchart LR
+    subgraph Browser
+        A[Next.js UI (Pathway Builder)]
+        B[Browser Extension]
+    end
+    A --> API[Next.js API Routes]
+    B --> API
+    API --> DB[D1 (SQLite) - Drizzle]
+    API --> KV[KV (CACHE)]
+    Worker[Cloudflare Worker (Crons & Background)] --> DB
+    Worker --> KV
+    Worker --> DO[Durable Object: RateLimiter]
+    API --> Worker
+    API --> GitHub[GitHub Issues]
+    GitHub --> Admin[Admin Dashboard]
+    Admin --> API
+    classDef infra fill:#f9f,stroke:#333,stroke-width:1px;
+    class DB,KV,Worker,DO,GitHub infra
+```
+
+Diagram notes
+- The diagram labels the main runtime components and shows primary request and background flows.
+- Responsibilities:
+    - UI: pathway building, client validation, search UX
+    - API: persistent storage access, search orchestration
+    - Worker: background aggregation, scheduled tasks, maintenance
+    - DO: shared state for rate limiting and coordination
 # System Architecture
 
 ## Overview

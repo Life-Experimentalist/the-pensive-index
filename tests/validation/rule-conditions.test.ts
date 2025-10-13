@@ -13,6 +13,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
   // Comprehensive tag classes for testing different validation rules
   const testTagClasses: TagClass[] = [
     {
+      slug: 'tc-shipping',
       id: 'tc-shipping',
       name: 'Shipping Tags',
       fandom_id: 'harry-potter',
@@ -42,6 +43,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       updated_at: new Date('2025-01-17T10:00:00Z'),
     },
     {
+      slug: 'tc-temporal',
       id: 'tc-temporal',
       name: 'Time Travel Tags',
       fandom_id: 'harry-potter',
@@ -71,6 +73,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       updated_at: new Date('2025-01-17T10:00:00Z'),
     },
     {
+      slug: 'tc-power-levels',
       id: 'tc-power-levels',
       name: 'Character Power Levels',
       fandom_id: 'harry-potter',
@@ -93,6 +96,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
       updated_at: new Date('2025-01-17T10:00:00Z'),
     },
     {
+      slug: 'tc-complex-dependencies',
       id: 'tc-complex-dependencies',
       name: 'Complex Dependency Testing',
       fandom_id: 'harry-potter',
@@ -421,6 +425,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
     it('should enforce minimum instance requirements', () => {
       // For this test, let's create a tag class with min_instances requirement
       const minRequiredTagClass: TagClass = {
+        slug: 'tc-required-minimum',
         id: 'tc-required-minimum',
         name: 'Required Minimum Tags',
         fandom_id: 'harry-potter',
@@ -811,6 +816,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should handle empty validation rules gracefully', () => {
       const emptyRulesTagClass: TagClass = {
+        slug: 'tc-empty',
         id: 'tc-empty',
         name: 'Empty Rules',
         fandom_id: 'harry-potter',
@@ -852,6 +858,7 @@ describe('Rule Conditions - Tag Class Validation', () => {
 
     it('should handle malformed validation rules gracefully', () => {
       const malformedTagClass: TagClass = {
+        slug: 'tc-malformed',
         id: 'tc-malformed',
         name: 'Malformed Rules',
         fandom_id: 'harry-potter',

@@ -1,3 +1,29 @@
+# User Guide — How to use The Pensieve Index
+
+This guide targets end users (readers and writers) and covers the primary flows for discovery, submission, and account management.
+
+Primary user journeys
+
+- Discover a story
+  1. Use the pathway builder to select tags/tropes
+  2. The system searches the library-first and displays matching stories
+  3. If no matching story exists, an option to "Create New Story" appears with a generated prompt
+
+- Submit a tagged story
+  1. Install the browser extension (instructions in `extension/`) or use the web submission form
+  2. Tag story metadata and submit — submissions create a GitHub Issue for admin review
+  3. Admins review and approve; approved stories are added to the library
+
+- Account management
+  - Sign up / sign in via `app/sign-up` and `app/sign-in`
+  - Manage saved pathways and favorites in the user profile page
+
+Accessibility & UX
+- Mobile-first interactions support tap-to-select for the pathway builder
+- Keyboard navigation is supported on desktop for accessibility and faster selection
+
+Reporting issues
+- For content errors or tagging issues, submit via the in-app feedback or open a GitHub Issue in the repository.
 # User Guide
 
 Welcome to The Pensieve Index - your gateway to discovering fanfiction that perfectly matches your tastes and creating detailed story prompts when library gaps exist.

@@ -95,3 +95,4 @@ package-lock.json
 
 *.md
 .specify/
+scripts\archived\*

@@ -59,6 +59,14 @@ crons = [
   "0 * * * *"     # Every hour - Resource usage monitoring
 ]
 
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+
 # Build configuration - using modern deployment
 # No custom build needed for simple worker
 

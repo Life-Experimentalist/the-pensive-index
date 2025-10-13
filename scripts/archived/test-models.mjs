@@ -1,4 +1,8 @@
-import { FandomModel, TagModel, PlotBlockModel } from '../src/lib/database/models/index.js';
+import {
+  FandomModel,
+  TagModel,
+  PlotBlockModel,
+} from '../../src/lib/database/models/index.js';
 
 async function testModels() {
   console.log('\n=== Testing Model Fixes ===\n');
@@ -7,7 +11,11 @@ async function testModels() {
     // Get Harry Potter by slug
     console.log('1. Getting Harry Potter fandom by slug...');
     const fandom = await FandomModel.getBySlug('harry-potter');
-    console.log(`   Found: ${fandom?.name} (ID: ${fandom?.id}, Type: ${typeof fandom?.id})`);
+    console.log(
+      `   Found: ${fandom?.name} (ID: ${
+        fandom?.id
+      }, Type: ${typeof fandom?.id})`
+    );
 
     if (!fandom) {
       console.log('   ERROR: Fandom not found!');

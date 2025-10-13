@@ -1,66 +1,79 @@
-# Documentation Directory
+# The Pensieve Index — Documentation Hub
 
-This directory contains comprehensive documentation for The Pensieve Index project.
+This wiki holds the authoritative documentation for The Pensieve Index. It is organized for three primary audiences:
 
-## Documentation Structure
+- Product users (readers, writers)
+- Site administrators and moderators
+- Developers and operators
 
-### 📁 Core Documentation
-- [`README.md`](../README.md) - Project overview and quick start guide
-- [`PROJECT_DOCS.md`](../PROJECT_DOCS.md) - Complete technical documentation
-- [`CONTRIBUTING.md`](../CONTRIBUTING.md) - Contribution guidelines and development workflow
+If you're new to the repository, start at the top-level project README (../README.md) for a short quickstart; this wiki contains more detailed operational, architectural, and contributor-facing documentation.
 
-### 📁 Architecture & Design
-- [`architecture/`](./architecture/) - System architecture and design decisions
-- [`api/`](./api/) - API documentation and OpenAPI-3.1.3 specifications
-- [`database/`](./database/) - Database schema and migration documentation
+Repository docs map
+-------------------
 
-### 📁 User Guides
-- [`user-guide/`](./user-guide/) - End-user documentation for readers and writers
-- [`admin-guide/`](./admin-guide/) - Administrator documentation for content management
-- [`extension-guide/`](./extension-guide/) - Browser extension usage and installation
+- Core
+	- `../README.md` — Project overview and quickstart
+	- `CONTRIBUTING.md` — Contribution workflow, release process, and code review guidelines
 
-### 📁 Development
-- [`development/`](./development/) - Developer setup, workflows, and best practices
-- [`spec-kit/`](./spec-kit/) - Spec-Kit workflow documentation and examples
-- [`testing/`](./testing/) - Testing strategies, guidelines, and examples
+- Architecture & APIs
+	- `architecture/` — System design, data flow diagrams, and component responsibilities
+	- `api/` — API reference, endpoints, and usage examples (OpenAPI when available)
+	- `database/` — D1/Drizzle schema notes, migrations, and seed strategies
 
-### 📁 Deployment & Operations
-- [`deployment/`](./deployment/) - Production deployment guides and configurations
-- [`monitoring/`](./monitoring/) - Performance monitoring and observability setup
+- Development & Testing
+	- `development/` — Local setup, development workflows, spec-kit usage, and debugging tips
+	- `spec-kit/` — Feature specification templates and the spec-driven workflow used by the project
+	- `tests/` (repository root) — Unit, integration and E2E test patterns and how to run them
 
-## Quick Navigation
+- Deployment & Operations
+	- `deployment/` — Production deployment guide, Cloudflare worker config, and rollback steps
+	- `monitoring/` — Observability, alerts, and performance tuning guidance
 
-### For New Users
-1. Start with the [README.md](../README.md) for project overview
-2. Read the [User Guide](./user-guide/README.md) for platform usage
-3. Check the [Admin Guide](./admin-guide/README.md) if you're managing content
+- User & Admin Guides
+	- `user-guide/` — How-to guides for end users and power users
+	- `admin/` (in wiki) — Admin dashboard workflows and moderation processes
 
-### For Developers
-1. Read [CONTRIBUTING.md](../CONTRIBUTING.md) for development workflow
-2. Follow the [Development Setup Guide](./development/setup.md)
-3. Understand the [Spec-Kit Workflow](./spec-kit/workflow.md)
-4. Review the [Architecture Documentation](./architecture/README.md)
+How to use this wiki
+--------------------
 
-### For Admins & Deployers
-1. Check the [Deployment Guide](./deployment/README.md)
-2. Review [Database Setup](./database/setup.md)
-3. Configure [Monitoring](./monitoring/setup.md)
+1. Pick the audience that matches your task (Developer / Admin / User).
+2. Use the 'Search' feature in the repo or the table of contents links below to find a page.
+3. When changing code that requires documentation updates, add a short changelog entry under the relevant wiki page (date + summary + author).
 
-## Documentation Principles
+Documentation maintenance checklist
+----------------------------------
 
-Our documentation follows these principles:
-- **Discovery-Focused**: Emphasizes story search and discovery over prompt generation
-- **User-Centric**: Written for specific user types (readers, writers, admins)
-- **Spec-Driven**: Aligns with our Spec-Kit development methodology
-- **Living Documentation**: Updated with each feature implementation
+- [ ] Each feature or API PR should include a documentation checklist in its description.
+- [ ] For any public API changes, update `wiki/api/API-DOCUMENTATION.md` and the OpenAPI spec if present.
+- [ ] On each release, update `wiki/deployment/production-deployment-guide.md` with any net-new infra changes.
+- [ ] Keep architecture diagrams in `wiki/architecture/ARCHITECTURE.md` in sync with the codebase.
 
-## Contributing to Documentation
+Priority pages to review now
+---------------------------
 
-See our [Documentation Contributing Guide](./development/documentation.md) for:
-- Writing standards and style guide
-- How to update documentation during development
-- Review process for documentation changes
+1. `deployment/production-deployment-guide.md` — ensure Cloudflare steps are current.
+2. `development/setup.md` — verify local setup steps (Node version, env vars, DB setup) are accurate.
+3. `api/API-DOCUMENTATION.md` — confirm any new endpoints are documented.
+
+New quick references
+- `deployment/production-deployment-quickstart.md` — short step-by-step production deploy quickstart
+- `deployment/observability.md` — logs, metrics, Sentry and Cloudflare observability notes
+- `development/setup.md` — detailed local setup (added)
+- `api/openapi-guidelines.md` — guidance for OpenAPI updates and client generation
+
+Contributing to the wiki
+------------------------
+
+This repo uses the same PR workflow as code. To update the wiki:
+
+1. Create a branch named `docs/<short-topic>` (e.g., `docs/deployment-observability`).
+2. Edit or add markdown files under `wiki/` with the exact change.
+3. Open a PR and reference any related code change PRs.
+4. Add reviewers: at least one developer and one product owner for user-facing docs.
+
+If you want, I can iterate and rewrite specific pages next (Deployment, Development, API, Architecture, User Guide). Tell me which pages to prioritize, or I'll start with the ones flagged above.
 
 ---
 
-*This documentation is maintained as part of The Pensieve Index project and follows our Spec-Driven Development methodology.*
+Generated on: 2025-10-13
+

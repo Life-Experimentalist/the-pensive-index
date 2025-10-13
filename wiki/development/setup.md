@@ -1,3 +1,47 @@
+# Development Setup — Step-by-step
+
+This page details the exact steps to get a local development environment running for The Pensieve Index.
+
+1. Required tools
+- Node.js v18+ (use nvm or other manager)
+- npm (or pnpm if preferred by the team)
+- SQLite3 (for local D1 emulation)
+
+2. Clone and install
+
+    git clone https://github.com/Life-Experimentalist/the-pensive-index.git
+    cd the-pensive-index
+    npm ci
+
+3. Environment variables
+- Copy `.env.example` to `.env.local` and provide any required keys. Typical variables:
+  - NEXT_PUBLIC_APP_URL
+  - DATABASE_URL (local SQLite path)
+  - Clerk keys: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+  - NEXTAUTH_SECRET
+
+4. Database (migrations & seed)
+
+    # Create the data directory and initialize the DB
+    mkdir -p data
+    npm run migrate
+    npm run seed
+
+5. Run the app
+
+    npm run dev
+
+6. Type-check and tests
+
+    # Type-check (fix errors before PRs)
+    npm run type-check
+
+    # Run unit tests
+    npm run test
+
+7. Debugging tips
+- If tests/reference imports fail, inspect `tsconfig.json` path mappings and the `src/types` shims.
+- For Playwright e2e tests, ensure the test DB is seeded and the global setup script runs successfully.
 # Development Setup Guide
 
 This guide will help you set up a local development environment for The Pensieve Index.
@@ -62,6 +106,19 @@ npm run test:watch
 ```
 
 Visit `http://localhost:3000` to see the application.
+
+Local setup flow (Mermaid)
+--------------------------
+
+```mermaid
+flowchart TD
+  Clone["Clone repo"] --> Install["npm ci / install deps"]
+  Install --> Env["Copy .env.example -> .env.local"]
+  Env --> DB["Run migrations & seed"]
+  DB --> Dev["npm run dev (start server)"]
+  Dev --> Browser["Open http://localhost:3000"]
+  classDef steps fill:#efe,stroke:#333,stroke-width:1px
+```
 
 ## Development Workflow
 

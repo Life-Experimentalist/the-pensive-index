@@ -1,5 +1,28 @@
 # API Documentation
 
+This folder collects API references and guidelines for documenting endpoints. The application exposes JSON APIs under `app/api/` and serverless worker endpoints in `worker.ts`.
+
+Where to find code
+- Next.js App Router API routes: `app/api/` (server components / route handlers)
+- Worker endpoints: `worker.ts` (Cloudflare worker entry)
+
+API spec
+- If an OpenAPI spec is present it lives under `specs/` or `wiki/api/openapi/`.
+- When adding or modifying an endpoint, update the OpenAPI document (if present) and the markdown reference here.
+
+Documenting endpoints
+- Use this template for each new public endpoint:
+  - Path and method
+  - Request schema (JSON example)
+  - Response schema (JSON example)
+  - Auth/permissions (who can call it)
+  - Rate limits and caching behaviour
+
+Testing APIs
+- Integration tests and contract tests are under `tests/api/` and `tests/contracts/`.
+- Use the test helpers and fixtures in `tests/setup/` to boot a test DB and predictable cache state.
+# API Documentation
+
 The Pensieve Index provides REST API endpoints for story discovery, pathway management, and content submission.
 
 ## Base URL
@@ -48,7 +71,7 @@ List all available fandoms with basic metadata.
 }
 ```
 
-#### GET /api/fandoms/[fandomId]
+#### GET /api/fandoms/{fandomId}
 
 Get detailed fandom information including available tags and tropes.
 
@@ -294,7 +317,7 @@ Create a new tag.
 
 ## Trope Tree API
 
-### GET /api/plot-blocks/[blockId]/tree
+### GET /api/plot-blocks/{blockId}/tree
 
 Get the complete tree structure for a trope.
 

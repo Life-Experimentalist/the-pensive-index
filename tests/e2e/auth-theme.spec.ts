@@ -14,7 +14,7 @@ test.describe('Sign-in Redirect', () => {
     // For now, we'll test the redirect logic structure
 
     const redirectUrl = encodeURIComponent(
-      'http://localhost:3001/admin/fandom-assignment/'
+      'http://localhost:3000/admin/fandom-assignment/'
     );
     await page.goto(`/sign-in/?redirect_url=${redirectUrl}`);
 

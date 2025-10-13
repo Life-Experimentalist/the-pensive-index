@@ -1126,7 +1126,7 @@ export function handleRequest(
   if (nextjsRoutes.some(route => pathname.startsWith(route))) {
     // In development, redirect to local server
     if (env.ENVIRONMENT === 'development') {
-      return Response.redirect('http://localhost:3001' + pathname, 302);
+      return Response.redirect('http://localhost:3000' + pathname, 302);
     }
 
     // In production, this would be handled by your Next.js deployment
@@ -1154,7 +1154,7 @@ export function handleRequest(
   <script>
     // In production, this would redirect to your Next.js app
     setTimeout(() => {
-      window.location.href = 'https://your-nextjs-deployment.pages.dev' + window.location.pathname;
+      window.location.href = 'https://pensive.vkrishna04.me' + window.location.pathname;
     }, 2000);
   </script>
 </body>

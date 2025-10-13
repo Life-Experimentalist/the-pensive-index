@@ -256,8 +256,8 @@ export class FandomQueries {
 
     return {
       content_count: counts,
-      created_at: fandom.created_at.toISOString(),
-      last_updated: fandom.updated_at.toISOString(),
+      created_at: fandom.created_at,
+      last_updated: fandom.updated_at,
       is_active: fandom.is_active,
     };
   }

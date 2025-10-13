@@ -476,6 +476,7 @@ export class DatabaseSeeder {
       {
         id: 'hp-relationship-status',
         name: 'Relationship Status',
+        slug: 'hp-relationship-status',
         fandom_id: 'harry-potter',
         description: 'Character relationship status tags',
         validation_rules: {
@@ -513,6 +514,7 @@ export class DatabaseSeeder {
       {
         id: 'test-tag-1',
         name: 'Test Tag 1',
+        slug: 'test-tag-1',
         fandom_id: 'star-trek',
         description: 'Test tag for development',
         category: 'test',
@@ -528,6 +530,7 @@ export class DatabaseSeeder {
       {
         id: 'test-plot-block-1',
         name: 'Test Trope 1',
+        slug: 'test-trope-1',
         fandom_id: 'star-trek',
         description: 'Test trope for development',
         category: 'test',

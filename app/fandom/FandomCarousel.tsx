@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FandomCarouselProps {
   fandoms: Array<{
-    id: number;
+    id: string;
     name: string;
     slug: string;
     description: string;

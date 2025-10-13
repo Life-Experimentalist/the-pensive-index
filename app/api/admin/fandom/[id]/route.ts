@@ -19,17 +19,7 @@ export async function GET(
     // Validate route parameters
     const resolvedParams = await params;
     const validatedParams = FandomParamsSchema.parse(resolvedParams);
-    const fandomId = parseInt(validatedParams.id);
-
-    if (isNaN(fandomId)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid fandom ID format',
-        },
-        { status: 400 }
-      );
-    }
+    const fandomId = validatedParams.id;
 
     // Initialize service
     const fandomCreationService = new FandomCreationService();
@@ -122,17 +112,7 @@ export async function PUT(
   try {
     // TODO: Add authentication and ProjectAdmin role check
     const resolvedParams = await params;
-    const fandomId = parseInt(resolvedParams.id);
-
-    if (isNaN(fandomId)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid fandom ID',
-        },
-        { status: 400 }
-      );
-    }
+    const fandomId = resolvedParams.id;
 
     const body = await request.json();
     const { name, slug, description, is_active } = body;
@@ -231,17 +211,7 @@ export async function DELETE(
   try {
     // TODO: Add authentication and ProjectAdmin role check
     const resolvedParams = await params;
-    const fandomId = parseInt(resolvedParams.id);
-
-    if (isNaN(fandomId)) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid fandom ID',
-        },
-        { status: 400 }
-      );
-    }
+    const fandomId = resolvedParams.id;
 
     const { getDatabase } = await import('@/lib/database');
     const { fandoms, tags, plotBlocks, storySubmissions } = await import(
@@ -269,21 +239,20 @@ export async function DELETE(
     }
 
     // Get counts for confirmation message
-    const fandomIdStr = String(fandomId);
     const [tagCount] = await db
-      .select({ count: sql<number>`COUNT(*)` })
+      .select({ count: sql`COUNT(*)` })
       .from(tags)
-      .where(eq(tags.fandom_id, fandomIdStr));
+      .where(eq(tags.fandom_id, fandomId));
 
     const [plotBlockCount] = await db
-      .select({ count: sql<number>`COUNT(*)` })
+      .select({ count: sql`COUNT(*)` })
       .from(plotBlocks)
-      .where(eq(plotBlocks.fandom_id, fandomIdStr));
+      .where(eq(plotBlocks.fandom_id, fandomId));
 
     const [submissionCount] = await db
-      .select({ count: sql<number>`COUNT(*)` })
+      .select({ count: sql`COUNT(*)` })
       .from(storySubmissions)
-      .where(eq(storySubmissions.fandom_id, fandomIdStr));
+      .where(eq(storySubmissions.fandom_id, fandomId));
 
     // Delete fandom (cascade will handle related records)
     await db.delete(fandoms).where(eq(fandoms.id, fandomId));

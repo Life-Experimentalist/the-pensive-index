@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination (efficient COUNT(*))
     const totalResult = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: sql`count(*)` })
       .from(fandoms)
       .where(whereClause);
 

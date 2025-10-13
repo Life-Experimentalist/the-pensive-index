@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || undefined;
 
     const { getDatabase } = await import('@/lib/database');
-    const { fandoms, tags, plotBlocks, fandomAdminAssignments } = await import(
+    const { fandoms, tags, plotBlocks } = await import(
       '@/lib/database/schema'
     );
     const { sql } = await import('drizzle-orm');
@@ -150,9 +150,9 @@ export async function GET(request: NextRequest) {
         is_active: fandoms.is_active,
         created_at: fandoms.created_at,
         updated_at: fandoms.updated_at,
-        tag_count: sql<number>`(SELECT COUNT(*) FROM ${tags} WHERE ${tags.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
-        plot_block_count: sql<number>`(SELECT COUNT(*) FROM ${plotBlocks} WHERE ${plotBlocks.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
-        admin_count: sql<number>`(SELECT COUNT(*) FROM ${fandomAdminAssignments} WHERE ${fandomAdminAssignments.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+        tag_count: sql`(SELECT COUNT(*) FROM ${tags} WHERE ${tags.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+        plot_block_count: sql`(SELECT COUNT(*) FROM ${plotBlocks} WHERE ${plotBlocks.fandom_id} = CAST(${fandoms.id} AS TEXT))`,
+        // TODO: Add admin_count when fandomAdminAssignments table is created
       })
       .from(fandoms)
       .orderBy(fandoms.name);

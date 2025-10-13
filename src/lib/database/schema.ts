@@ -10,7 +10,7 @@ import { relations, sql } from 'drizzle-orm';
 
 // Fandoms table
 export const fandoms = sqliteTable('fandoms', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description').notNull(),

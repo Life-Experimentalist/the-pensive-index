@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 
 // Permission definitions
 interface Permissions {
@@ -357,7 +357,8 @@ interface PermissionProviderProps {
 }
 
 export function PermissionProvider({ children }: PermissionProviderProps) {
-  const { user, isLoaded } = useUser();
+  const { user } = useUser();
+  const { isLoaded } = useAuth();
   const [permissions, setPermissions] =
     useState<Permissions>(DEFAULT_PERMISSIONS);
   const [loading, setLoading] = useState(true);

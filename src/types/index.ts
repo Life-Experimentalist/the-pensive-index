@@ -244,14 +244,14 @@ export interface CircularReferenceContext {
 // Validation result types
 export interface ValidationResult {
   is_valid: boolean;
-  errors: ValidationError[];
+  errors: ValidationErrorData[];
   warnings: ValidationWarning[];
   suggestions?: ValidationSuggestion[];
   missing_requirements?: Array<{ type: string; name: string }>;
   conflicts?: Array<{ description: string }>;
 }
 
-export interface ValidationError {
+export interface ValidationErrorData {
   type: string;
   message: string;
   field?: string;
@@ -368,14 +368,14 @@ export interface StorySearchContext {
 }
 
 export interface StorySearchFilters {
-  rating?: string[];
-  status?: ('complete' | 'incomplete' | 'abandoned' | 'hiatus')[];
-  min_word_count?: number;
-  max_word_count?: number;
-  min_relevance_score?: number;
-  exclude_warnings?: string[];
-  sort_by?: 'relevance' | 'word_count' | 'updated_at' | 'created_at';
-  sort_order?: 'asc' | 'desc';
+  ratings?: string[];
+  statuses?: ('complete' | 'incomplete' | 'abandoned' | 'hiatus' | 'unknown')[];
+  minWordCount?: number;
+  maxWordCount?: number;
+  minRelevanceScore?: number;
+  excludeWarnings?: string[];
+  sortBy?: 'relevance' | 'wordCount' | 'updatedAt' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
 }

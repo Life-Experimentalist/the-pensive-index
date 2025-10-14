@@ -7,6 +7,7 @@
  */
 
 import { getDatabase } from '../database';
+import { getResultChanges } from '../database/db-compatibility';
 import {
   submissionQueue,
   storySubmissions,
@@ -278,8 +279,8 @@ export class QueueService {
         success: true,
         queueEntryId,
         assignedModeratorId: moderatorId,
-        estimatedReviewTime: updatedEntry.estimatedReviewTime,
-        deadline: updatedEntry.deadline,
+        estimatedReviewTime: updatedEntry.estimatedReviewTime ?? undefined,
+        deadline: updatedEntry.deadline ?? undefined,
       };
     } catch (error) {
       return {
@@ -404,7 +405,7 @@ export class QueueService {
         .delete(submissionQueue)
         .where(eq(submissionQueue.id, queueEntryId));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     } catch (error) {
       console.error('Failed to remove queue entry:', error);
       return false;
@@ -431,7 +432,7 @@ export class QueueService {
         .set({ priority, deadline })
         .where(eq(submissionQueue.id, queueEntryId));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     } catch (error) {
       console.error('Failed to update queue priority:', error);
       return false;

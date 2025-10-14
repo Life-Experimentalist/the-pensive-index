@@ -156,7 +156,7 @@ export class FandomQueries {
       })
       .where(eq(fandoms.id, id));
 
-    return result.changes > 0;
+      return getResultChanges(result) > 0;
   }
 
   /**
@@ -165,7 +165,7 @@ export class FandomQueries {
   async deleteFandom(id: string): Promise<boolean> {
     const result = await this.db.delete(fandoms).where(eq(fandoms.id, id));
 
-    return result.changes > 0;
+    return getResultChanges(result) > 0;
   }
 
   /**

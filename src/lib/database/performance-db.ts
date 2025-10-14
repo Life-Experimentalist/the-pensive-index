@@ -78,15 +78,6 @@ export interface D1PreparedStatement {
   raw<T = unknown>(): Promise<T[]>;
 }
 
-export interface D1Result<T = unknown> {
-  results?: T[];
-  success: boolean;
-  meta?: {
-    changes?: number;
-    last_row_id?: number;
-  };
-  error?: string;
-}
 
 export interface D1ExecResult {
   count: number;
@@ -163,16 +154,22 @@ function createD1Adapter(db: any): D1Database {
                   success: true,
                   meta: {
                     changes: result.changes || 0,
-                    last_row_id:
-                      (result.lastInsertRowid as number) || undefined,
+                    last_row_id: (result.lastInsertRowid as number) || 0,
                   },
-                };
+                } as unknown as D1Result<T>;
               } catch (error: any) {
                 console.error('D1 Adapter run() error:', error);
                 return {
                   success: false,
                   error: error.message,
-                };
+                  meta: {
+                    duration: 0,
+                    changes: 0,
+                    last_row_id: 0,
+                    rows_read: 0,
+                    rows_written: 0,
+                  },
+                } as unknown as D1Result<T>;
               }
             },
 
@@ -189,14 +186,21 @@ function createD1Adapter(db: any): D1Database {
                 return {
                   results,
                   success: true,
-                };
+                } as unknown as D1Result<T>;
               } catch (error: any) {
                 console.error('D1 Adapter all() error:', error);
                 return {
                   results: [],
                   success: false,
                   error: error.message,
-                };
+                  meta: {
+                    duration: 0,
+                    changes: 0,
+                    last_row_id: 0,
+                    rows_read: 0,
+                    rows_written: 0,
+                  },
+                } as D1Result<T>;
               }
             },
 

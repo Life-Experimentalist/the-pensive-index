@@ -1,18 +1,13 @@
-import type {
-  PathwayItem,
-  Story,
-  StorySearchResult,
-  Tag,
-  PlotBlock,
-  StorySearchFilters,
-} from '@/types';
+import type { PathwayItem, Tag, PlotBlock, StorySearchFilters } from '@/types';
+import type { DomainStory, DomainStoryResult } from '@/types/domain';
+import { mapDbStoriesToDomain } from '@/lib/mappers/story-mapper';
 import { getDatabase } from '@/lib/database';
 
 export interface SearchQuery {
   fandomId: string;
   pathway: PathwayItem[];
   filters?: StorySearchFilters;
-  sort?: string;
+  sort?: { field: string; direction: 'asc' | 'desc' };
   limit?: number;
   offset?: number;
 }
@@ -20,7 +15,7 @@ export interface SearchQuery {
 export interface SearchContext {
   tags: Tag[];
   plotBlocks: PlotBlock[];
-  stories: Story[];
+  stories: DomainStory[];
   userPreferences?: UserPreferences;
 }
 
@@ -84,21 +79,21 @@ export class StorySearchService {
   /**
    * Search stories based on pathway with intelligent relevance scoring
    */
-  async searchStories(
+  searchStories(
     query: SearchQuery,
     context: SearchContext
-  ): Promise<{
-    results: StorySearchResult[];
+  ): {
+    results: DomainStoryResult[];
     stats: SearchStats;
-  }> {
+  } {
     const startTime = Date.now();
 
     try {
       // 1. Build base query with pathway matching
-      const baseResults = await this.buildBaseQuery(query, context);
+      const baseResults = this.buildBaseQuery(query, context);
 
       // 2. Calculate relevance scores for each story
-      const scoredResults = await this.calculateRelevanceScores(
+      const scoredResults = this.calculateRelevanceScores(
         baseResults,
         query.pathway,
         context
@@ -139,10 +134,10 @@ export class StorySearchService {
   /**
    * Build base query to find potentially matching stories
    */
-  private async buildBaseQuery(
+  private buildBaseQuery(
     query: SearchQuery,
     context: SearchContext
-  ): Promise<Story[]> {
+  ): DomainStory[] {
     // Extract tag and trope IDs from pathway
     const tagIds = query.pathway
       .filter(item => item.type === 'tag')
@@ -184,33 +179,33 @@ export class StorySearchService {
       this.maxResults,
     ];
 
-    // Execute query (simplified - in practice would use proper DB connection)
-    const results = await this.executeQuery(sql, params);
-    return results as Story[];
+    // Execute query (simplified) and map DB rows into domain stories
+    const results = this.executeQuery(sql, params);
+    return mapDbStoriesToDomain(results);
   }
 
   /**
    * Calculate multi-factor relevance scores for stories
    */
-  private async calculateRelevanceScores(
-    stories: Story[],
+  private calculateRelevanceScores(
+    stories: DomainStory[],
     pathway: PathwayItem[],
     context: SearchContext
-  ): Promise<StorySearchResult[]> {
-    const StorySearchResults: StorySearchResult[] = [];
+  ): DomainStoryResult[] {
+    const StorySearchResults: DomainStoryResult[] = [];
 
     for (const story of stories) {
       // Get story's tags and tropes
-      const storyTags = await this.getStoryTags(story.id);
-      const storyPlotBlocks = await this.getStoryPlotBlocks(story.id);
+      const storyTags = this.getStoryTags(story.id);
+      const storyPlotBlocks = this.getStoryPlotBlocks(story.id);
 
       // Calculate relevance factors
-      const factors = await this.calculateRelevanceFactors(
+      const factors = this.calculateRelevanceFactors(
         story,
         pathway,
+        context,
         storyTags,
-        storyPlotBlocks,
-        context
+        storyPlotBlocks
       );
 
       // Combine factors with weights to get final score
@@ -236,13 +231,13 @@ export class StorySearchService {
   /**
    * Calculate individual relevance factors for a story
    */
-  private async calculateRelevanceFactors(
-    story: Story,
+  private calculateRelevanceFactors(
+    story: DomainStory,
     pathway: PathwayItem[],
+    context: SearchContext,
     storyTags: string[],
-    storyPlotBlocks: string[],
-    context: SearchContext
-  ): Promise<RelevanceFactors> {
+    storyPlotBlocks: string[]
+  ): RelevanceFactors {
     // 1. Exact Matches (40% weight)
     const pathwayTagIds = pathway.filter(p => p.type === 'tag').map(p => p.id);
     const pathwayPlotBlockIds = pathway
@@ -262,7 +257,7 @@ export class StorySearchService {
       totalPathwayItems > 0 ? (totalExactMatches / totalPathwayItems) * 100 : 0;
 
     // 2. Category Matches (20% weight)
-    const categoryMatches = await this.calculateCategoryMatches(
+    const categoryMatches = this.calculateCategoryMatches(
       pathway,
       storyTags,
       storyPlotBlocks,
@@ -270,7 +265,7 @@ export class StorySearchService {
     );
 
     // 3. Semantic Similarity (15% weight)
-    const semanticSimilarity = await this.calculateSemanticSimilarity(
+    const semanticSimilarity = this.calculateSemanticSimilarity(
       pathway,
       story,
       context
@@ -301,12 +296,12 @@ export class StorySearchService {
   /**
    * Calculate category-based matches (same category tags/tropes)
    */
-  private async calculateCategoryMatches(
+  private calculateCategoryMatches(
     pathway: PathwayItem[],
     storyTags: string[],
     storyPlotBlocks: string[],
     context: SearchContext
-  ): Promise<number> {
+  ): number {
     let categoryScore = 0;
     let totalComparisons = 0;
 
@@ -354,11 +349,11 @@ export class StorySearchService {
   /**
    * Calculate semantic similarity using description and title analysis
    */
-  private async calculateSemanticSimilarity(
+  private calculateSemanticSimilarity(
     pathway: PathwayItem[],
-    story: Story,
+    story: DomainStory,
     context: SearchContext
-  ): Promise<number> {
+  ): number {
     // Simplified semantic analysis - in production would use proper NLP
     const pathwayKeywords = this.extractKeywords(pathway, context);
     const storyKeywords = this.extractStoryKeywords(story);
@@ -379,7 +374,7 @@ export class StorySearchService {
   /**
    * Calculate popularity score based on story statistics
    */
-  private calculatePopularityScore(story: Story): number {
+  private calculatePopularityScore(story: DomainStory): number {
     const maxKudos = 10000; // Reasonable maximum for normalization
     const maxHits = 100000; // Reasonable maximum for normalization
     const maxBookmarks = 5000; // Reasonable maximum for normalization
@@ -396,17 +391,22 @@ export class StorySearchService {
   /**
    * Calculate recency score based on last update
    */
-  private calculateRecencyScore(story: Story): number {
-    if (!story.updatedAt) return 0;
+  private calculateRecencyScore(story: DomainStory): number {
+    if (!story.updatedAt) {
+      return 0;
+    }
 
     const now = Date.now();
     const updatedTime = new Date(story.updatedAt).getTime();
     const daysSinceUpdate = (now - updatedTime) / (1000 * 60 * 60 * 24);
 
     // Stories updated within 30 days get full points, linear decay after
-    if (daysSinceUpdate <= 30) return 100;
-    if (daysSinceUpdate <= 365)
+    if (daysSinceUpdate <= 30) {
+      return 100;
+    }
+    if (daysSinceUpdate <= 365) {
       return Math.max(0, 100 - ((daysSinceUpdate - 30) / 335) * 100);
+    }
     return 0;
   }
 
@@ -414,10 +414,12 @@ export class StorySearchService {
    * Calculate user preference alignment
    */
   private calculateUserAlignment(
-    story: Story,
+    story: DomainStory,
     preferences?: UserPreferences
   ): number {
-    if (!preferences) return 50; // Neutral score if no preferences
+    if (!preferences) {
+      return 50;
+    } // Neutral score if no preferences
 
     let score = 0;
     let factors = 0;
@@ -443,7 +445,11 @@ export class StorySearchService {
     // Status preference
     if (preferences.preferredStatuses.length > 0) {
       factors++;
-      if (preferences.preferredStatuses.includes(story.status || 'unknown')) {
+      if (
+        preferences.preferredStatuses.includes(
+          story.status || ('unknown' as any)
+        )
+      ) {
         score += 25;
       }
     }
@@ -485,11 +491,12 @@ export class StorySearchService {
    * Apply search filters to results
    */
   private applyFilters(
-    results: StorySearchResult[],
+    results: DomainStoryResult[],
     filters?: StorySearchFilters
-  ): StorySearchResult[] {
-    if (!filters) return results;
-
+  ): DomainStoryResult[] {
+    if (!filters) {
+      return results as any;
+    }
     return results.filter(result => {
       const story = result.story;
 
@@ -502,7 +509,7 @@ export class StorySearchService {
 
       // Status filter
       if (filters.statuses && filters.statuses.length > 0) {
-        if (!filters.statuses.includes(story.status || 'unknown')) {
+        if (!filters.statuses.includes((story.status || 'unknown') as any)) {
           return false;
         }
       }
@@ -522,20 +529,24 @@ export class StorySearchService {
         return false;
       }
 
-      // Date filters
-      if (filters.updatedAfter) {
-        const updatedDate = new Date(story.updatedAt || 0);
-        if (updatedDate < new Date(filters.updatedAfter)) {
-          return false;
-        }
-      }
-
-      // Minimum relevance score
+      // Relevance score filter
       if (
         filters.minRelevanceScore &&
-        result.relevanceScore < filters.minRelevanceScore
+        (result.relevanceScore || 0) < filters.minRelevanceScore
       ) {
         return false;
+      }
+
+      // Warnings filter
+      if (filters.excludeWarnings && filters.excludeWarnings.length > 0) {
+        if (
+          story.warnings &&
+          story.warnings.some(warning =>
+            filters.excludeWarnings.includes(warning)
+          )
+        ) {
+          return false;
+        }
       }
 
       return true;
@@ -546,17 +557,17 @@ export class StorySearchService {
    * Sort results based on sort option
    */
   private sortResults(
-    results: StorySearchResult[],
-    sort?: string
-  ): StorySearchResult[] {
+    results: DomainStoryResult[],
+    sort?: { field: string; direction: 'asc' | 'desc' }
+  ): DomainStoryResult[] {
     const sortedResults = [...results];
 
     switch (sort?.field) {
       case 'relevance':
         sortedResults.sort((a, b) =>
           sort.direction === 'desc'
-            ? b.relevanceScore - a.relevanceScore
-            : a.relevanceScore - b.relevanceScore
+            ? (b.relevanceScore || 0) - (a.relevanceScore || 0)
+            : (a.relevanceScore || 0) - (b.relevanceScore || 0)
         );
         break;
 
@@ -586,7 +597,9 @@ export class StorySearchService {
 
       default:
         // Default to relevance score descending
-        sortedResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
+        sortedResults.sort(
+          (a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0)
+        );
         break;
     }
 
@@ -602,10 +615,10 @@ export class StorySearchService {
    * Apply pagination to results
    */
   private applyPagination(
-    results: StorySearchResult[],
+    results: DomainStoryResult[],
     limit: number,
     offset: number
-  ): StorySearchResult[] {
+  ): DomainStoryResult[] {
     return results.slice(offset, offset + limit);
   }
 
@@ -613,31 +626,42 @@ export class StorySearchService {
    * Generate search statistics
    */
   private generateSearchStats(
-    baseResults: Story[],
-    filteredResults: StorySearchResult[],
-    finalResults: StorySearchResult[],
+    baseResults: DomainStory[],
+    filteredResults: DomainStoryResult[],
+    finalResults: DomainStoryResult[],
     query: SearchQuery,
     searchTime: number
   ): SearchStats {
     const relevanceDistribution = {
-      excellent: filteredResults.filter(r => r.relevanceScore >= 90).length,
-      good: filteredResults.filter(
-        r => r.relevanceScore >= 70 && r.relevanceScore < 90
-      ).length,
-      fair: filteredResults.filter(
-        r => r.relevanceScore >= 50 && r.relevanceScore < 70
-      ).length,
-      poor: filteredResults.filter(r => r.relevanceScore < 50).length,
+      excellent: filteredResults.filter(r => (r.relevanceScore ?? 0) >= 90)
+        .length,
+      good: filteredResults.filter(r => {
+        const score = r.relevanceScore ?? 0;
+        return score >= 70 && score < 90;
+      }).length,
+      fair: filteredResults.filter(r => {
+        const score = r.relevanceScore ?? 0;
+        return score >= 50 && score < 70;
+      }).length,
+      poor: filteredResults.filter(r => (r.relevanceScore ?? 0) < 50).length,
     };
 
     const filtersApplied: string[] = [];
-    if (query.filters?.ratings) filtersApplied.push('ratings');
-    if (query.filters?.statuses) filtersApplied.push('statuses');
-    if (query.filters?.minWordCount || query.filters?.maxWordCount)
+    if (query.filters?.ratings) {
+      filtersApplied.push('ratings');
+    }
+    if (query.filters?.statuses) {
+      filtersApplied.push('statuses');
+    }
+    if (query.filters?.minWordCount || query.filters?.maxWordCount) {
       filtersApplied.push('word_count');
-    if (query.filters?.updatedAfter) filtersApplied.push('update_date');
-    if (query.filters?.minRelevanceScore)
+    }
+    if (query.filters?.updatedAfter) {
+      filtersApplied.push('update_date');
+    }
+    if (query.filters?.minRelevanceScore) {
       filtersApplied.push('relevance_score');
+    }
 
     return {
       totalResults: filteredResults.length,
@@ -653,18 +677,18 @@ export class StorySearchService {
 
   // Helper methods (simplified implementations)
 
-  private async executeQuery(sql: string, params: any[]): Promise<any[]> {
+  private executeQuery(sql: string, params: any[]): any[] {
     // In practice, would use proper database connection
     // This is a placeholder for the actual implementation
     return [];
   }
 
-  private async getStoryTags(storyId: string): Promise<string[]> {
+  private getStoryTags(storyId: string): string[] {
     // Query story_tags table
     return [];
   }
 
-  private async getStoryPlotBlocks(storyId: string): Promise<string[]> {
+  private getStoryPlotBlocks(storyId: string): string[] {
     // Query story_plot_blocks table
     return [];
   }
@@ -728,7 +752,7 @@ export class StorySearchService {
     return [...new Set(keywords.filter(k => k.length > 2))];
   }
 
-  private extractStoryKeywords(story: Story): string[] {
+  private extractStoryKeywords(story: DomainStory): string[] {
     const keywords: string[] = [];
 
     if (story.title) {
@@ -743,11 +767,21 @@ export class StorySearchService {
   }
 
   private categorizeLength(wordCount: number): string {
-    if (wordCount < 1000) return 'drabble';
-    if (wordCount < 5000) return 'oneshot';
-    if (wordCount < 20000) return 'short';
-    if (wordCount < 50000) return 'medium';
-    if (wordCount < 100000) return 'long';
+    if (wordCount < 1000) {
+      return 'drabble';
+    }
+    if (wordCount < 5000) {
+      return 'oneshot';
+    }
+    if (wordCount < 20000) {
+      return 'short';
+    }
+    if (wordCount < 50000) {
+      return 'medium';
+    }
+    if (wordCount < 100000) {
+      return 'long';
+    }
     return 'epic';
   }
 }

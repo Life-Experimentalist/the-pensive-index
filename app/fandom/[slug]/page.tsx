@@ -266,7 +266,13 @@ export default async function FandomDiscoveryPage({
 // Generate static params for popular fandoms (optional optimization)
 // Only generate during development to avoid build-time database errors
 export async function generateStaticParams() {
-  // Skip static generation in production builds to avoid database access errors
+  // Allow skipping static params generation in CI or when DB isn't available
+  // Set SKIP_BUILD_STATIC_PARAMS=1 to avoid trying to open the DB during builds
+  if (process.env.SKIP_BUILD_STATIC_PARAMS === '1' || process.env.CI === '1') {
+    // Return empty array so build continues without attempting DB access
+    return [];
+  }
+
   try {
     const fandoms = await FandomModel.getAllActive();
     // Generate static pages for top 10 most popular fandoms
@@ -274,11 +280,8 @@ export async function generateStaticParams() {
       slug: fandom.slug,
     }));
   } catch (error) {
-    console.error(
-      '[Fandom] Database unavailable during static params generation:',
-      error
-    );
-    // Fallback: return empty array if database is not accessible at build time
+    // Log a concise message only to avoid noisy stack traces in CI logs
+    console.error('[Fandom] Skipping static params — DB unavailable');
     return [];
   }
 }

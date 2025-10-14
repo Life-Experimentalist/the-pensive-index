@@ -448,22 +448,9 @@ interface Env {
   RATE_LIMITER: DurableObjectNamespace;
 }
 
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-}
+// Types for D1Database/D1PreparedStatement are provided globally in
+// src/types/ambient.d.ts during the migration. Do not redeclare here.
 
-interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  run(): Promise<D1Result>;
-  all<T = unknown>(): Promise<D1Result<T>>;
-  first<T = unknown>(): Promise<T | null>;
-}
-
-interface D1Result<T = unknown> {
-  success: boolean;
-  results?: T[];
-  error?: string;
-}
 
 interface KVNamespace {
   get<T>(key: string, options?: { type: 'json' }): Promise<T | null>;

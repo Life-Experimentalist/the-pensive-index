@@ -13,6 +13,7 @@
  */
 
 import { DatabaseConnection } from '@/lib/database';
+import { getResultChanges } from './db-compatibility';
 import {
   adminUsers,
   validationRules,
@@ -312,7 +313,7 @@ export class AdminQueries {
         })
         .where(eq(adminUsers.id, id));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     },
 
     /**
@@ -598,7 +599,7 @@ export class AdminQueries {
         .delete(validationRules)
         .where(eq(validationRules.id, id));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     },
 
     /**
@@ -999,7 +1000,7 @@ export class AdminQueries {
         })
         .where(eq(ruleTemplates.id, id));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     },
   };
 
@@ -1208,7 +1209,7 @@ export class AdminQueries {
         })
         .where(eq(tagClasses.id, id));
 
-      return result.changes > 0;
+      return getResultChanges(result) > 0;
     },
   };
 

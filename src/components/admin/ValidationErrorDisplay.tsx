@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import {
   ValidationResult,
-  ValidationError,
+  ValidationErrorData,
   ValidationWarning,
   ValidationSuggestion,
 } from '../../types';
 
 interface ValidationErrorDisplayProps {
   validationResult: ValidationResult;
-  onFixError?: (error: ValidationError, fix: any) => Promise<void>;
+  onFixError?: (error: ValidationErrorData, fix: any) => Promise<void>;
   onDismissError?: (errorIndex: number) => void;
   showSuggestions?: boolean;
   compactMode?: boolean;
@@ -26,9 +26,8 @@ export function ValidationErrorDisplay({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(['errors'])
   );
-  const [selectedError, setSelectedError] = useState<ValidationError | null>(
-    null
-  );
+  const [selectedError, setSelectedError] =
+    useState<ValidationErrorData | null>(null);
 
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections);

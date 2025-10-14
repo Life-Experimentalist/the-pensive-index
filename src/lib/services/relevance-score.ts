@@ -1,4 +1,5 @@
-import type { PathwayItem, Story, Tag, PlotBlock, SearchResult } from '@/types';
+import type { PathwayItem, Tag, PlotBlock, SearchResult } from '@/types';
+import type { DomainStory as Story } from '@/types/domain';
 
 export interface ScoreWeights {
   exactMatches: number; // Default: 0.40
@@ -952,8 +953,12 @@ export class RelevanceScoreService {
 
   private setCache(key: string, score: DetailedScore): void {
     if (this.scoreCache.size >= this.maxCacheSize) {
-      const firstKey = this.scoreCache.keys().next().value;
-      this.scoreCache.delete(firstKey);
+      const firstKey = this.scoreCache.keys().next().value as
+        | string
+        | undefined;
+      if (firstKey) {
+        this.scoreCache.delete(firstKey);
+      }
     }
 
     this.scoreCache.set(key, score);

@@ -99,8 +99,8 @@ export default function TagsAdminPage() {
         throw new Error('Failed to fetch data');
       }
 
-      const tagsData = await tagsRes.json();
-      const fandomsData = await fandomsRes.json();
+      const tagsData = (await tagsRes.json()) as { tags?: any[] };
+      const fandomsData = (await fandomsRes.json()) as { fandoms?: any[] };
 
       setTags(tagsData.tags || []);
       setFandoms(fandomsData.fandoms || []);
@@ -132,7 +132,7 @@ export default function TagsAdminPage() {
       if (!response.ok) {
         return;
       }
-      const data = await response.json();
+      const data = (await response.json()) as { tags?: any[] };
       setParentTags(data.tags || []);
     } catch (err) {
       console.error('Failed to fetch parent tags:', err);
@@ -211,7 +211,7 @@ export default function TagsAdminPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error || 'Failed to save tag');
       }
 

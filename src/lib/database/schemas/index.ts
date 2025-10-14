@@ -314,9 +314,17 @@ function createTablesIfNotExist(database: Database.Database) {
     CREATE INDEX IF NOT EXISTS plot_blocks_slug_idx ON plot_blocks(slug);
   `);
 
-  database.exec(`
-    CREATE INDEX IF NOT EXISTS plot_blocks_display_order_idx ON plot_blocks(display_order);
-  `);
+  // Create index on display_order only if the column exists
+  try {
+    database.exec(`
+      CREATE INDEX IF NOT EXISTS plot_blocks_display_order_idx ON plot_blocks(display_order);
+    `);
+  } catch (error: any) {
+    // Column doesn't exist yet, will be added by migration
+    if (!error.message?.includes('no such column')) {
+      throw error;
+    }
+  }
 
   database.exec(`
     CREATE INDEX IF NOT EXISTS plot_blocks_is_active_idx ON plot_blocks(is_active);

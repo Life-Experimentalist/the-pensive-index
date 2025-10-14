@@ -59,7 +59,7 @@ export default function FandomsAdminPage() {
       if (!response.ok) {
         throw new Error('Failed to fetch fandoms');
       }
-      const data = await response.json();
+      const data = (await response.json()) as { fandoms?: any[] };
       setFandoms(data.fandoms || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -122,7 +122,7 @@ export default function FandomsAdminPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error || 'Failed to save fandom');
       }
 
@@ -148,7 +148,7 @@ export default function FandomsAdminPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error || 'Failed to delete fandom');
       }
 

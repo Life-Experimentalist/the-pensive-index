@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import ThemeToggle from '@/components/theme/ThemeToggle';
+// import ThemeToggle from '@/components/theme/ThemeToggle';
 import {
   LayoutDashboard,
   Settings,
@@ -155,12 +155,11 @@ export default function CollapsibleSidebar({
           onClick={onMobileClose}
         />
       )}
-
       {/* Mobile sidebar overlay */}
       {isMobileOpen && (
         <aside
           className={cn(
-            'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card border-r border-border shadow-lg transition-all duration-300 ease-in-out z-40 w-64 md:hidden',
+            'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white dark:bg-slate-900 border-r border-border shadow-lg transition-all duration-300 ease-in-out z-40 w-64 md:hidden',
             className
           )}
         >
@@ -197,21 +196,13 @@ export default function CollapsibleSidebar({
                 );
               })}
             </div>
-
-            {/* Mobile Theme Toggle */}
-            <div className="border-t border-border pt-4 px-2">
-              <div className="flex justify-center">
-                <ThemeToggle />
-              </div>
-            </div>
           </nav>
         </aside>
       )}
-
       {/* Desktop sidebar - Original expanding behavior but with better positioning */}
       <aside
         className={cn(
-          'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card border-r border-border shadow-lg transition-all duration-300 ease-in-out',
+          'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white dark:bg-slate-900 border-r border-border shadow-lg transition-all duration-300 ease-in-out',
           // Desktop behavior - z-50 when expanded to float above content
           'hidden md:flex md:flex-col',
           isExpanded || isPinned ? 'w-64 z-50' : 'w-16 z-20',
@@ -319,13 +310,8 @@ export default function CollapsibleSidebar({
           </div>
         </div>
 
-        {/* Theme Toggle - Always visible */}
-        <div className="px-2 pb-4 border-t border-border pt-4">
-          <div className="flex justify-center">
-            <ThemeToggle />
-          </div>
-        </div>
-      </aside>;
+      </aside>
+      ;
     </>
   );
 }

@@ -2,8 +2,8 @@
  * Quick script to create a test admin user for authentication testing
  */
 
-import { DatabaseManager } from '../src/lib/database';
-import { schema } from '../src/lib/database/schema';
+import { DatabaseManager } from '../../src/lib/database';
+import { schema } from '../../src/lib/database/schema';
 import { sql } from 'drizzle-orm';
 
 async function createTestAdmin() {

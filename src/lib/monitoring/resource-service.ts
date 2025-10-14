@@ -379,26 +379,6 @@ export async function trackResourceUsage(
   }
 }
 
-// =============================================================================
-// TYPES
-// =============================================================================
+// Types for D1Database/D1PreparedStatement are provided globally in
+// src/types/ambient.d.ts during the migration. Do not redeclare here.
 
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-}
-
-interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  run(): Promise<D1Result>;
-  all<T = unknown>(): Promise<D1Result<T>>;
-  first<T = unknown>(colName?: string): Promise<T | null>;
-}
-
-interface D1Result<T = unknown> {
-  success: boolean;
-  results?: T[];
-  error?: string;
-  meta?: {
-    changes?: number;
-  };
-}

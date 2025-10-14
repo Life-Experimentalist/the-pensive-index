@@ -10,18 +10,20 @@ import { relations, sql } from 'drizzle-orm';
 
 // Fandoms table
 export const fandoms = sqliteTable('fandoms', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  // Use text IDs to match existing runtime table creation (and seed data)
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   description: text('description').notNull(),
   metadata: text('metadata', { mode: 'json' }),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
-  created_at: text('created_at')
+  // Use integer unix epoch timestamps to match createTablesIfNotExist SQL
+  created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
-    .default(sql`(datetime('now'))`),
-  updated_at: text('updated_at')
+    .default(sql`(unixepoch())`),
+  updated_at: integer('updated_at', { mode: 'timestamp' })
     .notNull()
-    .default(sql`(datetime('now'))`),
+    .default(sql`(unixepoch())`),
 });
 
 // Tags table
@@ -108,6 +110,11 @@ export const plotBlocks = sqliteTable('plot_blocks', {
   tag_combination: text('tag_combination', { mode: 'json' }).$type<string[]>(),
   display_order: integer('display_order').notNull().default(0),
   is_active: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  dependencies: text('dependencies', { mode: 'json' }).$type<string[]>(),
+  requires: text('requires', { mode: 'json' }).$type<string[]>(),
+  children: text('children', { mode: 'json' }).$type<string[]>(),
+  conflicts_with: text('conflicts_with', { mode: 'json' }).$type<string[]>(),
+  enhances: text('enhances', { mode: 'json' }).$type<string[]>(),
   created_at: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),

@@ -1,11 +1,3 @@
-// ✅ COLOR TOKEN MIGRATION COMPLETE (100%)
-// All color classes have been converted to theme-aware tokens:
-// - text-gray-* → text-foreground, text-muted-foreground
-// - bg-white/bg-gray-* → bg-card, bg-background
-// - border-gray-* → border-border
-// - Gradients maintained for branded elements (purple/indigo)
-// Migration completed: October 12, 2025
-
 'use client';
 
 import { useState, useEffect } from 'react';

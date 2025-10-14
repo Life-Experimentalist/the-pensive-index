@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useUser } from '@clerk/nextjs';
 import {
   Users,
@@ -263,10 +264,12 @@ const UserManagement: React.FC = () => {
     if (filters.dateRange.start || filters.dateRange.end) {
       filtered = filtered.filter(user => {
         const userDate = new Date(user.createdAt);
-        if (filters.dateRange.start && userDate < filters.dateRange.start)
+        if (filters.dateRange.start && userDate < filters.dateRange.start) {
           return false;
-        if (filters.dateRange.end && userDate > filters.dateRange.end)
+        }
+        if (filters.dateRange.end && userDate > filters.dateRange.end) {
           return false;
+        }
         return true;
       });
     }
@@ -302,8 +305,12 @@ const UserManagement: React.FC = () => {
           bValue = b.displayName;
       }
 
-      if (aValue < bValue) return filters.sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return filters.sortOrder === 'asc' ? 1 : -1;
+      if (aValue < bValue) {
+        return filters.sortOrder === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return filters.sortOrder === 'asc' ? 1 : -1;
+      }
       return 0;
     });
 
@@ -341,7 +348,9 @@ const UserManagement: React.FC = () => {
         body: JSON.stringify(operation),
       });
 
-      if (!response.ok) throw new Error('Bulk operation failed');
+      if (!response.ok) {
+        throw new Error('Bulk operation failed');
+      }
 
       await loadUserData();
       setSelectedUsers([]);
@@ -366,7 +375,9 @@ const UserManagement: React.FC = () => {
         body: JSON.stringify({ action, ...data }),
       });
 
-      if (!response.ok) throw new Error(`${action} failed`);
+      if (!response.ok) {
+        throw new Error(`${action} failed`);
+      }
 
       await loadUserData();
       setUserModal(null);
@@ -387,7 +398,9 @@ const UserManagement: React.FC = () => {
         body: JSON.stringify({ userIds, format, filters }),
       });
 
-      if (!response.ok) throw new Error('Export failed');
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -406,7 +419,9 @@ const UserManagement: React.FC = () => {
   };
 
   const formatDate = (date: Date | string | undefined) => {
-    if (!date) return 'Never';
+    if (!date) {
+      return 'Never';
+    }
     const d = new Date(date);
     return (
       d.toLocaleDateString() +
@@ -781,10 +796,12 @@ const UserManagement: React.FC = () => {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         {user.profileImageUrl ? (
-                          <img
+                          <Image
                             className="h-10 w-10 rounded-full"
                             src={user.profileImageUrl}
                             alt=""
+                            width={40}
+                            height={40}
                           />
                         ) : (
                           <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">

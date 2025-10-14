@@ -10,37 +10,13 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import SafeUserButton from '@/components/ui/SafeUserButton';
+import MainNavigation from '@/components/layout/MainNavigation';
 
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/icon.png"
-                alt="The Pensieve Index"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-              />
-              <Link
-                href="/"
-                className="text-xl font-bold text-gray-900 dark:text-white"
-              >
-                The Pensieve Index
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <SafeUserButton afterSignOutUrl="/" />
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Main Navigation */}
+      <MainNavigation />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

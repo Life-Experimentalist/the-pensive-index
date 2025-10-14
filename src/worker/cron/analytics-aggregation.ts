@@ -25,7 +25,9 @@ const BUCKET_SIZE = 24 * 60 * 60 * 1000; // 1 day
 const LOOKBACK_WINDOW = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 interface AnalyticsBucket {
-  bucket: Date;
+  periodType: string;
+  periodStart: Date;
+  periodEnd: Date;
   fandomId: number | null;
   eventType: string;
   count: number;
@@ -105,24 +107,23 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
 
   try {
     // Get unaggregated events from the last 3 days
-    const events = await db
-      .select()
-      .from(analyticsEvents)
-      .where(
-        and(
-          gte(analyticsEvents.timestamp, new Date(startTime)),
-          lt(analyticsEvents.timestamp, new Date(now))
-        )
-      )
-      .all();
+    const eventsStmt = db.prepare(`
+      SELECT * FROM analytics_events
+      WHERE timestamp >= ? AND timestamp < ?
+    `);
+    const events = await eventsStmt.bind(startTime, now).all();
 
     console.log(
-      `[Analytics Aggregation] Found ${events.length} events to aggregate`
+      `[Analytics Aggregation] Found ${
+        events.results?.length || 0
+      } events to aggregate`
     );
 
-    if (events.length === 0) {
+    if (!events.results || events.results.length === 0) {
       return 0;
     }
+
+    const typedEvents = events.results as any[];
 
     // Group events into buckets
     const buckets = new Map<
@@ -137,7 +138,7 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
       }
     >();
 
-    for (const event of events) {
+    for (const event of typedEvents) {
       // Calculate bucket timestamp (round down to nearest day)
       const bucketTime = new Date(
         Math.floor(event.timestamp.getTime() / BUCKET_SIZE) * BUCKET_SIZE
@@ -159,7 +160,10 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
         });
       }
 
-      const bucket = buckets.get(key)!;
+      const bucket = buckets.get(key);
+      if (!bucket) {
+        continue;
+      }
       bucket.events.push(event);
 
       if (event.userId) {
@@ -197,7 +201,9 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
         : [];
 
       aggregates.push({
-        bucket: bucket.bucket,
+        periodType: 'DAILY',
+        periodStart: bucket.bucket,
+        periodEnd: new Date(bucket.bucket.getTime() + BUCKET_SIZE),
         fandomId: bucket.fandomId,
         eventType: bucket.eventType,
         count: bucket.events.length,
@@ -214,12 +220,13 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
     for (const aggregate of aggregates) {
       try {
         // Check if aggregate already exists
-        const existing = await db
+        const existing = await (db as any)
           .select()
           .from(analyticsAggregates)
           .where(
             and(
-              eq(analyticsAggregates.bucket, aggregate.bucket),
+              eq(analyticsAggregates.periodType, aggregate.periodType),
+              eq(analyticsAggregates.periodStart, aggregate.periodStart),
               aggregate.fandomId !== null
                 ? eq(analyticsAggregates.fandomId, aggregate.fandomId)
                 : sql`${analyticsAggregates.fandomId} IS NULL`,
@@ -248,7 +255,7 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
           }
 
           // Use latest conversion rate and top pathways
-          await db
+          const updated = await (db as any)
             .update(analyticsAggregates)
             .set({
               count: newCount,
@@ -263,7 +270,8 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
             })
             .where(
               and(
-                eq(analyticsAggregates.bucket, aggregate.bucket),
+                eq(analyticsAggregates.periodType, aggregate.periodType),
+                eq(analyticsAggregates.periodStart, aggregate.periodStart),
                 aggregate.fandomId !== null
                   ? eq(analyticsAggregates.fandomId, aggregate.fandomId)
                   : sql`${analyticsAggregates.fandomId} IS NULL`,
@@ -275,23 +283,29 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
           console.log(
             `[Analytics Aggregation] Updated aggregate for ${
               aggregate.eventType
-            } (${aggregate.bucket.toISOString()})`
+            } (${aggregate.periodStart.toISOString()})`
           );
         } else {
           // Insert new aggregate
-          await db
+          await (db as any)
             .insert(analyticsAggregates)
             .values({
-              bucket: aggregate.bucket,
+              periodType: aggregate.periodType,
+              periodStart: aggregate.periodStart.getTime(),
+              periodEnd: aggregate.periodEnd.getTime(),
               fandomId: aggregate.fandomId,
               eventType: aggregate.eventType,
-              count: aggregate.count,
-              uniqueUsers: aggregate.uniqueUsers,
-              avgDuration: aggregate.avgDuration,
-              conversionRate: aggregate.conversionRate,
-              topPathways:
+              eventCount: aggregate.count,
+              uniqueSessions: aggregate.uniqueUsers,
+              metadata:
+                aggregate.avgDuration !== null ||
+                aggregate.conversionRate !== null ||
                 aggregate.topPathways.length > 0
-                  ? JSON.stringify(aggregate.topPathways)
+                  ? JSON.stringify({
+                      avgDuration: aggregate.avgDuration,
+                      conversionRate: aggregate.conversionRate,
+                      topPathways: aggregate.topPathways,
+                    })
                   : null,
             })
             .run();
@@ -300,7 +314,7 @@ export async function aggregateAnalytics(db: D1Database): Promise<number> {
           console.log(
             `[Analytics Aggregation] Inserted aggregate for ${
               aggregate.eventType
-            } (${aggregate.bucket.toISOString()})`
+            } (${aggregate.periodStart.toISOString()})`
           );
         }
       } catch (error) {
@@ -338,7 +352,7 @@ export async function cleanupOldEvents(db: D1Database): Promise<number> {
   );
 
   try {
-    const result = await db
+    const result = await (db as any)
       .delete(analyticsEvents)
       .where(lt(analyticsEvents.timestamp, cutoffDate))
       .run();
@@ -360,7 +374,7 @@ export async function cleanupOldEvents(db: D1Database): Promise<number> {
  */
 export async function handleAnalyticsAggregationCron(env: {
   DB: D1Database;
-  CACHE: KVNamespace;
+  CACHE: typeof KVNamespace;
 }): Promise<void> {
   console.log('[Analytics Aggregation Cron] Starting...');
   const startTime = Date.now();

@@ -31,8 +31,8 @@ import {
 export const fandoms = sqliteTable(
   'fandoms',
   {
-    // Primary key - auto-incrementing integer
-    id: integer('id').primaryKey({ autoIncrement: true }),
+    // Primary key - string id to match runtime table creation
+    id: text('id').primaryKey(),
 
     // Human-readable name (required, unique)
     name: text('name').notNull(),
@@ -51,13 +51,13 @@ export const fandoms = sqliteTable(
       .notNull()
       .default(true),
 
-    // Automatic timestamp fields
-    created_at: text('created_at')
+    // Automatic timestamp fields (unix epoch integers)
+    created_at: integer('created_at', { mode: 'timestamp' })
       .notNull()
-      .default(sql`(datetime('now'))`),
-    updated_at: text('updated_at')
+      .default(sql`(unixepoch())`),
+    updated_at: integer('updated_at', { mode: 'timestamp' })
       .notNull()
-      .default(sql`(datetime('now'))`),
+      .default(sql`(unixepoch())`),
   },
   table => ({
     // Unique constraints

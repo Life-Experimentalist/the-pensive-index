@@ -9,6 +9,7 @@
 
 import { eq, and, desc, asc, like, sql, inArray, isNull } from 'drizzle-orm';
 import { getDatabase } from './config';
+import { getResultChanges } from './db-compatibility';
 import {
   fandomContentItems,
   fandomContentVersions,
@@ -154,7 +155,9 @@ export class ContentQueries {
         .from(fandomContentItems)
         .where(eq(fandomContentItems.id, id));
 
-      if (!currentContent) {return null;}
+      if (!currentContent) {
+        return null;
+      }
 
       // Create version if requested
       if (createVersion) {
@@ -195,7 +198,7 @@ export class ContentQueries {
       })
       .where(eq(fandomContentItems.id, id));
 
-    return result.changes > 0;
+    return getResultChanges(result) > 0;
   }
 
   /**

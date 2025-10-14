@@ -206,7 +206,7 @@ export class PromptGenerationService {
     // Base originality on story scarcity and exact matches
     const totalCombinations = Math.pow(2, pathway.length); // Possible combinations
     const exactMatches = existingStories.filter(
-      story => story.relevanceScore > 95 // Very high match
+      story => story.relevanceScore && story.relevanceScore > 95 // Very high match
     ).length;
 
     // Calculate rarity

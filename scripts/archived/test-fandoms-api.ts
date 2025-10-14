@@ -2,7 +2,7 @@
  * Direct test of the fandoms API endpoint logic
  */
 
-import { FandomModel } from '../src/lib/database/models';
+import { FandomModel } from '../../src/lib/database/models';
 
 async function testFandomsAPI() {
   try {

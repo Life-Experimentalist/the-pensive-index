@@ -9,7 +9,7 @@ import { LRUCache } from 'lru-cache';
 // Redis client for distributed caching
 class CacheManager {
   private redisClient: Redis | null = null;
-  private localCache: LRUCache<string, any>;
+  private localCache: any;
   private isRedisAvailable: boolean = false;
 
   constructor() {
@@ -119,7 +119,9 @@ class CacheManager {
       try {
         const keys = await this.redisClient.keys(pattern);
         if (keys.length > 0) {
-          await this.redisClient.del(...keys);
+          await Promise.all(
+            keys.map((key: string) => (this.redisClient as any).del(key))
+          );
         }
       } catch (error) {
         console.warn('Cache pattern delete error:', error);
@@ -178,7 +180,7 @@ export class PerformanceMonitor {
       this.metrics.set(operation, []);
     }
 
-    const metrics = this.metrics.get(operation)!;
+    const metrics = this.metrics.get(operation) as number[];
     metrics.push(duration);
 
     // Keep only last 100 measurements
@@ -283,7 +285,7 @@ export class SubmissionOptimizer {
 
     return QueryOptimizer.executeWithCache(
       cacheKey,
-      async () => {
+      () => {
         // This would be implemented with the actual database query
         // Using appropriate indexes and optimized joins
         const timer = PerformanceMonitor.startTimer('queue_query');
@@ -291,13 +293,13 @@ export class SubmissionOptimizer {
         try {
           // Optimized query would go here
           // SELECT with proper indexes on status, priority, fandom, submission_date
-          return {
+          return Promise.resolve({
             submissions: [],
             total: 0,
             queuePositions: {},
             moderators: {},
             moderationHistory: {},
-          };
+          });
         } finally {
           timer();
         }
@@ -317,7 +319,7 @@ export class SubmissionOptimizer {
         async batch => {
           // Single query for batch of submissions
           // Including related data (moderator assignments, flags, etc.)
-          return [];
+          return Promise.resolve([]);
         }
       );
     } finally {
@@ -348,13 +350,16 @@ export class ExtensionOptimizer {
         try {
           // Cached story parsing to avoid re-parsing same URLs
           // This would integrate with the extension content scripts
-          return {
-            title: '',
-            author: '',
-            description: '',
-            tags: [],
-            metadata: {},
-          };
+          return () =>
+            Promise.resolve({
+              title: '',
+              author: '',
+              fandom: '',
+              tags: [],
+              wordCount: 0,
+              status: 'unknown',
+              lastUpdated: new Date(),
+            });
         } finally {
           timer();
         }
@@ -370,7 +375,7 @@ export class ExtensionOptimizer {
       // Preload commonly used fandom data for extension
       const fandoms = await QueryOptimizer.executeWithCache(
         CacheKeys.fandoms(),
-        async () => {
+        () => {
           // Query all active fandoms with basic info
           return [];
         },
@@ -386,7 +391,7 @@ export class ExtensionOptimizer {
 
 // API response optimization
 export class APIOptimizer {
-  static async optimizeSubmissionResponse(submissionData: any) {
+  static optimizeSubmissionResponse(submissionData: any) {
     // Minimize response payload size
     return {
       id: submissionData.id,
@@ -447,7 +452,7 @@ export function withPerformanceMonitoring(handler: any) {
 }
 
 // Health check endpoint for monitoring
-export async function getPerformanceHealth() {
+export function getPerformanceHealth() {
   const metrics = PerformanceMonitor.getMetrics();
   const cacheStats = cache.getStats();
 
@@ -456,7 +461,7 @@ export async function getPerformanceHealth() {
     cache: cacheStats,
     performance: {
       slowOperations: Object.entries(metrics)
-        .filter(([_, data]) => (data as any).average > 1000) // > 1 second
+        .filter(([_, data]) => data.average > 1000) // > 1 second
         .map(([operation, data]) => ({ operation, ...data })),
       totalOperations: Object.keys(metrics).length,
     },
@@ -511,7 +516,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_users_active ON admin_users(is_active) WHER
 CREATE INDEX IF NOT EXISTS idx_admin_users_role ON admin_users(role);
 `;
 
-export default {
+const performanceUtils = {
   cache,
   CacheKeys,
   PerformanceMonitor,
@@ -523,3 +528,5 @@ export default {
   getPerformanceHealth,
   DATABASE_INDEXES,
 };
+
+export default performanceUtils;

@@ -32,7 +32,7 @@ export async function initializeDatabase(): Promise<void> {
 
   try {
     // Initialize based on environment
-    const config = getDatabaseConfig();
+    const config = await getDatabaseConfig();
     await db.initialize(config);
 
     // Test the connection
@@ -53,13 +53,26 @@ export async function initializeDatabase(): Promise<void> {
 /**
  * Get database configuration based on environment
  */
-function getDatabaseConfig() {
-  // Development environment - use local SQLite
+async function getDatabaseConfig() {
+  // Development environment - use local D1 (via wrangler)
   if (process.env.NODE_ENV === 'development') {
-    return {
-      type: 'sqlite' as const,
-      url: './data/the-pensive-index.db',
-    };
+    try {
+      // Try to use D1 local first for development-production parity
+      const { getD1Config } = await import('./d1-config');
+      const config = await getD1Config();
+      console.log('📊 Using Cloudflare D1 (local) for development');
+      return config;
+    } catch (error) {
+      // Fallback to better-sqlite3 if D1 initialization fails
+      console.warn(
+        '⚠️  D1 initialization failed, falling back to SQLite:',
+        error
+      );
+      return {
+        type: 'sqlite' as const,
+        url: './data/the-pensive-index.db',
+      };
+    }
   }
 
   // Production environment configurations

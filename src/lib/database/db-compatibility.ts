@@ -18,13 +18,13 @@ export async function executeCountQuery(
 ): Promise<number> {
   try {
     // In newer Drizzle ORM versions, we need to use the raw API
-    // @ts-ignore - Type errors are expected as we're working around API changes
-    const result = await db.run(query);
-    if (result && result[0] && typeof result[0].count !== 'undefined') {
-      return Number(result[0].count);
-    } else if (result && result[0] && Object.values(result[0]).length > 0) {
+    const result = await (db as any).run(query);
+    const r: any = result;
+    if (r && r[0] && typeof r[0].count !== 'undefined') {
+      return Number(r[0].count);
+    } else if (r && r[0] && Object.values(r[0]).length > 0) {
       // If count property doesn't exist, use the first value in the result
-      return Number(Object.values(result[0])[0]);
+      return Number(Object.values(r[0])[0]);
     }
     return 0;
   } catch (error) {
@@ -61,13 +61,22 @@ export async function executeRawQuery<T = any>(
  * Handles the API changes between different versions of Drizzle ORM
  * In newer versions, select() doesn't accept arguments directly
  */
-export function compatibleSelect(db: DatabaseConnection, fields: Record<string, any>, table: any) {
+export function compatibleSelect(
+  db: DatabaseConnection,
+  fields: Record<string, any>,
+  table: any
+) {
   // Create the query using raw SQL instead of the select() API that changed
   const fieldSelections: string[] = [];
 
   // Build SQL field selections
   Object.entries(fields).forEach(([alias, field]) => {
-    if (typeof field === 'object' && field !== null && '$type' in field && field.$type === 'custom') {
+    if (
+      typeof field === 'object' &&
+      field !== null &&
+      '$type' in field &&
+      field.$type === 'custom'
+    ) {
       // For custom SQL fields
       fieldSelections.push(`${field.sql} AS ${alias}`);
     } else if (typeof field === 'object' && field !== null && 'name' in field) {
@@ -91,24 +100,43 @@ export function compatibleSelect(db: DatabaseConnection, fields: Record<string, 
  * Handles different result formats between Drizzle ORM versions
  */
 export function getCountValue(result: any): number {
-  if (!result || !result[0]) return 0;
+  if (!result) return 0;
+
+  const r: any = result;
+  if (!r[0]) return 0;
 
   // Try different ways to access the count
-  // @ts-ignore - Checking different property access patterns
-  if (result[0].count !== undefined) return Number(result[0].count);
+  if (r[0].count !== undefined) return Number(r[0].count);
 
   // If it's in a nested object
-  // @ts-ignore - Checking nested property access
-  if (result[0].count && typeof result[0].count === 'object') {
-    // @ts-ignore - Accessing nested count property
-    return Number(result[0].count.value || 0);
+  if (r[0].count && typeof r[0].count === 'object') {
+    return Number(r[0].count.value || 0);
   }
 
   // Try getting the first property value if it's an object with a single numeric property
-  const firstKey = Object.keys(result[0])[0];
-  if (firstKey && !isNaN(Number(result[0][firstKey]))) {
-    return Number(result[0][firstKey]);
+  const firstKey = Object.keys(r[0])[0];
+  if (firstKey && !isNaN(Number(r[0][firstKey]))) {
+    return Number(r[0][firstKey]);
   }
 
+  return 0;
+}
+
+/**
+ * Safely extract a numeric changes count from a variety of DB result shapes.
+ * Accepts RunResult, D1Result, ResultSet, or raw arrays and returns 0 when not present.
+ */
+export function getResultChanges(result: any): number {
+  if (!result) return 0;
+  if (typeof result.changes === 'number') return result.changes;
+  if (Array.isArray(result) && typeof (result as any).changes === 'number')
+    return (result as any).changes;
+  // Some D1 runtimes put changes on the first element
+  if (
+    Array.isArray(result) &&
+    result[0] &&
+    typeof result[0].changes === 'number'
+  )
+    return result[0].changes;
   return 0;
 }

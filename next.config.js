@@ -64,6 +64,12 @@ const nextConfig = {
 
   // Optimize bundle size and performance
   webpack: (config, { dev, isServer }) => {
+    // Configure cache to use buffers for large strings
+    if (config.cache && config.cache.type === 'filesystem') {
+      config.cache.compression = 'gzip';
+      config.cache.maxMemoryGenerations = dev ? 5 : Infinity;
+    }
+
     // Wrap config with SpeedMeasurePlugin if available and in production mode
     let smp;
     if (SpeedMeasurePlugin && !dev && process.env.MEASURE_BUILD === 'true') {

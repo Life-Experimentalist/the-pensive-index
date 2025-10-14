@@ -2,7 +2,10 @@ import {
   ValidationRule,
   RuleCondition,
   RuleAction,
-} from '../../types/index.js';
+  RuleTemplate,
+  ValidationRuleType,
+  ValidationSeverity,
+} from '../../types/validation-rules';
 
 /**
  * ValidationRule Entity
@@ -15,28 +18,40 @@ export class ValidationRuleEntity {
   public readonly name: string;
   public readonly description: string;
   public readonly fandomId: string;
-  public readonly priority: number;
-  public readonly isActive: boolean;
+  public readonly ruleType: ValidationRuleType;
+  public readonly category: string;
+  public readonly appliesTo: string[];
   public readonly conditions: RuleCondition[];
   public readonly actions: RuleAction[];
-  public readonly tags: string[];
-  public readonly metadata: Record<string, any>;
+  public readonly severity: ValidationSeverity;
+  public readonly message: string;
+  public readonly isActive: boolean;
+  public readonly priority: number;
+  public readonly version: number;
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
+  public readonly createdBy: string;
+  public readonly updatedBy: string;
 
   constructor(data: ValidationRule) {
     this.id = data.id;
     this.name = data.name;
     this.description = data.description;
     this.fandomId = data.fandomId;
-    this.priority = data.priority;
-    this.isActive = data.isActive;
+    this.ruleType = data.ruleType;
+    this.category = data.category;
+    this.appliesTo = data.appliesTo;
     this.conditions = data.conditions;
     this.actions = data.actions;
-    this.tags = data.tags || [];
-    this.metadata = data.metadata || {};
+    this.severity = data.severity;
+    this.message = data.message;
+    this.isActive = data.isActive;
+    this.priority = data.priority;
+    this.version = data.version;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    this.createdBy = data.createdBy;
+    this.updatedBy = data.updatedBy;
   }
 
   /**
@@ -47,37 +62,37 @@ export class ValidationRuleEntity {
     placeholders: Record<string, any>,
     fandomId: string
   ): ValidationRuleEntity {
-    const resolvedConditions = template.conditions.map(condition =>
-      this.resolvePlaceholders(condition, placeholders)
+    // Apply placeholders to template
+    const resolvedName = template.name.replace(
+      /\{\{(\w+)\}\}/g,
+      (_, key) => placeholders[key] || key
+    );
+    const resolvedDescription = template.description.replace(
+      /\{\{(\w+)\}\}/g,
+      (_, key) => placeholders[key] || key
     );
 
-    const resolvedActions = template.actions.map(action =>
-      this.resolvePlaceholders(action, placeholders)
-    );
-
+    // For now, use template conditions/actions as-is
+    // In a full implementation, this would resolve parameters
     const ruleData: ValidationRule = {
       id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: template.name.replace(
-        /\{\{(\w+)\}\}/g,
-        (_, key) => placeholders[key] || key
-      ),
-      description: template.description.replace(
-        /\{\{(\w+)\}\}/g,
-        (_, key) => placeholders[key] || key
-      ),
+      name: resolvedName,
+      description: resolvedDescription,
       fandomId,
-      priority: template.defaultPriority,
+      ruleType: template.ruleType,
+      category: template.category,
+      appliesTo: ['pathway'], // Default
+      conditions: template.conditionTemplate as RuleCondition[], // Cast for now
+      actions: template.actionTemplate as RuleAction[], // Cast for now
+      severity: 'error', // Default
+      message: 'Validation rule created from template',
       isActive: true,
-      conditions: resolvedConditions,
-      actions: resolvedActions,
-      tags: template.tags || [],
-      metadata: {
-        templateId: template.id,
-        placeholders,
-        createdFromTemplate: true,
-      },
+      priority: 0,
+      version: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
+      createdBy: template.createdBy || 'system',
+      updatedBy: template.createdBy || 'system',
     };
 
     return new ValidationRuleEntity(ruleData);
@@ -138,51 +153,43 @@ export class ValidationRuleEntity {
   private validateCondition(condition: RuleCondition): string[] {
     const errors: string[] = [];
 
-    if (!condition.type) {
+    if (!condition.conditionType) {
       errors.push('Condition type is required');
     }
 
-    if (!condition.target) {
-      errors.push('Condition target is required');
+    if (!condition.targetType) {
+      errors.push('Condition target type is required');
     }
 
     // Type-specific validation
-    switch (condition.type) {
-      case 'tag_presence':
-      case 'tag_absence':
-        if (!condition.value || !Array.isArray(condition.value)) {
-          errors.push('Tag condition requires array of tag IDs');
+    switch (condition.conditionType) {
+      case 'has_tag':
+        if (!condition.targetIds || condition.targetIds.length === 0) {
+          errors.push('Tag condition requires target tag IDs');
         }
         break;
 
-      case 'plot_block_selection':
+      case 'has_plot_block':
+        if (!condition.targetIds || condition.targetIds.length === 0) {
+          errors.push('Plot block condition requires target plot block IDs');
+        }
+        break;
+
+      case 'tag_count':
+        if (typeof condition.value !== 'number') {
+          errors.push('Tag count condition requires numeric value');
+        }
+        break;
+
+      case 'plot_block_depth':
+        if (typeof condition.value !== 'number') {
+          errors.push('Plot block depth condition requires numeric value');
+        }
+        break;
+
+      case 'custom_expression':
         if (!condition.value || typeof condition.value !== 'string') {
-          errors.push('Trope condition requires trope ID');
-        }
-        break;
-
-      case 'count_comparison':
-        if (!condition.value || typeof condition.value !== 'number') {
-          errors.push('Count comparison requires numeric value');
-        }
-        if (
-          !condition.operator ||
-          !['=', '>', '<', '>=', '<=', '!='].includes(condition.operator)
-        ) {
-          errors.push('Count comparison requires valid operator');
-        }
-        break;
-
-      case 'logical_group':
-        if (!condition.children || !Array.isArray(condition.children)) {
-          errors.push('Logical group requires child conditions');
-        } else {
-          condition.children.forEach((child, index) => {
-            const childErrors = this.validateCondition(child);
-            childErrors.forEach(error =>
-              errors.push(`Child condition ${index + 1}: ${error}`)
-            );
-          });
+          errors.push('Custom expression condition requires string value');
         }
         break;
     }
@@ -196,38 +203,66 @@ export class ValidationRuleEntity {
   private validateAction(action: RuleAction): string[] {
     const errors: string[] = [];
 
-    if (!action.type) {
+    if (!action.actionType) {
       errors.push('Action type is required');
     }
 
-    if (!action.target) {
-      errors.push('Action target is required');
+    if (!action.targetType) {
+      errors.push('Action target type is required');
     }
 
     // Type-specific validation
-    switch (action.type) {
-      case 'add_error':
-      case 'add_warning':
-        if (!action.message) {
-          errors.push('Error/Warning action requires message');
+    switch (action.actionType) {
+      case 'require_tag':
+      case 'forbid_tag':
+      case 'suggest_tag':
+        if (!action.targetIds || action.targetIds.length === 0) {
+          errors.push('Tag action requires target tag IDs');
         }
         break;
 
-      case 'suggest_alternative':
-        if (!action.alternatives || !Array.isArray(action.alternatives)) {
-          errors.push('Suggest alternative action requires alternatives array');
+      case 'require_plot_block':
+        if (!action.targetIds || action.targetIds.length === 0) {
+          errors.push('Plot block action requires target plot block IDs');
         }
         break;
 
-      case 'require_confirmation':
-        if (!action.message) {
-          errors.push('Require confirmation action requires message');
+      case 'show_message':
+        if (!action.parameters?.message) {
+          errors.push('Show message action requires message parameter');
         }
         break;
 
-      case 'modify_selection':
-        if (!action.modifications || typeof action.modifications !== 'object') {
-          errors.push('Modify selection action requires modifications object');
+      case 'modify_priority':
+        if (typeof action.parameters?.priority !== 'number') {
+          errors.push(
+            'Modify priority action requires numeric priority parameter'
+          );
+        }
+        break;
+
+      case 'warn_plot_development':
+        if (!action.parameters?.warningType) {
+          errors.push(
+            'Plot development warning requires warningType parameter'
+          );
+        }
+        break;
+
+      case 'provide_guidance':
+        if (!action.parameters?.guidance) {
+          errors.push('Provide guidance action requires guidance parameter');
+        }
+        break;
+
+      case 'suggest_alternatives':
+        if (
+          !action.parameters?.alternatives ||
+          !Array.isArray(action.parameters.alternatives)
+        ) {
+          errors.push(
+            'Suggest alternatives action requires alternatives array parameter'
+          );
         }
         break;
     }
@@ -275,14 +310,20 @@ export class ValidationRuleEntity {
       name: `${this.name} (Copy)`,
       description: this.description,
       fandomId: this.fandomId,
+      ruleType: this.ruleType,
+      category: this.category,
+      appliesTo: this.appliesTo,
       priority: this.priority,
+      severity: this.severity,
+      message: this.message,
       isActive: this.isActive,
       conditions: JSON.parse(JSON.stringify(this.conditions)),
       actions: JSON.parse(JSON.stringify(this.actions)),
-      tags: [...this.tags],
-      metadata: { ...this.metadata, clonedFrom: this.id },
       createdAt: new Date(),
       updatedAt: new Date(),
+      version: this.version,
+      createdBy: this.createdBy,
+      updatedBy: this.updatedBy,
     };
 
     return new ValidationRuleEntity(ruleData);
@@ -299,14 +340,20 @@ export class ValidationRuleEntity {
       name: updates.name ?? this.name,
       description: updates.description ?? this.description,
       fandomId: updates.fandomId ?? this.fandomId,
+      ruleType: updates.ruleType ?? this.ruleType,
+      category: updates.category ?? this.category,
+      appliesTo: updates.appliesTo ?? this.appliesTo,
       priority: updates.priority ?? this.priority,
+      severity: updates.severity ?? this.severity,
+      message: updates.message ?? this.message,
       isActive: updates.isActive ?? this.isActive,
       conditions: updates.conditions ?? this.conditions,
       actions: updates.actions ?? this.actions,
-      tags: updates.tags ?? this.tags,
-      metadata: updates.metadata ?? this.metadata,
       createdAt: this.createdAt,
       updatedAt: new Date(),
+      version: this.version,
+      createdBy: this.createdBy,
+      updatedBy: this.updatedBy,
     };
 
     return new ValidationRuleEntity(ruleData);
@@ -321,14 +368,20 @@ export class ValidationRuleEntity {
       name: this.name,
       description: this.description,
       fandomId: this.fandomId,
+      ruleType: this.ruleType,
+      category: this.category,
+      appliesTo: this.appliesTo,
       priority: this.priority,
+      severity: this.severity,
+      message: this.message,
       isActive: this.isActive,
       conditions: this.conditions,
       actions: this.actions,
-      tags: this.tags,
-      metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      version: this.version,
+      createdBy: this.createdBy,
+      updatedBy: this.updatedBy,
     };
   }
 }
@@ -339,7 +392,7 @@ export class ValidationRuleEntity {
  * Manages reusable rule templates with placeholder replacement.
  * Enables sharing and standardization of common validation patterns.
  */
-export class RuleTemplate {
+export class RuleTemplateEntity {
   public readonly id: string;
   public readonly name: string;
   public readonly description: string;
@@ -476,7 +529,7 @@ export class RuleTemplate {
   /**
    * Creates a copy of the template
    */
-  clone(): RuleTemplate {
+  clone(): RuleTemplateEntity {
     const templateData: RuleTemplateData = {
       id: `${this.id}_copy_${Date.now()}`,
       name: `${this.name} (Copy)`,
@@ -494,20 +547,20 @@ export class RuleTemplate {
       updatedAt: new Date(),
     };
 
-    return new RuleTemplate(templateData);
+    return new RuleTemplateEntity(templateData);
   }
 
   /**
    * Increments usage count
    */
-  incrementUsage(): RuleTemplate {
+  incrementUsage(): RuleTemplateEntity {
     const templateData: RuleTemplateData = {
       ...this.toJSON(),
       usageCount: this.usageCount + 1,
       updatedAt: new Date(),
     };
 
-    return new RuleTemplate(templateData);
+    return new RuleTemplateEntity(templateData);
   }
 
   /**

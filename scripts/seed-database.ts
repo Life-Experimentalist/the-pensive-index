@@ -34,33 +34,37 @@ async function seedDatabase() {
 
     // Seed fandoms
     console.log('📚 Creating sample fandoms...');
-    const currentTime = new Date(); // Date object
 
     // Insert first fandom
-    await db
+    const harryPotterResult = await db
       .insert(fandoms)
       .values({
+        id: 'harry-potter',
         name: 'Harry Potter',
         description: 'The wizarding world of Harry Potter',
         slug: 'harry-potter',
         is_active: true,
-        created_at: currentTime,
-        updated_at: currentTime,
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning();
 
     // Insert second fandom
-    await db
+    const percyJacksonResult = await db
       .insert(fandoms)
       .values({
+        id: 'percy-jackson',
         name: 'Percy Jackson',
         description: 'Camp Half-Blood and the world of Greek mythology',
         slug: 'percy-jackson',
         is_active: true,
-        created_at: currentTime,
-        updated_at: currentTime,
       })
-      .onConflictDoNothing();
+      .onConflictDoNothing()
+      .returning();
+
+    console.log('✅ Fandoms created:', {
+      harryPotter: harryPotterResult.length > 0 ? 'created' : 'exists',
+      percyJackson: percyJacksonResult.length > 0 ? 'created' : 'exists',
+    });
 
     // Seed default admin user
     console.log('👨‍💼 Creating default admin user...');
@@ -80,8 +84,6 @@ async function seedDatabase() {
           },
         ],
         is_active: true,
-        created_at: currentTime,
-        updated_at: currentTime,
       })
       .onConflictDoNothing();
 
@@ -93,32 +95,29 @@ async function seedDatabase() {
         {
           id: 'tag-time-travel',
           name: 'Time Travel',
+          slug: 'time-travel',
           fandom_id: 'harry-potter',
           description: 'Stories involving time travel',
           category: 'plot-device',
           is_active: true,
-          created_at: currentTime,
-          updated_at: currentTime,
         },
         {
           id: 'tag-romance',
           name: 'Romance',
+          slug: 'romance',
           fandom_id: 'harry-potter',
           description: 'Romantic relationships',
           category: 'genre',
           is_active: true,
-          created_at: currentTime,
-          updated_at: currentTime,
         },
         {
           id: 'tag-adventure',
           name: 'Adventure',
+          slug: 'adventure',
           fandom_id: 'percy-jackson',
           description: 'Action and adventure stories',
           category: 'genre',
           is_active: true,
-          created_at: currentTime,
-          updated_at: currentTime,
         },
       ])
       .onConflictDoNothing();
@@ -131,22 +130,20 @@ async function seedDatabase() {
         {
           id: 'pb-goblin-inheritance',
           name: 'Goblin Inheritance',
+          slug: 'goblin-inheritance',
           fandom_id: 'harry-potter',
           category: 'inheritance',
           description: 'Harry discovers his inheritance through Gringotts',
           is_active: true,
-          created_at: currentTime,
-          updated_at: currentTime,
         },
         {
           id: 'pb-camp-arrival',
           name: 'Camp Half-Blood Arrival',
+          slug: 'camp-half-blood-arrival',
           fandom_id: 'percy-jackson',
           category: 'beginning',
           description: 'Character arrives at Camp Half-Blood',
           is_active: true,
-          created_at: currentTime,
-          updated_at: currentTime,
         },
       ])
       .onConflictDoNothing();

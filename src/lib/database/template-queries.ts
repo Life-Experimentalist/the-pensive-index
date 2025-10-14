@@ -1,6 +1,8 @@
 import { eq, and, asc, desc, like, sql } from 'drizzle-orm';
 import { getDatabase } from './config';
 import { fandoms, type Fandom } from './schema';
+import { executeCountQuery, createCountQuery } from './db-compatibility';
+import type { DatabaseConnection } from './index';
 import type { BulkOperation } from '@/types';
 
 /**
@@ -21,9 +23,11 @@ export class TemplateQueries {
   async createTemplate(
     data: Omit<Fandom, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Fandom> {
+    const id = crypto.randomUUID();
     const [newTemplate] = await this.db
       .insert(fandoms)
       .values({
+        id,
         ...data,
         created_at: sql`(unixepoch())`,
         updated_at: sql`(unixepoch())`,
@@ -93,14 +97,14 @@ export class TemplateQueries {
       .limit(limit)
       .offset(offset);
 
-    const totalResult = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(fandoms)
-      .where(whereClause);
+    const total = await executeCountQuery(
+      this.db as any,
+      createCountQuery(fandoms)
+    );
 
     return {
       templates: templatesResult,
-      total: totalResult[0]?.count || 0,
+      total,
     };
   }
 
@@ -132,7 +136,7 @@ export class TemplateQueries {
    */
   async deleteTemplate(id: string): Promise<boolean> {
     const result = await this.db.delete(fandoms).where(eq(fandoms.id, id));
-    return result.changes > 0;
+    return getResultChanges(result) > 0;
   }
 
   /**
@@ -159,13 +163,13 @@ export class TemplateQueries {
    * @returns The total number of active fandoms.
    */
   async getTemplateStats(): Promise<{ total: number }> {
-    const totalResult = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(fandoms)
-      .where(eq(fandoms.is_active, true));
+    const total = await executeCountQuery(
+      this.db as any,
+      sql`SELECT COUNT(*) as count FROM fandoms WHERE is_active = 1`
+    );
 
     return {
-      total: totalResult[0]?.count || 0,
+      total,
     };
   }
 }

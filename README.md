@@ -4,7 +4,7 @@
 
 [![Spec-Kit](https://img.shields.io/badge/Built%20with-Spec--Kit-blue.svg)](https://github.com/github/spec-kit)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-13+-black.svg)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 
 ## 🎯 Vision
 
@@ -12,10 +12,14 @@ The Pensieve Index solves a fundamental problem in fanfiction: **readers can't f
 
 Unlike existing platforms that use basic tags, we provide:
 
- - 🔍 **Discovery-Focused Search**: Search existing tagged stories with complex criteria before generating new prompts
+ - 🔍 **Discovery-Focused Search**: search existing tagged stories with complex criteria before generating new prompts
 - 🌳 **Hierarchical Tagging**: tropes with conditional branching (e.g., Goblin Inheritance → Black Lordship → After Sirius Death)
-- 🎯 **Dual Output**: Show matching stories AND enhanced prompts with novelty highlights
-- 👥 **Community Curation**: Admin-driven content growth with browser extension for story submission
+- 🎯 **Dual Output**: show matching stories AND enhanced prompts with novelty highlights
+- 👥 **Community Curation**: admin-driven content growth with browser extension for story submission
+
+**This is the design, not a description of a finished product.** The admin side and the
+data model are built; the discovery search and prompt generation are not yet wired end
+to end. See [Project Status](#-project-status) for what actually runs today.
 
 ## 🚀 Quick Start
 
@@ -85,7 +89,7 @@ Fandom (Harry Potter, Percy Jackson)
     └── Wrong-Boy-Who-Lived
 ```
 
-### User Journey
+### User Journey (intended flow)
 1. **Pathway Creation**: User builds story criteria using drag-and-drop or tap-to-select
 2. **Library Search**: System searches existing tagged stories with relevance scoring
 3. **Dual Output**: Shows matching stories + "Create New Story" prompt with novelty highlights
@@ -93,10 +97,10 @@ Fandom (Harry Potter, Percy Jackson)
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 13+ (App Router), React 18+, TypeScript 5.x
+- **Frontend**: Next.js 15 (App Router), React 18, TypeScript 5.x
 - **Styling**: Tailwind CSS for responsive design
 - **Interactions**: dnd-kit for drag-and-drop functionality
-- **Authentication**: NextAuth.js with role-based permissions
+- **Authentication**: Clerk (`@clerk/nextjs`) with role-based permissions
 - **Database**: Cloudflare D1 (SQLite) with Drizzle ORM
 - **Cache**: Cloudflare KV for performance optimization
 - **Deployment**: Cloudflare Pages + Workers (Edge Functions)
@@ -117,32 +121,25 @@ Fandom (Harry Potter, Percy Jackson)
 
 - **Desktop**: Full three-panel drag-and-drop interface
 - **Mobile**: Tap-to-select with collapsible panels
-- **Performance**: <200ms validation, <500ms search, 60fps interactions
+- **Performance**: the <200ms validation / <500ms search / 60fps interaction figures
+  are design targets set in [the project constitution](./.specify/memory/constitution.md),
+  not measured results.
 
 ## 👥 User Roles
 
-### Admin Hierarchy (✅ **FULLY IMPLEMENTED**)
+### Admin Hierarchy
 - **ProjectAdmin**: Global access - manage all fandoms, assign admin roles, system-wide settings
 - **FandomAdmin**: Scoped access - manage content within specific assigned fandoms only
 
-**Implemented Features:**
-- 🔐 **Role-Based Access Control (RBAC)** with comprehensive permission validation
-- 📧 **Admin Invitation System** with email-based workflow
-- 📊 **Audit Logging** for all admin actions with detailed tracking
-- 💻 **Admin Dashboards** with role-specific interfaces
-- 👥 **User Management** with role assignment and access control
-- 📱 **Mobile Responsive** design across all admin interfaces
-### Admin Hierarchy (✅ **FULLY IMPLEMENTED**)
-- **ProjectAdmin**: Global access - manage all fandoms, assign admin roles, system-wide settings
-- **FandomAdmin**: Scoped access - manage content within specific assigned fandoms only
+**Built:**
+- 🔐 **Role-Based Access Control (RBAC)** with permission validation
+- 📧 **Admin Invitation System** (`src/lib/admin/services/InvitationService.ts`)
+- 📊 **Audit Logging** (`src/lib/admin/services/AuditLogService.ts`) with an admin viewer
+- 👥 **User & fandom management** interfaces under `app/admin/`
 
-**Implemented Features:**
-- 🔐 **Role-Based Access Control (RBAC)** with comprehensive permission validation
-- 📧 **Admin Invitation System** with email-based workflow
-- 📊 **Audit Logging** for all admin actions with detailed tracking
-- 💻 **Admin Dashboards** with role-specific interfaces
-- 👥 **User Management** with role assignment and access control
-- 📱 **Mobile Responsive** design across all admin interfaces
+**Not yet backed by real data:** the analytics, rule-templates and validation-rules
+pages under `app/admin/` still render hardcoded mock arrays, and
+`app/api/admin/dashboard/stats/route.ts` returns hardcoded zeros.
 
 ### Community Features
 - **Story Submission**: Public form for submitting story URLs with manual tagging
@@ -223,7 +220,7 @@ npm run db:migrate       # Run database migrations
 npm run db:seed          # Seed with sample data
 
 # Cloudflare Deployment
-npm run deploy:worker    # Deploy Cloudflare Worker
+npm run deploy:preview   # Deploy a Cloudflare preview build
 npm run dev:worker       # Test worker locally
 npm run preview:worker   # Preview worker deployment
 wrangler deploy          # Full deployment (Pages + Worker)
@@ -238,39 +235,55 @@ wrangler kv:key put --binding=CACHE <key> <value>
 ```
 
 ### Deployment
-See [CLOUDFLARE_DEPLOYMENT.md]() for complete deployment guide:
-- Cloudflare Pages setup
-- D1 database configuration
-- KV cache setup
-- GitHub Actions CI/CD
-- Environment variables
-
-Quick deploy checklist: [DEPLOYMENT_CHECKLIST.md]()
+Deployment is configured in [`wrangler.toml`](./wrangler.toml): Cloudflare Pages +
+Workers, the `pensive-index` D1 database, and the `CACHE` KV namespace.
 
 ## 📋 Project Status
 
-- [x] Project initialization and spec framework
-- [x] **Hierarchical Admin System** (✅ **COMPLETE & OPERATIONAL**)
-  - [x] Two-tier admin roles (ProjectAdmin/FandomAdmin)
-  - [x] Role-based access control (RBAC)
-  - [x] Admin invitation system
-  - [x] Comprehensive audit logging
-  - [x] Admin dashboards (mobile responsive)
-  - [x] User & fandom management interfaces
-- [x] **Performance Optimization** (✅ **IMPLEMENTED**)
-  - [x] Caching system (KV + in-memory LRU)
-  - [x] Rate limiting (Durable Objects)
-  - [x] Performance monitoring dashboard
-  - [x] Analytics tracking (privacy-compliant)
-  - [x] Error logging and reporting
-  - [x] Database indexing and optimization
-  - [x] Resource usage monitoring (free-tier)
-- [ ] Core data models (Fandoms, Tags, tropes)
-- [ ] Validation engine with conflict detection
-- [ ] Drag-and-drop pathway builder
-- [ ] Story search and discovery
-- [ ] Mobile responsive interface
-- [ ] Browser extension
+In progress. The lists below describe what is wired end to end today, not what is planned.
+
+### Working
+
+- [x] Spec-driven development framework (`.specify/`) and repository scaffolding
+- [x] Core data models and migrations — fandoms, tags, tag classes, plot blocks,
+      validation rules (`src/lib/database/models/`, `migrations/`)
+- [x] Validation engine — conflict, dependency and circular-reference checks
+      (`src/lib/validation/`)
+- [x] Two-tier admin roles (ProjectAdmin / FandomAdmin) with role-based access control
+- [x] Admin invitation system and audit logging, with admin UIs for both
+- [x] User & fandom management interfaces
+- [x] Caching (Cloudflare KV + in-memory LRU), rate limiting (Durable Objects), error
+      logging and resource-usage monitoring (`src/lib/cache/`, `src/lib/monitoring/`)
+
+### Partially built — not finished
+
+- [ ] **Story search and discovery.** `StorySearchService` and `RelevanceScoreService`
+      (`src/lib/services/`) implement the relevance algorithm, but no API route or page
+      calls them. The routes the UI does call are stubs: `app/api/search/stories/route.ts`
+      is marked a placeholder implementation, `app/api/stories/search/route.ts` carries
+      open TODOs for full-text search, tag/trope filtering and relevance scoring, and
+      `StoryModel.search()` returns an empty array with its body commented out pending a
+      Drizzle ORM fix.
+- [ ] **Prompt generation.** `src/lib/services/prompt-generation.ts` exists but is not
+      called from a route; its novelty analysis is marked a placeholder, and
+      `PathwayModel` derives its novelty score with `Math.random()` rather than by
+      comparing against indexed stories.
+- [ ] **Drag-and-drop pathway builder.** dnd-kit components exist under
+      `src/components/drag-drop/` and `src/components/pathway/`, but no page under `app/`
+      mounts them; `app/pathway/page.tsx` uses its own click-based selection.
+- [ ] **Admin analytics dashboard.** The analytics, rule-templates and validation-rules
+      pages render hardcoded mock arrays, and the dashboard stats endpoint returns
+      hardcoded zeros — the underlying `src/lib/analytics/` and `src/lib/monitoring/`
+      services are real, but the pages are not reading from them.
+- [ ] **Browser extension.** Source lives in `src/extension/`, but
+      `extension/manifest.json` points at built files (`service-worker.js`,
+      `content-script.js`, `popup.html`, icon PNGs) that are not in the repository, and
+      no npm script produces them.
+
+### Not started
+
+- [ ] **Story corpus.** `migrations/0002_seed-data.sql` seeds fandoms, tag classes, tags
+      and plot blocks. It seeds no stories, so there is nothing indexed to search yet.
 
 ## 🤝 Contributing
 

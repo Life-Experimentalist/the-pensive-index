@@ -2,7 +2,7 @@
 	"$schema": "https://vkrishna04.me/schemas/project-manifest.schema.json",
 	"manifestVersion": 2,
 	"tagline": "Discovery-first fanfiction search with prompt generation.",
-	"summary": "A fanfiction discovery platform that searches existing tagged stories against complex, nuanced criteria before offering to generate a prompt. Tags are hierarchical with conditional branching rather than flat, so a search can express a specific premise instead of a keyword.",
+	"summary": "A fanfiction discovery platform designed to search existing tagged stories against complex, nuanced criteria before offering to generate a prompt. Tags are hierarchical with conditional branching rather than flat, so a search can express a specific premise instead of a keyword. In progress: the data and admin layers are built, the discovery search is not yet wired up.",
 	"status": "active",
 	"icon": "SiNextdotjs",
 	"readme": true,
@@ -18,10 +18,11 @@
 		"tagging"
 	],
 	"highlights": [
-		"Searches what already exists before generating anything, so a reader is not handed a prompt for a story that has already been written.",
+		"In progress. The data model, validation engine and two-tier admin system are built; the discovery search and prompt generation exist as services but are not yet wired to the app.",
 		"Hierarchical tags with conditional branching express a premise, rather than the flat keyword lists other platforms use.",
-		"Returns both matching stories and an enhanced prompt with the novel parts highlighted.",
-		"Content grows through admin-curated submission, including a browser extension for submitting stories."
+		"Designed to search what already exists before generating anything, so a reader is not handed a prompt for a story that has already been written.",
+		"Runs on Cloudflare Pages and Workers with a D1 database, KV caching and Durable Object rate limiting.",
+		"Content is intended to grow through admin-curated submission; a browser extension for submitting stories is drafted but not yet built or published."
 	],
 	"links": {
 		"repo": "https://github.com/Life-Experimentalist/the-pensive-index"

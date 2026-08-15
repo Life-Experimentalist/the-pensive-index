@@ -1,0 +1,27 @@
+{
+  "$schema": "https://devprune.vkrishna04.me/schemas/v1/devprune.schema.json",
+  "prunable": {
+    "directories": [
+      {
+        "path": "node_modules",
+        "rebuild": "npm ci",
+        "why": "npm dependency tree — package-lock.json is committed, so `npm ci` restores it exactly; git-ignored"
+      },
+      {
+        "path": ".next",
+        "rebuild": "npm run build",
+        "why": "Next.js build output — `npm run build` runs scripts/build-with-timer.js, which execs `next build`; next.config.js sets no distDir and leaves output:'export' commented out, so the target is .next; git-ignored"
+      },
+      {
+        "path": "test-results",
+        "rebuild": "npm run test:e2e",
+        "why": "Playwright artifacts — playwright.config.ts sets outputDir 'test-results/e2e-artifacts' and writes e2e-results.json / e2e-junit.xml here; git-ignored"
+      },
+      {
+        "path": "playwright-report",
+        "rebuild": "npm run test:e2e",
+        "why": "Playwright HTML report — playwright.config.ts declares the ['html'] reporter, whose default output directory this is; git-ignored"
+      }
+    ]
+  }
+}

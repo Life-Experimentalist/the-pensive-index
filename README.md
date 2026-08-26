@@ -32,7 +32,7 @@ to end. See [Project Status](#-project-status) for what actually runs today.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/the-pensive-index.git
+git clone https://github.com/Life-Experimentalist/the-pensive-index.git
 cd the-pensive-index
 
 # Install dependencies
@@ -105,7 +105,6 @@ Fandom (Harry Potter, Percy Jackson)
 - **Cache**: Cloudflare KV for performance optimization
 - **Deployment**: Cloudflare Pages + Workers (Edge Functions)
 - **Testing**: Vitest, React Testing Library, Playwright E2E
-- **CI/CD**: GitHub Actions with automatic deployments
 
 ## 📱 User Interface
 

@@ -1,0 +1,29 @@
+{
+	"$schema": "https://vkrishna04.me/schemas/project-manifest.schema.json",
+	"manifestVersion": 2,
+	"tagline": "Discovery-first fanfiction search with prompt generation.",
+	"summary": "A fanfiction discovery platform that searches existing tagged stories against complex, nuanced criteria before offering to generate a prompt. Tags are hierarchical with conditional branching rather than flat, so a search can express a specific premise instead of a keyword.",
+	"status": "active",
+	"icon": "SiNextdotjs",
+	"readme": true,
+	"technologies": [
+		"TypeScript",
+		"Next.js",
+		"SQLite"
+	],
+	"tags": [
+		"search",
+		"fanfiction",
+		"web-app",
+		"tagging"
+	],
+	"highlights": [
+		"Searches what already exists before generating anything, so a reader is not handed a prompt for a story that has already been written.",
+		"Hierarchical tags with conditional branching express a premise, rather than the flat keyword lists other platforms use.",
+		"Returns both matching stories and an enhanced prompt with the novel parts highlighted.",
+		"Content grows through admin-curated submission, including a browser extension for submitting stories."
+	],
+	"links": {
+		"repo": "https://github.com/Life-Experimentalist/the-pensive-index"
+	}
+}
